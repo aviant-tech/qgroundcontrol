@@ -4,8 +4,7 @@ name: Android 32/64-bit Release
 on:
   push:
     branches:
-      - 'master'
-      - 'Stable*'
+      - 'aviant/*'
     tags:
       - 'v*'
   pull_request:
@@ -19,7 +18,7 @@ defaults:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION:   5.15.2
-  BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
+  BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || github.ref == 'aviant/V4.2' ] }}
 
 jobs:
   build:
