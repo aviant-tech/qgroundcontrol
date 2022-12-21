@@ -63,25 +63,6 @@ jobs:
           ndk-version: r21e
           add-to-path: false
 
-      - name: Install ccache
-        run:  sudo apt-get install ccache
-
-      - name: ccache cache files
-        uses: actions/cache@v3
-        with:
-          path:         ~/.ccache
-          key:          ${{ runner.os }}-ccache-${{ matrix.eabi }}-${{ github.run_id }}
-          restore-keys: ${{ runner.os }}-ccache-${{ matrix.eabi }}
-
-      - name: Setup ccache
-        run: |
-            mkdir -p ~/.ccache
-            echo "base_dir = ${GITHUB_WORKSPACE}" > ~/.ccache/ccache.conf
-            echo "compression = true" >> ~/.ccache/ccache.conf
-            echo "compression_level = 5" >> ~/.ccache/ccache.conf
-            ccache -s
-            ccache -z
-
       - name: Create build directory
         run:  mkdir ${{ runner.temp }}/shadow_build_dir
 
@@ -108,11 +89,6 @@ jobs:
         run:  |
             qmake -r ${SOURCE_DIR}/qgroundcontrol.pro -spec android-clang CONFIG+=${BUILD_TYPE} CONFIG+=installer ANDROID_ABIS="${{ matrix.eabi }}"
             make -j2
-
-      - name: ccache post-run
-        run: |
-            ccache -p
-            ccache -s
 
       - name: Save artifact
         uses: actions/upload-artifact@master
