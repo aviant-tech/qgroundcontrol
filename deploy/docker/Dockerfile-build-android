@@ -78,6 +78,7 @@ RUN ./sdkmanager --sdk_root=/opt/android/sdk/ --install "platform-tools" "ndk;21
 RUN ./sdkmanager --sdk_root=/opt/android/sdk/ --install "platforms;android-28" "build-tools;28.0.3"
 RUN ./sdkmanager --sdk_root=/opt/android/sdk/ --install "platforms;android-29" "build-tools;29.0.2"
 RUN ./sdkmanager --sdk_root=/opt/android/sdk/ --install "platforms;android-30" "build-tools;30.0.1"
+RUN ./sdkmanager --sdk_root=/opt/android/sdk/ --install "platforms;android-33-ext4" "build-tools;33.0.1"
 ENV ANDROID_NDK=/opt/android/sdk/ndk/21.3.6528147/
 ENV ANDROID_NDK_ROOT=/opt/android/sdk/ndk/21.3.6528147/
 ENV ANDROID_NDK_HOME=/opt/android/sdk/ndk/21.3.6528147/
@@ -95,6 +96,7 @@ RUN locale-gen en_US.UTF-8 && dpkg-reconfigure locales
 # create user with id 1000 to not run commands/generate files as root
 RUN useradd user --create-home --home-dir /home/user --shell /bin/bash --uid 1000
 USER user
+USER root
 
 WORKDIR /project/build
 CMD [ "sh", "-c", "if [ -L /project/source/gstreamer-1.0-android-universal-1.18.5 ]; then rm -f /project/source/gstreamer-1.0-android-universal-1.18.5; fi && ln -fs /opt/gstreamer-1.0-android-universal-1.18.5 /project/source/gstreamer-1.0-android-universal-1.18.5 && qmake -r /project/source/qgroundcontrol.pro -spec android-clang CONFIG+=StableBuild CONFIG+=installer ANDROID_ABIS=\"armeabi-v7a\" && make -j$(nproc) && rm -f /project/source/gstreamer-1.0-android-universal-1.18.5" ]
