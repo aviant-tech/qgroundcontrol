@@ -46,6 +46,7 @@ Item {
     property var    _missionController:                 _planMasterController.missionController
     property var    _geoFenceController:                _planMasterController.geoFenceController
     property var    _rallyPointController:              _planMasterController.rallyPointController
+    property var    _automatedGroundTest:               _planMasterController.automatedGroundTest
     property var    _aviantMissionTools:                _planMasterController.aviantMissionTools
     property var    _visualItems:                       _missionController.visualItems
     property bool   _lightWidgetBorders:                editorMap.isSatelliteMap
@@ -58,11 +59,12 @@ Item {
     property var    _aviantSettings:                    QGroundControl.settingsManager.aviantSettings
     property bool   _promptForPlanUsageShowing:         false
 
-    readonly property var       _layers:                [_layerMission, _layerGeoFence, _layerRallyPoints]
+    readonly property var       _layers:                [_layerMission, _layerGeoFence, _layerRallyPoints, _layerAutomatedGroundTest]
 
     readonly property int       _layerMission:              1
     readonly property int       _layerGeoFence:             2
     readonly property int       _layerRallyPoints:          3
+    readonly property int       _layerAutomatedGroundTest:  4
     readonly property string    _armedVehicleUploadPrompt:  qsTr("Vehicle is currently armed. Do you want to upload the mission to the vehicle?")
 
     function mapCenter() {
@@ -844,6 +846,11 @@ Item {
                         text:       qsTr("Rally")
                         enabled:    _rallyPointController.supported
                     }
+
+                    QGCTabButton {
+                        text:       qsTr("Test")
+                        enabled:    _rallyPointController.supported
+                    }
                 }
             }
             //-------------------------------------------------------
@@ -918,6 +925,19 @@ Item {
                 visible:                _editingLayer == _layerRallyPoints && _rallyPointController.points.count
                 rallyPoint:             _rallyPointController.currentRallyPoint
                 controller:             _rallyPointController
+            }
+
+            // Automated Ground Test
+            AutomatedGroundTest {
+                id:                     automatedGroundTest
+                anchors.top:            rightControls.bottom
+                anchors.topMargin:      ScreenTools.defaultFontPixelHeight * 0.25
+                anchors.bottom:         parent.bottom
+                anchors.left:           parent.left
+                anchors.right:          parent.right
+                automatedGroundTest:    _automatedGroundTest
+                flightMap:              editorMap
+                visible:                _editingLayer == _layerAutomatedGroundTest
             }
         }
 

@@ -35,6 +35,7 @@ const char* PlanMasterController::kPlanFileType =               "Plan";
 const char* PlanMasterController::kJsonMissionObjectKey =       "mission";
 const char* PlanMasterController::kJsonGeoFenceObjectKey =      "geoFence";
 const char* PlanMasterController::kJsonRallyPointsObjectKey =   "rallyPoints";
+const char* PlanMasterController::kJsonAutomatedGroundTestObjectKey =   "automatedGroundTest";
 
 PlanMasterController::PlanMasterController(QObject* parent)
     : QObject               (parent)
@@ -45,6 +46,7 @@ PlanMasterController::PlanMasterController(QObject* parent)
     , _geoFenceController   (this)
     , _rallyPointController (this)
     , _aviantMissionTools   (this, this)
+    , _automatedGroundTest  (this)
 {
     _commonInit();
 }
@@ -58,6 +60,7 @@ PlanMasterController::PlanMasterController(MAV_AUTOPILOT firmwareType, MAV_TYPE 
     , _missionController    (this)
     , _geoFenceController   (this)
     , _rallyPointController (this)
+    , _automatedGroundTest  (this)
 {
     _commonInit();
 }
@@ -403,9 +406,10 @@ void PlanMasterController::loadFromFile(const QString& filename)
         }
 
         QList<JsonHelper::KeyValidateInfo> rgKeyInfo = {
-            { kJsonMissionObjectKey,        QJsonValue::Object, true },
-            { kJsonGeoFenceObjectKey,       QJsonValue::Object, true },
-            { kJsonRallyPointsObjectKey,    QJsonValue::Object, true },
+            { kJsonMissionObjectKey,                QJsonValue::Object, true },
+            { kJsonGeoFenceObjectKey,               QJsonValue::Object, true },
+            { kJsonRallyPointsObjectKey,            QJsonValue::Object, true },
+            { kJsonAutomatedGroundTestObjectKey,    QJsonValue::Object, true },
         };
         if (!JsonHelper::validateKeys(json, rgKeyInfo, errorString)) {
             qgcApp()->showAppMessage(errorMessage.arg(errorString));
@@ -414,7 +418,8 @@ void PlanMasterController::loadFromFile(const QString& filename)
 
         if (!_missionController.load(json[kJsonMissionObjectKey].toObject(), errorString) ||
                 !_geoFenceController.load(json[kJsonGeoFenceObjectKey].toObject(), errorString) ||
-                !_rallyPointController.load(json[kJsonRallyPointsObjectKey].toObject(), errorString)) {
+                !_rallyPointController.load(json[kJsonRallyPointsObjectKey].toObject(), errorString) ||
+                !_automatedGroundTest.load(json[kJsonAutomatedGroundTestObjectKey].toObject(), errorString)) {
             qgcApp()->showAppMessage(errorMessage.arg(errorString));
         } else {
             //-- Allow plugins to post process the load
@@ -469,9 +474,10 @@ bool  PlanMasterController::loadFromJson(QJsonDocument jsonDoc, QString &errorSt
     }
 
     QList<JsonHelper::KeyValidateInfo> rgKeyInfo = {
-        { kJsonMissionObjectKey,        QJsonValue::Object, true },
-        { kJsonGeoFenceObjectKey,       QJsonValue::Object, true },
-        { kJsonRallyPointsObjectKey,    QJsonValue::Object, true },
+        { kJsonMissionObjectKey,                QJsonValue::Object, true },
+        { kJsonGeoFenceObjectKey,               QJsonValue::Object, true },
+        { kJsonRallyPointsObjectKey,            QJsonValue::Object, true },
+        { kJsonAutomatedGroundTestObjectKey,    QJsonValue::Object, true },
     };
     if (!JsonHelper::validateKeys(json, rgKeyInfo, errorString)) {
         return false;

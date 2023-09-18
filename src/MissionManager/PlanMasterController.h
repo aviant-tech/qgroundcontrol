@@ -15,6 +15,7 @@
 #include "GeoFenceController.h"
 #include "RallyPointController.h"
 #include "AviantMissionTools.h"
+#include "AutomatedGroundTest.h"
 #include "Vehicle.h"
 #include "MultiVehicleManager.h"
 #include "QGCLoggingCategory.h"
@@ -43,6 +44,7 @@ public:
     Q_PROPERTY(GeoFenceController*      geoFenceController      READ geoFenceController                     CONSTANT)
     Q_PROPERTY(RallyPointController*    rallyPointController    READ rallyPointController                   CONSTANT)
     Q_PROPERTY(AviantMissionTools*      aviantMissionTools      READ aviantMissionTools                     CONSTANT)
+    Q_PROPERTY(AutomatedGroundTest*     automatedGroundTest     READ automatedGroundTest                    CONSTANT)
     Q_PROPERTY(bool                     offline                 READ offline                                NOTIFY offlineChanged)          ///< true: controller is not connected to an active vehicle
     Q_PROPERTY(bool                     containsItems           READ containsItems                          NOTIFY containsItemsChanged)    ///< true: Elemement is non-empty
     Q_PROPERTY(bool                     syncInProgress          READ syncInProgress                         NOTIFY syncInProgressChanged)   ///< true: Information is currently being saved/sent, false: no active save/send in progress
@@ -87,6 +89,7 @@ public:
     GeoFenceController*     geoFenceController(void)    { return &_geoFenceController; }
     RallyPointController*   rallyPointController(void)  { return &_rallyPointController; }
     AviantMissionTools*     aviantMissionTools(void)    { return &_aviantMissionTools; }
+    AutomatedGroundTest*    automatedGroundTest(void)   { return &_automatedGroundTest; }
 
     bool        offline         (void) const { return _offline; }
     bool        containsItems   (void) const;
@@ -113,6 +116,7 @@ public:
     static const char*  kJsonMissionObjectKey;
     static const char*  kJsonGeoFenceObjectKey;
     static const char*  kJsonRallyPointsObjectKey;
+    static const char*  kJsonAutomatedGroundTestObjectKey;
 
 signals:
     void containsItemsChanged               (bool containsItems);
@@ -150,6 +154,7 @@ private:
     GeoFenceController      _geoFenceController;
     RallyPointController    _rallyPointController;
     AviantMissionTools      _aviantMissionTools;
+    AutomatedGroundTest     _automatedGroundTest;
     bool                    _loadGeoFence =             false;
     bool                    _loadRallyPoints =          false;
     bool                    _sendGeoFence =             false;

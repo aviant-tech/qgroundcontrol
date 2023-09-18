@@ -469,6 +469,8 @@ void QGCApplication::_initCommon()
     qmlRegisterUncreatableType<GeoFenceController>      (kQGCControllers,                   1, 0, "GeoFenceController",         kRefOnly);
     qmlRegisterUncreatableType<RallyPointController>    (kQGCControllers,                   1, 0, "RallyPointController",       kRefOnly);
 
+    qmlRegisterUncreatableType<AutomatedGroundTest>     (kQGroundControl,                   1, 0, "AutomatedGroundTest",        kRefOnly);
+
     qmlRegisterUncreatableType<MissionItem>         (kQGroundControl,                       1, 0, "MissionItem",                kRefOnly);
     qmlRegisterUncreatableType<VisualMissionItem>   (kQGroundControl,                       1, 0, "VisualMissionItem",          kRefOnly);
     qmlRegisterUncreatableType<FlightPathSegment>   (kQGroundControl,                       1, 0, "FlightPathSegment",          kRefOnly);

@@ -1,5 +1,6 @@
 add_custom_target(PlanViewQml
 	SOURCES
+		AutomatedGroundTest.qml
 		CameraCalcCamera.qml
 		CameraCalcGrid.qml
 		CameraSection.qml
