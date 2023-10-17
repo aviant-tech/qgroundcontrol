@@ -25,6 +25,7 @@
 #include "HorizontalFactValueGrid.h"
 #include "InstrumentValueData.h"
 
+
 #include <QtQml>
 #include <QQmlEngine>
 
@@ -366,6 +367,7 @@ void QGCCorePlugin::factValueGridCreateDefaultSettings(const QString& defaultSet
     value->setText(value->fact()->shortDescription());
     value->setShowUnits(true);
 }
+
 
 QQmlApplicationEngine* QGCCorePlugin::createQmlApplicationEngine(QObject* parent)
 {

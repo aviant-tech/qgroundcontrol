@@ -64,6 +64,9 @@ FlightMap {
     property bool   _keepVehicleCentered:       pipMode ? true : false
     property bool   _saveZoomLevelSetting:      true
 
+    /// emitted when traficWarning status is changed
+    signal trafficWarning(bool visible, bool isCritical, variant ifo, variant myCoord)
+
     function updateAirspace(reset) {
         if(_airspaceEnabled) {
             var coordinateNW = _root.toCoordinate(Qt.point(0,0), false /* clipToViewPort */)
@@ -269,7 +272,8 @@ FlightMap {
         }
     }
     // Add distance sensor view
-    MapItemView{
+/* annoying error flooding, maybe not working at all
+   MapItemView{
         model: QGroundControl.multiVehicleManager.vehicles
         delegate: ProximityRadarMapView {
             vehicle:        object
@@ -278,7 +282,7 @@ FlightMap {
             z:              QGroundControl.zOrderVehicles
             enabled:        _showProximityRadar
         }
-    }
+    }*/
     // Add ADSB vehicles to the map
     MapItemView {
         model: QGroundControl.adsbVehicleManager.adsbVehicles
@@ -293,15 +297,29 @@ FlightMap {
         }
     }
 
+
     // Add lines to ADSB vehicles to the map
     MapItemView {
         model: QGroundControl.adsbVehicleManager.adsbVehicles
         delegate: MapPolyline {
             visible:    _showTrafficIndicators && get_proximity(object, _activeVehicle, _horizontalConflictDistance*2, _verticalConflictDistance*2)
-            line.width: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? 4 : 2
-            line.color: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? "red" : "yellow"
+            readonly property bool isCritical: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance)
+            line.width: isCritical ? 4 : 2
+            line.color: isCritical ? "red" : "yellow"
             z:          QGroundControl.zOrderVehicles+1
-            path:       visible ? [ object.coordinate, _activeVehicle.coordinate ] : []
+            readonly property var vechicleCoord: _activeVehicle.coordinate
+            path:       visible ? [ object.coordinate, vechicleCoord] : []
+            onIsCriticalChanged: _updateTraffic()
+            onVisibleChanged: _updateTraffic()
+            //TODO! this signals a lot! (eats battery) - the ALT valuevibrates within few cm and hence change signals,
+            // but the fix is not to be done here. There should be a filtering in C++ that should decide how to cut off few cm-mm changes.
+            // Just note, as on tablet this will be pain
+            onVechicleCoordChanged: _updateTraffic()
+
+
+            function _updateTraffic() {
+                _root.trafficWarning(visible, isCritical, object, vechicleCoord)
+            }
 
             function get_proximity(adsbVehicle, mainVehicle, horizontal_radius, vertical_radius) {
                 if (!adsbVehicle || !adsbVehicle.coordinate.isValid || !mainVehicle || !mainVehicle.coordinate.isValid) {

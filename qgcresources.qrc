@@ -37,7 +37,7 @@
         <file alias="Play">resources/Play.svg</file>
         <file alias="PowerButton">resources/PowerButton.svg</file>
         <file alias="QGCLogoBlack">resources/QGCLogoBlack.svg</file>
-		<file alias="QGCLogoFull">resources/QGCLogoFull.svg</file>
+        <file alias="QGCLogoFull">resources/QGCLogoFull.svg</file>
         <file alias="QGCLogoWhite">resources/QGCLogoWhite.svg</file>
         <file alias="QGCLogoArrow">resources/QGCLogoArrow.svg</file>
         <file alias="QGroundControlConnect">resources/QGroundControlConnect.svg</file>
@@ -103,5 +103,16 @@
     </qresource>
     <qresource prefix="/opengl">
         <file>resources/opengl/buglist.json</file>
+    </qresource>
+    <qresource prefix="/res/adsb">
+        <file alias="big_airplane.jpg" >resources/adsb/big_airplane.jpg</file>
+        <file alias="glider.jpg" >resources/adsb/glider.jpg</file>
+        <file alias="jet.jpg" >resources/adsb/jet.jpg</file>
+        <file alias="lighter_air.jpg" >resources/adsb/lighter_air.jpg</file>
+        <file alias="parachute.jpg" >resources/adsb/parachute.jpg</file>
+        <file alias="rotocraft.jpg" >resources/adsb/rotocraft.jpg</file>
+        <file alias="small_airplane.jpg" >resources/adsb/small_airplane.jpg</file>
+        <file alias="uav.jpg" >resources/adsb/uav.jpg</file>
+        <file alias="ufo.jpg" >resources/adsb/ufo.jpg</file>
     </qresource>
 </RCC>

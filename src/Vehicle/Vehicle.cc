@@ -3620,12 +3620,16 @@ void Vehicle::_handleADSBVehicle(const mavlink_message_t& message)
         vehicleInfo.availableFlags = 0;
         vehicleInfo.icaoAddress = adsbVehicleMsg.ICAO_address;
 
+
+
         vehicleInfo.location.setLatitude(adsbVehicleMsg.lat / 1e7);
         vehicleInfo.location.setLongitude(adsbVehicleMsg.lon / 1e7);
         vehicleInfo.availableFlags |= ADSBVehicle::LocationAvailable;
 
         vehicleInfo.callsign = adsbVehicleMsg.callsign;
         vehicleInfo.availableFlags |= ADSBVehicle::CallsignAvailable;
+
+        vehicleInfo.emitter = static_cast<decltype(vehicleInfo.emitter)>(adsbVehicleMsg.emitter_type);
 
         if (adsbVehicleMsg.flags & ADSB_FLAGS_VALID_ALTITUDE) {
             vehicleInfo.altitude = (double)adsbVehicleMsg.altitude / 1e3;

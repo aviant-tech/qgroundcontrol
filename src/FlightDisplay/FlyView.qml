@@ -84,6 +84,7 @@ Item {
         parentToolInsets:       _toolInsets
         mapControl:             _mapControl
         visible:                !QGroundControl.videoManager.fullScreen
+        trafficWarning:         mapControl.trafficWarning
     }
 
     FlyViewCustomLayer {
