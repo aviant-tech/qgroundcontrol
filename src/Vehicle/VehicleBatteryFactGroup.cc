@@ -28,6 +28,9 @@ const char* VehicleBatteryFactGroup::_chargeStateFactName           = "chargeSta
 
 const char* VehicleBatteryFactGroup::_settingsGroup =                       "Vehicle.battery";
 
+
+QMap<uint8_t, QPair<double, double>> VehicleBatteryFactGroup::_last_known_consumed{};
+
 VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* parent)
     : FactGroup             (1000, ":/json/Vehicle/BatteryFact.json", parent)
     , _batteryIdFact        (0, _batteryIdFactName,                 FactMetaData::valueTypeUint8)
@@ -123,6 +126,18 @@ void VehicleBatteryFactGroup::_handleHighLatency2(Vehicle* vehicle, mavlink_mess
     group->_setTelemetryAvailable(true);
 }
 
+void VehicleBatteryFactGroup::storeBatteryValue()
+{
+    for(auto i = 0; i < _last_known_consumed.size(); ++i) {
+        _last_known_consumed[i].first = _last_known_consumed[i].second;
+    }
+}
+
+void VehicleBatteryFactGroup::resetBatteryValue()
+{
+   _last_known_consumed.clear();
+}
+
 void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_message_t& message)
 {
     mavlink_battery_status_t batteryStatus;
@@ -150,12 +165,26 @@ void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_mes
         totalVoltage += cellVoltage;
     }
 
+
+    double consumed;
+    if(batteryStatus.current_consumed < 0)              // if invalid, we dont know the state, and indicate it
+        consumed = qQNaN();
+    else if(_last_known_consumed.contains(batteryStatus.id))            // upon soft reboot get a reseted consumed value, so we add the old known value
+        consumed = batteryStatus.current_consumed + _last_known_consumed[batteryStatus.id].first;
+    else
+        consumed = batteryStatus.current_consumed;      // otherwise use the value get
+
+    if(_last_known_consumed.contains(batteryStatus.id))
+        _last_known_consumed[batteryStatus.id].second = consumed;
+    else
+        _last_known_consumed.insert(batteryStatus.id, {0, consumed});
+
     group->function()->setRawValue          (batteryStatus.battery_function);
     group->type()->setRawValue              (batteryStatus.type);
     group->temperature()->setRawValue       (batteryStatus.temperature == INT16_MAX ?   qQNaN() : static_cast<double>(batteryStatus.temperature) / 100.0);
     group->voltage()->setRawValue           (totalVoltage);
     group->current()->setRawValue           (batteryStatus.current_battery == -1 ?      qQNaN() : static_cast<double>(batteryStatus.current_battery) / 100.0);
-    group->mahConsumed()->setRawValue       (batteryStatus.current_consumed == -1  ?    qQNaN() : batteryStatus.current_consumed);
+    group->mahConsumed()->setRawValue       (consumed);
     group->percentRemaining()->setRawValue  (batteryStatus.battery_remaining == -1 ?    qQNaN() : batteryStatus.battery_remaining);
     group->timeRemaining()->setRawValue     (batteryStatus.time_remaining == 0 ?        qQNaN() : batteryStatus.time_remaining);
     group->chargeState()->setRawValue       (batteryStatus.charge_state);
@@ -201,3 +230,4 @@ void VehicleBatteryFactGroup::_timeRemainingChanged(QVariant value)
         _timeRemainingStrFact.setRawValue(QString::asprintf("%02dH:%02dM:%02dS", hours, minutes, seconds));
     }
 }
+
