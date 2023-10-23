@@ -50,6 +50,13 @@ Item {
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property var    _aviantSettings:        QGroundControl.settingsManager.aviantSettings
     property bool   _showWinchControlMenu:  _aviantSettings.showWinchControlMenu.rawValue
+    property var    trafficWarning
+
+    onTrafficWarningChanged: {
+        if(trafficWarning) {
+            trafficWarning.connect(adsb_popup.show)
+        }
+    }
 
     QGCToolInsets {
         id:                     _totalToolInsets
@@ -156,6 +163,14 @@ Item {
         width:                  _rightPanelWidth
         visible:                _showWinchControlMenu
     }
+
+
+    ADSBVehiclePopup {
+        id: adsb_popup
+        visible: false
+        anchors.bottom: parent.bottom
+    }
+
 
     TelemetryValuesBar {
         id:                 telemetryPanel
