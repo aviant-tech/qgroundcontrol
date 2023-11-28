@@ -31,7 +31,7 @@ MapPolyline {
     line.color: Qt.rgba(1,1,1,1)
     opacity:    0.5
 
-    path: coordinate.isValid ? generateOctagon(coordinate, proximityValues) : []
+    path: enabled && proximityValues.telemetryAvailable && coordinate.isValid ? generateOctagon(coordinate, proximityValues) : []
 
     function generateOctagon(coord, sensor) {
         let path = [];
