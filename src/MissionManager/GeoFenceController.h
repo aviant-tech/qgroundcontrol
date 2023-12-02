@@ -34,6 +34,7 @@ public:
     GeoFenceController(PlanMasterController* masterController, QObject* parent = nullptr);
     ~GeoFenceController();
 
+    SHARED_CONSTANT(QString, DEFAULT, QStringLiteral("Default"));
     SHARED_CONSTANT(QString, NONE, QStringLiteral("None"));
     SHARED_CONSTANT(QString, WARN, QStringLiteral("Warn"));
     SHARED_CONSTANT(QString, HOLD, QStringLiteral("Hold"));
