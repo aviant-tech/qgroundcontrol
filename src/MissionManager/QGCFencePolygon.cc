@@ -67,8 +67,8 @@ bool QGCFencePolygon::loadFromJson(const QJsonObject& json, bool required, QStri
     QList<JsonHelper::KeyValidateInfo> keyInfoList = {
         { JsonHelper::jsonVersionKey,   QJsonValue::Double, true },
         { _jsonInclusionKey,            QJsonValue::Bool,   true },
-        { _jsonFenceActionKey,          QJsonValue::Double, true },
-        { _jsonMaxAltitudeKey,          QJsonValue::Double, true },
+        { _jsonFenceActionKey,          QJsonValue::Double, false },
+        { _jsonMaxAltitudeKey,          QJsonValue::Double, false },
     };
     if (!JsonHelper::validateKeys(json, keyInfoList, errorString)) {
         return false;
