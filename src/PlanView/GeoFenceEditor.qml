@@ -245,6 +245,7 @@ QGCFlickable {
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 4)
 
                                 model: [
+                                    { text: myGeoFenceController.DEFAULT },
                                     { text: myGeoFenceController.NONE },
                                     { text: myGeoFenceController.WARN },
                                     { text: myGeoFenceController.HOLD },
@@ -399,6 +400,7 @@ QGCFlickable {
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 5)
 
                                 model: [
+                                    { text: myGeoFenceController.DEFAULT },
                                     { text: myGeoFenceController.NONE },
                                     { text: myGeoFenceController.WARN },
                                     { text: myGeoFenceController.HOLD },
