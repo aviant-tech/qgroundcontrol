@@ -51,7 +51,7 @@ private slots:
     void _setDirty(void);
 
 private:
-    constexpr static int DEFAULT_FENCE_ACTION = 2; // HOLD
+    constexpr static int DEFAULT_FENCE_ACTION = 0; // 0 - Use the value from the parameter
     constexpr static int DEFAULT_MAX_ALTITUDE = 0; // 0 - Disabled
 
     void _init(void);
