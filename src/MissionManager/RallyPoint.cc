@@ -16,17 +16,20 @@
 const char* RallyPoint::_longitudeFactName =    "Longitude";
 const char* RallyPoint::_latitudeFactName =     "Latitude";
 const char* RallyPoint::_altitudeFactName =     "ABSOLUTE ALTITUDE";
+const char* RallyPoint::_typeFactName =         "Active";
 
 QMap<QString, FactMetaData*> RallyPoint::_metaDataMap;
 
-RallyPoint::RallyPoint(const QGeoCoordinate& coordinate, QObject* parent)
+RallyPoint::RallyPoint(const QGeoCoordinate& coordinate, int type, QObject* parent)
     : QObject(parent)
     , _dirty(false)
     , _longitudeFact(0, _longitudeFactName, FactMetaData::valueTypeDouble)
     , _latitudeFact(0, _latitudeFactName, FactMetaData::valueTypeDouble)
     , _altitudeFact(0, _altitudeFactName, FactMetaData::valueTypeDouble)
+    , _typeFact(0, _typeFactName, FactMetaData::valueTypeUint32)
 {
     setCoordinate(coordinate);
+    setType(type);
 
     _factSetup();
 }
@@ -37,10 +40,12 @@ RallyPoint::RallyPoint(const RallyPoint& other, QObject* parent)
     , _longitudeFact(0, _longitudeFactName, FactMetaData::valueTypeDouble)
     , _latitudeFact(0, _latitudeFactName, FactMetaData::valueTypeDouble)
     , _altitudeFact(0, _altitudeFactName, FactMetaData::valueTypeDouble)
+    , _typeFact(0, _typeFactName, FactMetaData::valueTypeUint32)
 {
     _longitudeFact.setRawValue(other._longitudeFact.rawValue());
     _latitudeFact.setRawValue(other._latitudeFact.rawValue());
     _altitudeFact.setRawValue(other._altitudeFact.rawValue());
+    _typeFact.setRawValue(other._typeFact.rawValue());
 
     _factSetup();
 }
@@ -50,6 +55,7 @@ const RallyPoint& RallyPoint::operator=(const RallyPoint& other)
     _longitudeFact.setRawValue(other._longitudeFact.rawValue());
     _latitudeFact.setRawValue(other._latitudeFact.rawValue());
     _altitudeFact.setRawValue(other._altitudeFact.rawValue());
+    _typeFact.setRawValue(other._typeFact.rawValue());
 
     emit coordinateChanged(coordinate());
 
@@ -68,10 +74,12 @@ void RallyPoint::_factSetup(void)
     _longitudeFact.setMetaData(_metaDataMap[_longitudeFactName]);
     _latitudeFact.setMetaData(_metaDataMap[_latitudeFactName]);
     _altitudeFact.setMetaData(_metaDataMap[_altitudeFactName]);
+    _typeFact.setMetaData(_metaDataMap[_typeFactName]);
 
     _textFieldFacts.append(QVariant::fromValue(&_longitudeFact));
     _textFieldFacts.append(QVariant::fromValue(&_latitudeFact));
     _textFieldFacts.append(QVariant::fromValue(&_altitudeFact));
+    _textFieldFacts.append(QVariant::fromValue(&_typeFact));
 
     connect(&_longitudeFact, &Fact::valueChanged, this, &RallyPoint::_sendCoordinateChanged);
     connect(&_latitudeFact, &Fact::valueChanged, this, &RallyPoint::_sendCoordinateChanged);
@@ -120,4 +128,17 @@ QGeoCoordinate RallyPoint::coordinate(void) const
 void RallyPoint::_sendCoordinateChanged(void)
 {
     emit coordinateChanged(coordinate());
+}
+
+int RallyPoint::type(void) const
+{
+    return _typeFact.rawValue().toInt();
+}
+
+void RallyPoint::setType(int type)
+{
+    if (type != this->type()) {
+        _typeFact.setRawValue(type);
+        emit typeChanged(type);
+    }
 }

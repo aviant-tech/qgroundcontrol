@@ -53,6 +53,7 @@ bool JsonHelper::validateRequiredKeys(const QJsonObject& jsonObject, const QStri
 bool JsonHelper::_loadGeoCoordinate(const QJsonValue&   jsonValue,
                                     bool                altitudeRequired,
                                     QGeoCoordinate&     coordinate,
+                                    int*                type,
                                     QString&            errorString,
                                     bool                geoJsonFormat)
 {
@@ -63,6 +64,7 @@ bool JsonHelper::_loadGeoCoordinate(const QJsonValue&   jsonValue,
 
     QJsonArray coordinateArray = jsonValue.toArray();
     int requiredCount = altitudeRequired ? 3 : 2;
+    requiredCount += type != NULL ? 1 : 0;
     if (coordinateArray.count() != requiredCount) {
         errorString = QObject::tr("Coordinate array must contain %1 values").arg(requiredCount);
         return false;
@@ -80,15 +82,24 @@ bool JsonHelper::_loadGeoCoordinate(const QJsonValue&   jsonValue,
     } else {
         coordinate = QGeoCoordinate(possibleNaNJsonValue(coordinateArray[0]), possibleNaNJsonValue(coordinateArray[1]));
     }
+    int i = 2;
     if (altitudeRequired) {
-        coordinate.setAltitude(possibleNaNJsonValue(coordinateArray[2]));
+        coordinate.setAltitude(possibleNaNJsonValue(coordinateArray[i++]));
+    }
+    if (type != NULL) {
+        *type = coordinateArray[i++].toInt();
     }
 
     return true;
 }
 
+// Care must be taken when using this function, as both altitude and type is optional
+// Type should not be used without altitude, as it may be erroneously interpreted as
+// altitude if it is. Type is only used for rally point (and may sometimes be omitted),
+// and altitude is always required for rally point.
 void JsonHelper::_saveGeoCoordinate(const QGeoCoordinate&   coordinate,
                                     bool                    writeAltitude,
+                                    int*                    type,
                                     QJsonValue&             jsonValue,
                                     bool                    geoJsonFormat)
 {
@@ -102,6 +113,9 @@ void JsonHelper::_saveGeoCoordinate(const QGeoCoordinate&   coordinate,
     if (writeAltitude) {
         coordinateArray << coordinate.altitude();
     }
+    if (type != NULL) {
+        coordinateArray << *type;
+    }
 
     jsonValue = QJsonValue(coordinateArray);
 }
@@ -112,14 +126,22 @@ bool JsonHelper::loadGeoCoordinate(const QJsonValue&    jsonValue,
                                    QString&             errorString,
                                    bool                 geoJsonFormat)
 {
-    return _loadGeoCoordinate(jsonValue, altitudeRequired, coordinate, errorString, geoJsonFormat);
+    return _loadGeoCoordinate(jsonValue, altitudeRequired, coordinate, NULL, errorString, geoJsonFormat);
 }
 
 void JsonHelper::saveGeoCoordinate(const QGeoCoordinate&    coordinate,
                                    bool                     writeAltitude,
                                    QJsonValue&              jsonValue)
 {
-    _saveGeoCoordinate(coordinate, writeAltitude, jsonValue, false /* geoJsonFormat */);
+    _saveGeoCoordinate(coordinate, writeAltitude, NULL, jsonValue, false /* geoJsonFormat */);
+}
+
+void JsonHelper::saveGeoCoordinate(const QGeoCoordinate&    coordinate,
+                                   bool                     writeAltitude,
+                                   int                      type,
+                                   QJsonValue&              jsonValue)
+{
+    _saveGeoCoordinate(coordinate, writeAltitude, &type, jsonValue, false /* geoJsonFormat */);
 }
 
 bool JsonHelper::loadGeoJsonCoordinate(const QJsonValue& jsonValue,
@@ -127,14 +149,14 @@ bool JsonHelper::loadGeoJsonCoordinate(const QJsonValue& jsonValue,
                                        QGeoCoordinate&   coordinate,
                                        QString&          errorString)
 {
-    return _loadGeoCoordinate(jsonValue, altitudeRequired, coordinate, errorString, true /* geoJsonFormat */);
+    return _loadGeoCoordinate(jsonValue, altitudeRequired, coordinate, NULL, errorString, true /* geoJsonFormat */);
 }
 
 void JsonHelper::saveGeoJsonCoordinate(const QGeoCoordinate& coordinate,
                                        bool                  writeAltitude,
                                        QJsonValue&           jsonValue)
 {
-    _saveGeoCoordinate(coordinate, writeAltitude, jsonValue, true /* geoJsonFormat */);
+    _saveGeoCoordinate(coordinate, writeAltitude, NULL, jsonValue, true /* geoJsonFormat */);
 }
 
 bool JsonHelper::validateKeyTypes(const QJsonObject& jsonObject, const QStringList& keys, const QList<QJsonValue::Type>& types, QString& errorString)
@@ -412,6 +434,37 @@ bool JsonHelper::loadGeoCoordinateArray(const QJsonValue&       jsonValue,
 
     return true;
 }
+
+bool JsonHelper::loadGeoCoordinateArray(const QJsonValue&       jsonValue,
+                                        bool                    altitudeRequired,
+                                        QList<QGeoCoordinate>&  rgPoints,
+                                        QList<int>*             types,
+                                        QString&                errorString)
+{
+    if (!jsonValue.isArray()) {
+        errorString = QObject::tr("value for coordinate array is not array");
+        return false;
+    }
+    QJsonArray rgJsonPoints = jsonValue.toArray();
+
+    rgPoints.clear();
+    for (int i=0; i<rgJsonPoints.count(); i++) {
+        QGeoCoordinate coordinate;
+        int type = 0;
+
+        if (!JsonHelper::_loadGeoCoordinate(rgJsonPoints[i], altitudeRequired, coordinate,
+                    types != NULL ? &type : NULL, errorString, false /* !geoJsonFormat */)) {
+            return false;
+        }
+        rgPoints.append(coordinate);
+        if (types != NULL) {
+            types->append(type);
+        }
+    }
+
+    return true;
+}
+
 
 void JsonHelper::saveGeoCoordinateArray(const QVariantList& rgVarPoints,
                                         bool                writeAltitude,
