@@ -5,6 +5,7 @@ import QtQuick.Layouts              1.11
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 import QGroundControl.Controls      1.0
+import QGroundControl.FactSystem    1.0
 import QGroundControl.FactControls  1.0
 import QGroundControl.Palette       1.0
 
@@ -103,19 +104,29 @@ Rectangle {
 
             Repeater {
                 model: rallyPoint ? rallyPoint.textFieldFacts : 0
-                QGCLabel {
-                    text: modelData.name + ":"
-                }
-            }
 
-            Repeater {
-                model: rallyPoint ? rallyPoint.textFieldFacts : 0
-                FactTextField {
-                    Layout.fillWidth:   true
-                    showUnits:          true
-                    fact:               modelData
-                }
-            }
+                Column {
+                    property bool showCombo: modelData.enumStrings.length > 0
+
+                    QGCLabel {
+                        text: modelData.name + ":"
+                    }
+                    FactTextField {
+                        Layout.fillWidth:   true
+                        showUnits:          true
+                        fact:               modelData
+                        visible:            !parent.showCombo
+                    }
+                    FactComboBox {
+                        Layout.fillWidth:   true
+                        indexModel:         false
+                        fact:               parent.showCombo ? modelData : _nullFact
+                        visible:            parent.showCombo
+
+                        property var _nullFact: Fact { }
+                    }
+                }  // RowLayout
+            }  // Repeater
         } // GridLayout
     } // Rectangle
 } // Rectangle
