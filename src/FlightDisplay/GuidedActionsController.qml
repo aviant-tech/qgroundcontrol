@@ -32,6 +32,7 @@ Item {
     property var actionList
     property var altitudeSlider
     property var orbitMapCircle
+    property var flyViewWidgetLayer
 
     readonly property string emergencyStopTitle:            qsTr("EMERGENCY STOP")
     readonly property string armTitle:                      qsTr("Arm")
@@ -54,6 +55,7 @@ Item {
     readonly property string vtolTransitionTitle:           qsTr("VTOL Transition")
     readonly property string roiTitle:                      qsTr("ROI")
     readonly property string actionListTitle:               qsTr("Action")
+    readonly property string branchTitle:                   qsTr("Branch")
 
     readonly property string armMessage:                        qsTr("Arm the vehicle.")
     readonly property string forceArmMessage:                   qsTr("WARNING: This will force arming of the vehicle bypassing any safety checks.")
@@ -75,6 +77,7 @@ Item {
     readonly property string vtolTransitionFwdMessage:          qsTr("Transition VTOL to fixed wing flight.")
     readonly property string vtolTransitionMRMessage:           qsTr("Transition VTOL to multi-rotor flight.")
     readonly property string roiMessage:                        qsTr("Make the specified location a Region Of Interest.")
+    readonly property string branchMessage:                     qsTr("Move the vehicle to the specified location.")
 
     readonly property int actionRTL:                        1
     readonly property int actionLand:                       2
@@ -100,6 +103,7 @@ Item {
     readonly property int actionROI:                        22
     readonly property int actionActionList:                 23
     readonly property int actionForceArm:                   24
+    readonly property int actionBranch:                     25
 
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property bool   _useChecklist:              QGroundControl.settingsManager.appSettings.useChecklist.rawValue && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
@@ -122,6 +126,7 @@ Item {
     property bool showLandAbort:        _guidedActionsEnabled && _vehicleFlying && _fixedWingOnApproach
     property bool showGotoLocation:     _guidedActionsEnabled && _vehicleFlying
     property bool showActionList:       _guidedActionsEnabled && (showStartMission || showResumeMission || showChangeAlt || showLandAbort)
+    property bool showBranch:           _guidedActionsEnabled && _vehicleFlying
 
     // Note: The '_missionItemCount - 2' is a hack to not trigger resume mission when a mission ends with an RTL item
     property bool showResumeMission:    _activeVehicle && !_vehicleArmed && _vehicleWasFlying && _missionAvailable && _resumeMissionIndex > 0 && (_resumeMissionIndex < _missionItemCount - 2)
@@ -157,6 +162,8 @@ Item {
     property bool __roiSupported:           _activeVehicle ? !_hideROI && _activeVehicle.roiModeSupported : false
     property bool __orbitSupported:         _activeVehicle ? !_hideOrbit && _activeVehicle.orbitModeSupported : false
     property bool __flightMode:             _flightMode
+
+    signal setBranchesVisibility(bool isVisible)
 
     function _outputState() {
         if (_corePlugin.guidedActionsControllerLogging()) {
@@ -321,6 +328,7 @@ Item {
         confirmDialog.mapIndicator = mapIndicator
         confirmDialog.optionText = ""
         _actionData = actionData
+        setBranchesVisibility(false)
         switch (actionCode) {
         case actionArm:
             if (_vehicleFlying || !_guidedActionsEnabled) {
@@ -452,6 +460,12 @@ Item {
         case actionActionList:
             actionList.show()
             return
+        case actionBranch:
+            confirmDialog.title = branchTitle
+            confirmDialog.message = branchMessage
+            confirmDialog.hideTrigger = Qt.binding(function() { return !showBranch })
+            setBranchesVisibility(true)
+            break;
         default:
             console.warn("Unknown actionCode", actionCode)
             return
@@ -463,6 +477,8 @@ Item {
     function executeAction(actionCode, actionData, actionAltitudeChange, optionChecked) {
         var i;
         var rgVehicle;
+        var selectedBranch;
+
         switch (actionCode) {
         case actionRTL:
             _activeVehicle.guidedModeRTL(optionChecked)
@@ -531,6 +547,11 @@ Item {
             break
         case actionROI:
             _activeVehicle.guidedModeROI(actionData)
+            break
+        case actionBranch:
+            selectedBranch = flyViewWidgetLayer.getSelectedBranchItem()
+            _activeVehicle.setCurrentMissionSequence(selectedBranch)
+            setBranchesVisibility(false)
             break
         default:
             console.warn(qsTr("Internal error: unknown actionCode"), actionCode)

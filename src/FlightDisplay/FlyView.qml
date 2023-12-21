@@ -56,6 +56,7 @@ Item {
     property rect   _centerViewport:        Qt.rect(0, 0, width, height)
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property var    _mapControl:            mapControl
+    property var    _widgetLayer:           widgetLayer
 
     property real   _fullItemZorder:    0
     property real   _pipItemZorder:     QGroundControl.zOrderWidgets
@@ -100,6 +101,7 @@ Item {
         missionController:  _missionController
         actionList:         _guidedActionList
         altitudeSlider:     _guidedAltSlider
+        flyViewWidgetLayer: _widgetLayer
     }
 
     /*GuidedActionConfirm {
