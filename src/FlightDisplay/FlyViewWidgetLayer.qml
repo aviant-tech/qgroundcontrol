@@ -51,6 +51,10 @@ Item {
     property var    _aviantSettings:        QGroundControl.settingsManager.aviantSettings
     property bool   _showWinchControlMenu:  _aviantSettings.showWinchControlMenu.rawValue
 
+    function getSelectedBranchItem() {
+        return branchSelector._selectedBranchItem
+    }
+
     QGCToolInsets {
         id:                     _totalToolInsets
         leftEdgeTopInset:       toolStrip.leftInset
@@ -147,6 +151,10 @@ Item {
         ]
 
         property bool _verticalCenter: !QGroundControl.settingsManager.flyViewSettings.alternateInstrumentPanel.rawValue && !_showWinchControlMenu
+    }
+
+    BranchSelector {
+        id: branchSelector
     }
     
     VehicleWarningSideBar {
