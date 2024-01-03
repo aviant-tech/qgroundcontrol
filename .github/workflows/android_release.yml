@@ -69,6 +69,7 @@ jobs:
             ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-33-ext4"
             ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34"
             ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext8"
+            ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext10"
 
       - name: Create build directory
         run:  mkdir ${{ runner.temp }}/shadow_build_dir
