@@ -112,6 +112,13 @@ public:
                                   bool                  writeAltitude,  ///< true: write altitude to json
                                   QJsonValue&           jsonValue);     ///< json value to save to
 
+    /// Saves a QGeoCoordinate, including type as integer
+    ///     Stored as array [ lat, lon, alt, type ]
+    static void saveGeoCoordinate(const QGeoCoordinate& coordinate,     ///< QGeoCoordinate to save
+                                  bool                  writeAltitude,  ///< true: write altitude to json
+                                  int                   type,           ///< type value to include in array
+                                  QJsonValue&           jsonValue);     ///< json value to save to
+
     /// Loads a QGeoCoordinate
     ///     Stored as array [ lon, lat, alt ]
     /// @return false: validation failed
@@ -142,6 +149,13 @@ public:
                                        bool                     altitudeRequired,   ///< true: altitude field must be specified
                                        QList<QGeoCoordinate>&   rgPoints,           ///< returned points
                                        QString&                 errorString);       ///< returned error string if load failure
+    
+    /// Load a list of QGeoCoordinates from a json array, including type
+    static bool loadGeoCoordinateArray(const QJsonValue&        jsonValue,          ///< json value which contains points
+                                       bool                     altitudeRequired,   ///< true: altitude field must be specified
+                                       QList<QGeoCoordinate>&   rgPoints,           ///< returned points
+                                       QList<int>*              types,              ///< read type to this list, unless NULL
+                                       QString&                 errorString);       ///< returned error string if load failure
 
     /// Saves a list of QGeoCoordinates to a json array
     static void saveGeoCoordinateArray(const QVariantList&  rgVarPoints,            ///< points to save
@@ -168,10 +182,12 @@ private:
     static bool _loadGeoCoordinate(const QJsonValue&    jsonValue,
                                    bool                 altitudeRequired,
                                    QGeoCoordinate&      coordinate,
+                                   int*                 type,
                                    QString&             errorString,
                                    bool                 geoJsonFormat);
     static void _saveGeoCoordinate(const QGeoCoordinate&    coordinate,
                                    bool                     writeAltitude,
+                                   int*                     type,
                                    QJsonValue&              jsonValue,
                                    bool                     geoJsonFormat);
     static QStringList _addDefaultLocKeys(QJsonObject& jsonObject);

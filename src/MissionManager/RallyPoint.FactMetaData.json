@@ -22,6 +22,14 @@
     "decimalPlaces":    2,
     "units":            "m",
     "default":     0.0
+},
+{
+    "name":             "Active",
+    "shortDesc": "Specify in what modes of flight the rally point is valid",
+    "type":             "uint32",
+    "enumStrings":      "Always,MR only,FW only",
+    "enumValues":       "0,1,2",
+    "default":     0
 }
 ]
 }

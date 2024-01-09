@@ -78,6 +78,7 @@ private:
     bool                _itemsRequested =       false;
 
     static const int    _jsonCurrentVersion = 2;
+    static const int    _jsonCurrentVersionWithRPType = 102;
     static const char*  _jsonFileTypeValue;
     static const char*  _jsonPointsKey;
 };

@@ -14,6 +14,7 @@
 
 #include "QGCLoggingCategory.h"
 #include "PlanManager.h"
+#include "RallyPoint.h"
 
 class Vehicle;
 class PlanManager;
@@ -31,10 +32,10 @@ public:
     ~RallyPointManager();
     
     bool                    supported       (void) const;
-    void                    sendToVehicle   (const QList<QGeoCoordinate>& rgPoints);
+    void                    sendToVehicle   (const QList<const RallyPoint*>& rgPoints);
     void                    removeAll       (void);
     QString                 editorQml       (void) const                            { return QStringLiteral("qrc:/FirmwarePlugin/RallyPointEditor.qml"); }
-    QList<QGeoCoordinate>   points          (void) const                            { return _rgPoints; }
+    QList<RallyPoint>       points          (void) const                            { return _rgPoints; }
 
     /// Error codes returned in error signal
     typedef enum {
@@ -58,6 +59,6 @@ private slots:
 protected:
     void _sendError(ErrorCode_t errorCode, const QString& errorMsg);
 
-    QList<QGeoCoordinate> _rgPoints;
-    QList<QGeoCoordinate> _rgSendPoints;
+    QList<RallyPoint> _rgPoints;
+    QList<RallyPoint> _rgSendPoints;
 };
