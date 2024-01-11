@@ -154,7 +154,7 @@ QGCFlickable {
 
                     GridLayout {
                         Layout.fillWidth:   true
-                        columns:            3
+                        columns:            5
                         flow:               GridLayout.TopToBottom
                         visible:            polygonSection.checked && myGeoFenceController.polygons.count > 0
 
@@ -199,8 +199,68 @@ QGCFlickable {
                         }
 
                         QGCLabel {
-                            text:               qsTr("Delete")
+                            text:               qsTr("Altitude")
                             Layout.column:      2
+                            Layout.alignment:   Qt.AlignHCenter
+                        }
+
+                        Repeater {
+                            model: myGeoFenceController.polygons
+
+                            QGCTextField {
+                                required property int index
+
+                                id : textFieldPolygons
+                                property int _value: textFieldPolygons.index != -1 ? myGeoFenceController.getPolygonMaxAltitude(textFieldPolygons.index) : 0
+                                text: _value
+                                unitsLabel: "m"
+                                showUnits: true
+                                validator: IntValidator {bottom: 0; top: 100000}
+
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 4)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 4)
+                                Layout.alignment:   Qt.AlignHCenter
+
+                                onEditingFinished: myGeoFenceController.setPolygonMaxAltitude(textFieldPolygons.index, parseInt(textFieldPolygons.text))
+                            }
+                        }
+
+                        QGCLabel {
+                            text:               qsTr("Action")
+                            Layout.column:      3
+                            Layout.alignment:   Qt.AlignHCenter
+                        }
+
+                        Repeater {
+                            model: myGeoFenceController.polygons
+
+                            QGCComboBox {
+                                required property int index
+
+                                id : comboBoxPolygons
+                                currentIndex : comboBoxPolygons.index != -1 ? myGeoFenceController.getPolygonFenceAction(comboBoxPolygons.index) : 0
+                                textRole: "text"
+                                Layout.alignment:   Qt.AlignHCenter
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 4)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 4)
+
+                                model: [
+                                    { text: myGeoFenceController.DEFAULT },
+                                    { text: myGeoFenceController.NONE },
+                                    { text: myGeoFenceController.WARN },
+                                    { text: myGeoFenceController.HOLD },
+                                    { text: myGeoFenceController.RTL },
+                                    { text: myGeoFenceController.LAND },
+                                    { text: myGeoFenceController.TERMINATE }
+                                ]
+
+                                onActivated: myGeoFenceController.setPolygonFenceAction(comboBoxPolygons.index, currentIndex)
+                            }
+                        }
+
+                        QGCLabel {
+                            text:               qsTr("Delete")
+                            Layout.column:      4
                             Layout.alignment:   Qt.AlignHCenter
                         }
 
@@ -210,6 +270,8 @@ QGCFlickable {
                             QGCButton {
                                 text:               qsTr("Del")
                                 Layout.alignment:   Qt.AlignHCenter
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 5)
                                 onClicked:          myGeoFenceController.deletePolygon(index)
                             }
                         }
@@ -230,7 +292,7 @@ QGCFlickable {
                     GridLayout {
                         anchors.left:       parent.left
                         anchors.right:      parent.right
-                        columns:            4
+                        columns:            6
                         flow:               GridLayout.TopToBottom
                         visible:            polygonSection.checked && myGeoFenceController.circles.count > 0
 
@@ -285,14 +347,75 @@ QGCFlickable {
 
                             FactTextField {
                                 fact:               object.radius
-                                Layout.fillWidth:   true
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 5)
                                 Layout.alignment:   Qt.AlignHCenter
                             }
                         }
 
                         QGCLabel {
-                            text:               qsTr("Delete")
+                            text:               qsTr("Altitude")
                             Layout.column:      3
+                            Layout.alignment:   Qt.AlignHCenter
+                        }
+
+                        Repeater {
+                            model: myGeoFenceController.circles
+
+                            QGCTextField {
+                                required property int index
+
+                                id : textFieldCircles
+                                property int _value: textFieldCircles.index != -1 ? myGeoFenceController.getCircleMaxAltitude(textFieldCircles.index) : 0
+                                text: _value
+                                unitsLabel: "m"
+                                showUnits: true
+                                validator: IntValidator {bottom: 0; top: 100000}
+
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.alignment:   Qt.AlignHCenter
+
+                                onEditingFinished: myGeoFenceController.setCircleMaxAltitude(textFieldCircles.index, parseInt(textFieldCircles.text))
+                            }
+                        }
+
+                        QGCLabel {
+                            text:               qsTr("Action")
+                            Layout.column:      4
+                            Layout.alignment:   Qt.AlignHCenter
+                        }
+
+                        Repeater {
+                            model: myGeoFenceController.circles
+
+                            QGCComboBox {
+                                required property int index
+
+                                id : comboBoxCircles
+                                currentIndex : comboBoxCircles.index != -1 ? myGeoFenceController.getCircleFenceAction(comboBoxCircles.index) : 0
+                                textRole: "text"
+                                Layout.alignment:   Qt.AlignHCenter
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 5)
+
+                                model: [
+                                    { text: myGeoFenceController.DEFAULT },
+                                    { text: myGeoFenceController.NONE },
+                                    { text: myGeoFenceController.WARN },
+                                    { text: myGeoFenceController.HOLD },
+                                    { text: myGeoFenceController.RTL },
+                                    { text: myGeoFenceController.LAND },
+                                    { text: myGeoFenceController.TERMINATE }
+                                ]
+
+                                onActivated: myGeoFenceController.setCircleFenceAction(comboBoxCircles.index, currentIndex)
+                            }
+                        }
+
+                        QGCLabel {
+                            text:               qsTr("Delete")
+                            Layout.column:      5
                             Layout.alignment:   Qt.AlignHCenter
                         }
 

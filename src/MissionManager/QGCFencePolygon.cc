@@ -11,6 +11,8 @@
 #include "JsonHelper.h"
 
 const char* QGCFencePolygon::_jsonInclusionKey = "inclusion";
+const char* QGCFencePolygon::_jsonFenceActionKey = "fenceAction";
+const char* QGCFencePolygon::_jsonMaxAltitudeKey = "maxAltitude";
 
 QGCFencePolygon::QGCFencePolygon(bool inclusion, QObject* parent)
     : QGCMapPolygon (parent)
@@ -22,6 +24,8 @@ QGCFencePolygon::QGCFencePolygon(bool inclusion, QObject* parent)
 QGCFencePolygon::QGCFencePolygon(const QGCFencePolygon& other, QObject* parent)
     : QGCMapPolygon (other, parent)
     , _inclusion    (other._inclusion)
+    , _fenceAction  (other._fenceAction)
+    , _maxAltitude  (other._maxAltitude)
 {
     _init();
 }
@@ -36,6 +40,8 @@ const QGCFencePolygon& QGCFencePolygon::operator=(const QGCFencePolygon& other)
     QGCMapPolygon::operator=(other);
 
     setInclusion(other._inclusion);
+    setFenceAction(other._fenceAction);
+    setMaxAltitude(other._maxAltitude);
 
     return *this;
 }
@@ -49,6 +55,8 @@ void QGCFencePolygon::saveToJson(QJsonObject& json)
 {
     json[JsonHelper::jsonVersionKey] = _jsonCurrentVersion;
     json[_jsonInclusionKey] = _inclusion;
+    json[_jsonFenceActionKey] = _fenceAction;
+    json[_jsonMaxAltitudeKey] = _maxAltitude;
     QGCMapPolygon::saveToJson(json);
 }
 
@@ -59,6 +67,8 @@ bool QGCFencePolygon::loadFromJson(const QJsonObject& json, bool required, QStri
     QList<JsonHelper::KeyValidateInfo> keyInfoList = {
         { JsonHelper::jsonVersionKey,   QJsonValue::Double, true },
         { _jsonInclusionKey,            QJsonValue::Bool,   true },
+        { _jsonFenceActionKey,          QJsonValue::Double, false },
+        { _jsonMaxAltitudeKey,          QJsonValue::Double, false },
     };
     if (!JsonHelper::validateKeys(json, keyInfoList, errorString)) {
         return false;
@@ -73,6 +83,8 @@ bool QGCFencePolygon::loadFromJson(const QJsonObject& json, bool required, QStri
         return false;
     }
 
+    setMaxAltitude(json[_jsonMaxAltitudeKey].toInt());
+    setFenceAction(json[_jsonFenceActionKey].toInt());
     setInclusion(json[_jsonInclusionKey].toBool());
 
     return true;
@@ -80,8 +92,16 @@ bool QGCFencePolygon::loadFromJson(const QJsonObject& json, bool required, QStri
 
 void QGCFencePolygon::setInclusion(bool inclusion)
 {
-    if (inclusion != _inclusion) {
-        _inclusion = inclusion;
-        emit inclusionChanged(inclusion);
-    }
+    _inclusion = inclusion;
+    emit inclusionChanged(inclusion);
+}
+
+void QGCFencePolygon::setFenceAction (int fenceAction)
+{
+    _fenceAction = fenceAction;
+}
+
+void QGCFencePolygon::setMaxAltitude (int maxAltitude)
+{
+    _maxAltitude = maxAltitude;
 }
