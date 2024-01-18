@@ -231,22 +231,11 @@ QGCFlickable {
                             model: myGeoFenceController.polygons
 
                             QGCComboBox {
-                                textRole: "text"
                                 currentIndex : object.fenceAction
                                 Layout.alignment:   Qt.AlignHCenter
                                 Layout.maximumWidth: (geoFenceEditorRect.width / 4)
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 4)
-
-                                model: [
-                                    { text: myGeoFenceController.DEFAULT },
-                                    { text: myGeoFenceController.NONE },
-                                    { text: myGeoFenceController.WARN },
-                                    { text: myGeoFenceController.HOLD },
-                                    { text: myGeoFenceController.RTL },
-                                    { text: myGeoFenceController.LAND },
-                                    { text: myGeoFenceController.TERMINATE }
-                                ]
-
+                                model: myGeoFenceController.fenceActions
                                 onActivated: object.fenceAction = currentIndex
                             }
                         }
@@ -383,17 +372,7 @@ QGCFlickable {
                                 Layout.alignment:   Qt.AlignHCenter
                                 Layout.maximumWidth: (geoFenceEditorRect.width / 5)
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 5)
-
-                                model: [
-                                    { text: myGeoFenceController.DEFAULT },
-                                    { text: myGeoFenceController.NONE },
-                                    { text: myGeoFenceController.WARN },
-                                    { text: myGeoFenceController.HOLD },
-                                    { text: myGeoFenceController.RTL },
-                                    { text: myGeoFenceController.LAND },
-                                    { text: myGeoFenceController.TERMINATE }
-                                ]
-
+                                model: myGeoFenceController.fenceActions
                                 onActivated: object.fenceAction = currentIndex
                             }
                         }
