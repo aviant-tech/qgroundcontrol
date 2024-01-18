@@ -18,10 +18,6 @@
 #include "MultiVehicleManager.h"
 #include "QGCLoggingCategory.h"
 
-#define SHARED_CONSTANT(type, name, value) \
-static inline const type name = value; \
-    Q_PROPERTY(type name MEMBER name CONSTANT)
-
 Q_DECLARE_LOGGING_CATEGORY(GeoFenceControllerLog)
 
 class GeoFenceManager;
@@ -34,18 +30,11 @@ public:
     GeoFenceController(PlanMasterController* masterController, QObject* parent = nullptr);
     ~GeoFenceController();
 
-    SHARED_CONSTANT(QString, DEFAULT, QStringLiteral("Default"));
-    SHARED_CONSTANT(QString, NONE, QStringLiteral("None"));
-    SHARED_CONSTANT(QString, WARN, QStringLiteral("Warn"));
-    SHARED_CONSTANT(QString, HOLD, QStringLiteral("Hold"));
-    SHARED_CONSTANT(QString, RTL, QStringLiteral("RTL"));
-    SHARED_CONSTANT(QString, LAND, QStringLiteral("Land"));
-    SHARED_CONSTANT(QString, TERMINATE, QStringLiteral("Terminate"));
-
     Q_PROPERTY(QmlObjectListModel*  polygons                READ polygons                                           CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  circles                 READ circles                                            CONSTANT)
     Q_PROPERTY(QGeoCoordinate       breachReturnPoint       READ breachReturnPoint      WRITE setBreachReturnPoint  NOTIFY breachReturnPointChanged)
     Q_PROPERTY(Fact*                breachReturnAltitude    READ breachReturnAltitude                               CONSTANT)
+    Q_PROPERTY(QStringList          fenceActions            READ fenceActions                                       CONSTANT)
 
     // Hack to expose PX4 circular fence controlled by GF_MAX_HOR_DIST
     Q_PROPERTY(double               paramCircularFence  READ paramCircularFence                             NOTIFY paramCircularFenceChanged)
@@ -71,8 +60,9 @@ public:
     /// Clears the interactive bit from all fence items
     Q_INVOKABLE void clearAllInteractive(void);
 
-    double  paramCircularFence  (void);
-    Fact*   breachReturnAltitude(void) { return &_breachReturnAltitudeFact; }
+    double      paramCircularFence  (void);
+    Fact*       breachReturnAltitude(void) { return &_breachReturnAltitudeFact; }
+    QStringList fenceActions(void) const;
 
     // Overrides from PlanElementController
     bool supported                  (void) const final;

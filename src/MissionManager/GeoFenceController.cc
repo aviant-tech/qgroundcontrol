@@ -527,3 +527,16 @@ bool GeoFenceController::isEmpty(void) const
     return _polygons.count() == 0 && _circles.count() == 0 && !_breachReturnPoint.isValid();
 
 }
+
+QStringList GeoFenceController::fenceActions(void) const {
+    // The index of the elements in this list must match the action in the autopilot
+    return QStringList({
+            "Default",   // 0
+            "None",      // 1
+            "Warn",      // 2
+            "Hold",      // 3
+            "RTL",       // 4
+            "Land",      // 5
+            "Terminate"  // 6
+            });
+}
