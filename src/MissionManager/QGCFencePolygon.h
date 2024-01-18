@@ -23,6 +23,8 @@ public:
     const QGCFencePolygon& operator=(const QGCFencePolygon& other);
 
     Q_PROPERTY(bool inclusion READ inclusion WRITE setInclusion NOTIFY inclusionChanged)
+    Q_PROPERTY(int fenceAction READ fenceAction WRITE setFenceAction NOTIFY fenceActionChanged)
+    Q_PROPERTY(int maxAltitude READ maxAltitude WRITE setMaxAltitude NOTIFY maxAltitudeChanged)
 
     /// Saves the QGCFencePolygon to the json object.
     ///     @param json Json object to save to
@@ -46,6 +48,8 @@ public:
 
 signals:
     void inclusionChanged   (bool inclusion);
+    void fenceActionChanged(int fenceAction);
+    void maxAltitudeChanged(int maxAltitude);
 
 private slots:
     void _setDirty(void);

@@ -33,6 +33,8 @@ QGCFencePolygon::QGCFencePolygon(const QGCFencePolygon& other, QObject* parent)
 void QGCFencePolygon::_init(void)
 {
     connect(this, &QGCFencePolygon::inclusionChanged, this, &QGCFencePolygon::_setDirty);
+    connect(this, &QGCFencePolygon::fenceActionChanged, this, &QGCFencePolygon::_setDirty);
+    connect(this, &QGCFencePolygon::maxAltitudeChanged, this, &QGCFencePolygon::_setDirty);
 }
 
 const QGCFencePolygon& QGCFencePolygon::operator=(const QGCFencePolygon& other)
@@ -92,16 +94,21 @@ bool QGCFencePolygon::loadFromJson(const QJsonObject& json, bool required, QStri
 
 void QGCFencePolygon::setInclusion(bool inclusion)
 {
+    if (inclusion == _inclusion) return;
     _inclusion = inclusion;
     emit inclusionChanged(inclusion);
 }
 
 void QGCFencePolygon::setFenceAction (int fenceAction)
 {
+    if (fenceAction == _fenceAction) return;
     _fenceAction = fenceAction;
+    emit fenceActionChanged(fenceAction);
 }
 
 void QGCFencePolygon::setMaxAltitude (int maxAltitude)
 {
+    if (maxAltitude == _maxAltitude) return;
     _maxAltitude = maxAltitude;
+    emit maxAltitudeChanged(maxAltitude);
 }

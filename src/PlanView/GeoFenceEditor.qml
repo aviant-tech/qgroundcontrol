@@ -208,11 +208,7 @@ QGCFlickable {
                             model: myGeoFenceController.polygons
 
                             QGCTextField {
-                                required property int index
-
-                                id : textFieldPolygons
-                                property int _value: textFieldPolygons.index != -1 ? myGeoFenceController.getPolygonMaxAltitude(textFieldPolygons.index) : 0
-                                text: _value
+                                text: object.maxAltitude
                                 unitsLabel: "m"
                                 showUnits: true
                                 validator: IntValidator {bottom: 0; top: 100000}
@@ -221,7 +217,7 @@ QGCFlickable {
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 4)
                                 Layout.alignment:   Qt.AlignHCenter
 
-                                onEditingFinished: myGeoFenceController.setPolygonMaxAltitude(textFieldPolygons.index, parseInt(textFieldPolygons.text))
+                                onEditingFinished: object.maxAltitude = parseInt(text)
                             }
                         }
 
@@ -235,11 +231,8 @@ QGCFlickable {
                             model: myGeoFenceController.polygons
 
                             QGCComboBox {
-                                required property int index
-
-                                id : comboBoxPolygons
-                                currentIndex : comboBoxPolygons.index != -1 ? myGeoFenceController.getPolygonFenceAction(comboBoxPolygons.index) : 0
                                 textRole: "text"
+                                currentIndex : object.fenceAction
                                 Layout.alignment:   Qt.AlignHCenter
                                 Layout.maximumWidth: (geoFenceEditorRect.width / 4)
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 4)
@@ -254,7 +247,7 @@ QGCFlickable {
                                     { text: myGeoFenceController.TERMINATE }
                                 ]
 
-                                onActivated: myGeoFenceController.setPolygonFenceAction(comboBoxPolygons.index, currentIndex)
+                                onActivated: object.fenceAction = currentIndex
                             }
                         }
 
@@ -363,11 +356,7 @@ QGCFlickable {
                             model: myGeoFenceController.circles
 
                             QGCTextField {
-                                required property int index
-
-                                id : textFieldCircles
-                                property int _value: textFieldCircles.index != -1 ? myGeoFenceController.getCircleMaxAltitude(textFieldCircles.index) : 0
-                                text: _value
+                                text: object.maxAltitude
                                 unitsLabel: "m"
                                 showUnits: true
                                 validator: IntValidator {bottom: 0; top: 100000}
@@ -376,7 +365,7 @@ QGCFlickable {
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 5)
                                 Layout.alignment:   Qt.AlignHCenter
 
-                                onEditingFinished: myGeoFenceController.setCircleMaxAltitude(textFieldCircles.index, parseInt(textFieldCircles.text))
+                                onEditingFinished: object.maxAltitude = parseInt(text)
                             }
                         }
 
@@ -390,11 +379,7 @@ QGCFlickable {
                             model: myGeoFenceController.circles
 
                             QGCComboBox {
-                                required property int index
-
-                                id : comboBoxCircles
-                                currentIndex : comboBoxCircles.index != -1 ? myGeoFenceController.getCircleFenceAction(comboBoxCircles.index) : 0
-                                textRole: "text"
+                                currentIndex : object.fenceAction
                                 Layout.alignment:   Qt.AlignHCenter
                                 Layout.maximumWidth: (geoFenceEditorRect.width / 5)
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 5)
@@ -409,7 +394,7 @@ QGCFlickable {
                                     { text: myGeoFenceController.TERMINATE }
                                 ]
 
-                                onActivated: myGeoFenceController.setCircleFenceAction(comboBoxCircles.index, currentIndex)
+                                onActivated: object.fenceAction = currentIndex
                             }
                         }
 
