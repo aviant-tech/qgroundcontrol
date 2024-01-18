@@ -40,6 +40,8 @@ QGCFenceCircle::QGCFenceCircle(const QGCFenceCircle& other, QObject* parent)
 void QGCFenceCircle::_init(void)
 {
     connect(this, &QGCFenceCircle::inclusionChanged, this, &QGCFenceCircle::_setDirty);
+    connect(this, &QGCFenceCircle::fenceActionChanged, this, &QGCFenceCircle::_setDirty);
+    connect(this, &QGCFenceCircle::maxAltitudeChanged, this, &QGCFenceCircle::_setDirty);
 }
 
 const QGCFenceCircle& QGCFenceCircle::operator=(const QGCFenceCircle& other)
@@ -92,23 +94,28 @@ bool QGCFenceCircle::loadFromJson(const QJsonObject& json, QString& errorString)
 
     setMaxAltitude(json[_jsonMaxAltitudeKey].toInt());
     setFenceAction(json[_jsonFenceActionKey].toInt());
-    setInclusion(json[_jsonInclusionKey].toBool()); // This will trigger even to change maxAltitude, fenceAction and inclustion
+    setInclusion(json[_jsonInclusionKey].toBool());
 
     return true;
 }
 
 void QGCFenceCircle::setInclusion(bool inclusion)
 {
+    if (inclusion == _inclusion) return;
     _inclusion = inclusion;
     emit inclusionChanged(inclusion);
 }
 
 void QGCFenceCircle::setFenceAction (int fenceAction)
 {
+    if (fenceAction == _fenceAction) return;
     _fenceAction = fenceAction;
+    emit fenceActionChanged(fenceAction);
 }
 
 void QGCFenceCircle::setMaxAltitude (int maxAltitude)
 {
+    if (maxAltitude == _maxAltitude) return;
     _maxAltitude = maxAltitude;
+    emit maxAltitudeChanged(maxAltitude);
 }
