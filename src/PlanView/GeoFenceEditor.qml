@@ -212,6 +212,7 @@ QGCFlickable {
                                 unitsLabel: "m"
                                 showUnits: true
                                 validator: IntValidator {bottom: 0; top: 100000}
+                                enabled: object.inclusion
 
                                 Layout.maximumWidth: (geoFenceEditorRect.width / 4)
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 4)
@@ -349,6 +350,7 @@ QGCFlickable {
                                 unitsLabel: "m"
                                 showUnits: true
                                 validator: IntValidator {bottom: 0; top: 100000}
+                                enabled: object.inclusion
 
                                 Layout.maximumWidth: (geoFenceEditorRect.width / 5)
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 5)

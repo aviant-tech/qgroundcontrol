@@ -58,7 +58,7 @@ void QGCFencePolygon::saveToJson(QJsonObject& json)
     json[JsonHelper::jsonVersionKey] = _jsonCurrentVersion;
     json[_jsonInclusionKey] = _inclusion;
     json[_jsonFenceActionKey] = _fenceAction;
-    json[_jsonMaxAltitudeKey] = _maxAltitude;
+    json[_jsonMaxAltitudeKey] = _inclusion ? _maxAltitude : 0;
     QGCMapPolygon::saveToJson(json);
 }
 

@@ -41,7 +41,7 @@ public:
 
     bool inclusion      (void) const { return _inclusion; }
     int  fenceAction    (void) const { return _fenceAction; }
-    int  maxAltitude    (void) const { return _maxAltitude; }
+    int  maxAltitude    (void) const { return _inclusion ? _maxAltitude : 0; }
     void setInclusion   (bool inclusion);
     void setFenceAction (int fenceAction);
     void setMaxAltitude(int maxAltitude);
