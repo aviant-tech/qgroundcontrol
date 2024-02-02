@@ -281,15 +281,14 @@ void PlanMasterController::_loadRallyPointsComplete(void)
 
 void PlanMasterController::_sendMissionComplete(void)
 {
-    if (_sendGeoFence) {
-        _sendGeoFence = false;
-        _sendRallyPoints = true;
-        if (_geoFenceController.supported()) {
-            qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle start GeoFence sendToVehicle";
-            _geoFenceController.sendToVehicle();
+    if (_sendRallyPoints) {
+        _sendRallyPoints = false;
+        if (_rallyPointController.supported()) {
+            qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle start Rally Point sendToVehicle";
+            _rallyPointController.sendToVehicle();
         } else {
-            qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle GeoFence not supported skipping";
-            _sendGeoFenceComplete();
+            qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle Rally Point not supported skipping";
+            _sendRallyPointsComplete();
         }
         setDirty(false);
     }
@@ -297,15 +296,11 @@ void PlanMasterController::_sendMissionComplete(void)
 
 void PlanMasterController::_sendGeoFenceComplete(void)
 {
-    if (_sendRallyPoints) {
-        _sendRallyPoints = false;
-        if (_rallyPointController.supported()) {
-            qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle start rally sendToVehicle";
-            _rallyPointController.sendToVehicle();
-        } else {
-            qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle Rally Points not support skipping";
-            _sendRallyPointsComplete();
-        }
+    if (_sendMission) {
+        _sendMission = false;
+        _sendRallyPoints = true;
+        qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle start mission sendToVehicle";
+        _missionController.sendToVehicle();
     }
 }
 
@@ -345,9 +340,16 @@ void PlanMasterController::sendToVehicle(void)
     } else if (syncInProgress()) {
         qCWarning(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle called while syncInProgress";
     } else {
-        qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle start mission sendToVehicle";
-        _sendGeoFence = true;
-        _missionController.sendToVehicle();
+        if (_geoFenceController.supported()) {
+            qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle start GeoFence sendToVehicle";
+            _sendMission = true;
+            _geoFenceController.sendToVehicle();
+        } else {
+            qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle GeoFence not supported skipping";
+            qCDebug(PlanMasterControllerLog) << "PlanMasterController::sendToVehicle start mission sendToVehicle";
+            _sendRallyPoints = true;
+            _missionController.sendToVehicle();
+        }
         setDirty(false);
     }
 }
