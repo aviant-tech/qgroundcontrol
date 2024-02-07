@@ -832,6 +832,10 @@ Rectangle {
                                 text:       _aviantSettings.missionToolsInsecureHttps.shortDescription
                                 fact:       _aviantSettings.missionToolsInsecureHttps
                             }
+                            FactCheckBox {
+                                text:       _aviantSettings.hideBreachReturnPoint.shortDescription
+                                fact:       _aviantSettings.hideBreachReturnPoint
+                            }
                         }
                     }
 
