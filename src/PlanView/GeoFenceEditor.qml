@@ -16,6 +16,7 @@ QGCFlickable {
 
     property var    myGeoFenceController
     property var    flightMap
+    property var    _aviantSettings:            QGroundControl.settingsManager.aviantSettings
 
     readonly property real  _editFieldWidth:    Math.min(width - _margin * 2, ScreenTools.defaultFontPixelWidth * 15)
     readonly property real  _margin:            ScreenTools.defaultFontPixelWidth / 2
@@ -398,6 +399,7 @@ QGCFlickable {
 
                     SectionHeader {
                         id:             breachReturnSection
+                        visible:        !_aviantSettings.hideBreachReturnPoint.rawValue
                         anchors.left:   parent.left
                         anchors.right:  parent.right
                         text:           qsTr("Breach Return Point")
