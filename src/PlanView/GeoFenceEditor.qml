@@ -200,7 +200,7 @@ QGCFlickable {
                         }
 
                         QGCLabel {
-                            text:               qsTr("Altitude")
+                            text:               qsTr("Max Altitude\nAMSL")
                             Layout.column:      2
                             Layout.alignment:   Qt.AlignHCenter
                         }
@@ -209,17 +209,25 @@ QGCFlickable {
                             model: myGeoFenceController.polygons
 
                             QGCTextField {
-                                text: object.maxAltitude
+                                text: object.maxAltitude == 0 ? "Disabled" : object.maxAltitude
+                                textColor: acceptableInput ? "black" : "red"
                                 unitsLabel: "m"
                                 showUnits: true
-                                validator: IntValidator {bottom: 0; top: 100000}
+                                validator: RegExpValidator{ regExp: /^[0-9]{1,5}|disabled$/i }
                                 enabled: object.inclusion
 
                                 Layout.maximumWidth: (geoFenceEditorRect.width / 4)
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 4)
                                 Layout.alignment:   Qt.AlignHCenter
 
-                                onEditingFinished: object.maxAltitude = parseInt(text)
+                                onEditingFinished: {
+                                    if (text.toUpperCase() == "DISABLED" || text == 0) {
+                                        object.maxAltitude = 0
+                                        text = "Disabled"
+                                    } else {
+                                        object.maxAltitude = parseInt(text)
+                                    }
+                                }
                             }
                         }
 
@@ -338,7 +346,7 @@ QGCFlickable {
                         }
 
                         QGCLabel {
-                            text:               qsTr("Altitude")
+                            text:               qsTr("Max Altitude\nAMSL")
                             Layout.column:      3
                             Layout.alignment:   Qt.AlignHCenter
                         }
@@ -347,17 +355,25 @@ QGCFlickable {
                             model: myGeoFenceController.circles
 
                             QGCTextField {
-                                text: object.maxAltitude
+                                text: object.maxAltitude == 0 ? "Disabled" : object.maxAltitude
+                                textColor: acceptableInput ? "black" : "red"
                                 unitsLabel: "m"
                                 showUnits: true
-                                validator: IntValidator {bottom: 0; top: 100000}
+                                validator: RegExpValidator{ regExp: /^[0-9]{1,5}|disabled$/i }
                                 enabled: object.inclusion
 
                                 Layout.maximumWidth: (geoFenceEditorRect.width / 5)
                                 Layout.minimumWidth: (geoFenceEditorRect.width / 5)
                                 Layout.alignment:   Qt.AlignHCenter
 
-                                onEditingFinished: object.maxAltitude = parseInt(text)
+                                onEditingFinished: {
+                                    if (text.toUpperCase() == "DISABLED" || text == 0) {
+                                        object.maxAltitude = 0
+                                        text = "Disabled"
+                                    } else {
+                                        object.maxAltitude = parseInt(text)
+                                    }
+                                }
                             }
                         }
 
