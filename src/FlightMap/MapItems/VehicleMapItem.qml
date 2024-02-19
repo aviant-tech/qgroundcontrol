@@ -16,6 +16,7 @@ import QGroundControl               1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 import QGroundControl.Controls      1.0
+import QGroundControl.ADSBVehicle   1.0
 
 /// Marker for displaying a vehicle location on the map
 MapQuickItem {
@@ -26,6 +27,7 @@ MapQuickItem {
     property double heading:        vehicle ? vehicle.heading.value : Number.NaN    ///< Vehicle heading, NAN for none
     property real   size:           _adsbVehicle ? _adsbSize : _uavSize             /// Size for icon
     property bool   alert:          false                                           /// Collision alert
+    property var    emitterType:    ADSBVehicle.EMITTER_TYPE_NO_INFO
 
     anchorPoint.x:  vehicleItem.width  / 2
     anchorPoint.y:  vehicleItem.height / 2
@@ -61,9 +63,41 @@ MapQuickItem {
             color:              Qt.rgba(0.94,0.91,0,0.5)
             source:             vehicleShadow
         }
+
         Image {
+            function getAdsbIcon(emitterType, alert) {
+                switch (emitterType) {
+                    case ADSBVehicle.EMITTER_TYPE_LIGHT:
+                    case ADSBVehicle.EMITTER_TYPE_SMALL:
+                    case ADSBVehicle.EMITTER_TYPE_LARGE:
+                    case ADSBVehicle.EMITTER_TYPE_HEAVY:
+                    case ADSBVehicle.EMITTER_TYPE_HIGHLY_MANUV:
+                    case ADSBVehicle.EMITTER_TYPE_GLIDER:
+                    case ADSBVehicle.EMITTER_TYPE_ULTRA_LIGHT:
+                        return alert ? "/qmlimages/AlertAircraft.svg" : "/qmlimages/AwarenessAircraft.svg"
+                    case ADSBVehicle.EMITTER_TYPE_UAV:
+                        return alert ? "/qmlimages/AlertDrone.svg" : "/qmlimages/AwarenessDrone.svg"
+                    case ADSBVehicle.EMITTER_TYPE_ROTOCRAFT:
+                        return alert ? "/qmlimages/AlertHeli.svg" : "/qmlimages/AwarenessHeli.svg"
+                    case ADSBVehicle.EMITTER_TYPE_PARACHUTE:
+                        return alert ? "/qmlimages/AlertPara.svg" : "/qmlimages/AwarenessPara.svg"
+                    case ADSBVehicle.EMITTER_TYPE_NO_INFO:
+                    case ADSBVehicle.EMITTER_TYPE_HIGH_VORTEX_LARGE:
+                    case ADSBVehicle.EMITTER_TYPE_UNASSIGNED:
+                    case ADSBVehicle.EMITTER_TYPE_LIGHTER_AIR:
+                    case ADSBVehicle.EMITTER_TYPE_UNASSIGNED2:
+                    case ADSBVehicle.EMITTER_TYPE_SPACE:
+                    case ADSBVehicle.EMITTER_TYPE_UNASSGINED3:
+                    case ADSBVehicle.EMITTER_TYPE_EMERGENCY_SURFACE:
+                    case ADSBVehicle.EMITTER_TYPE_SERVICE_SURFACE:
+                    case ADSBVehicle.EMITTER_TYPE_POINT_OBSTACLE:
+                    default:
+                        return alert ? "/qmlimages/AlertUnknown.svg" : "/qmlimages/AwarenessUnknown.svg"
+                }
+            }
+
             id:                 vehicleIcon
-            source:             _adsbVehicle ? (alert ? "/qmlimages/AlertAircraft.svg" : "/qmlimages/AwarenessAircraft.svg") : vehicle.vehicleImageOpaque
+            source:             _adsbVehicle ? getAdsbIcon(emitterType, alert) : vehicle.vehicleImageOpaque
             mipmap:             true
             width:              size
             sourceSize.width:   size
