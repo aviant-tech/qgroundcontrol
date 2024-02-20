@@ -37,6 +37,22 @@
     "default":          false
 },
 {
+    "name":             "guidedStepUpAltitude",
+    "shortDesc": "Altitude to adjust upwards",
+    "type":             "double",
+    "units":            "m",
+    "default":     5,
+    "min":         0
+},
+{
+    "name":             "guidedStepDownAltitude",
+    "shortDesc": "Altitude to adjust downwards",
+    "type":             "double",
+    "units":            "m",
+    "default":     10,
+    "min":         0
+},
+{
     "name":             "showLogReplayStatusBar",
     "shortDesc": "Show/Hide Log Replay status bar",
     "type":             "bool",

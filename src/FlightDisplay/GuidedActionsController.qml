@@ -75,6 +75,8 @@ Item {
     readonly property string vtolTransitionFwdMessage:          qsTr("Transition VTOL to fixed wing flight.")
     readonly property string vtolTransitionMRMessage:           qsTr("Transition VTOL to multi-rotor flight.")
     readonly property string roiMessage:                        qsTr("Make the specified location a Region Of Interest.")
+    readonly property string stepUpAltMessage:                  qsTr("Adjust the altitude of the vehicle UP")
+    readonly property string stepDownAltMessage:                qsTr("Adjust the altitude of the vehicle DOWN")
 
     readonly property int actionRTL:                        1
     readonly property int actionLand:                       2
@@ -100,6 +102,7 @@ Item {
     readonly property int actionROI:                        22
     readonly property int actionActionList:                 23
     readonly property int actionForceArm:                   24
+    readonly property int actionStepAlt:                    25
 
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property bool   _useChecklist:              QGroundControl.settingsManager.appSettings.useChecklist.rawValue && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
@@ -401,6 +404,11 @@ Item {
             altitudeSlider.reset()
             altitudeSlider.visible = true
             break;
+        case actionStepAlt:
+            confirmDialog.title = changeAltTitle
+            confirmDialog.message = actionData > 0 ? stepUpAltMessage : stepDownAltMessage
+            confirmDialog.hideTrigger = Qt.binding(function() { return !showChangeAlt })
+            break;
         case actionGoto:
             confirmDialog.title = gotoTitle
             confirmDialog.message = gotoMessage
@@ -501,6 +509,9 @@ Item {
             break
         case actionChangeAlt:
             _activeVehicle.guidedModeChangeAltitude(actionAltitudeChange, false /* pauseVehicle */)
+            break
+        case actionStepAlt:
+            _activeVehicle.guidedModeChangeAltitude(actionData, false /* pauseVehicle */)
             break
         case actionGoto:
             _activeVehicle.guidedModeGotoLocation(actionData)
