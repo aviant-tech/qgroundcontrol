@@ -18,8 +18,7 @@ import QGroundControl.Vehicle       1.0
 Rectangle {
     id:                 _root
 
-    readonly property real _maxAlt: 121.92  // 400 feet
-    readonly property real _minAlt: 3
+    readonly property real _sliderExponent: 3  // Must be an odd integer
 
     property var  _activeVehicle:       QGroundControl.multiVehicleManager.activeVehicle
     property var  _flyViewSettings:     QGroundControl.settingsManager.flyViewSettings
@@ -32,6 +31,10 @@ Rectangle {
     property bool _useAMSL:             _flyViewSettings ? _flyViewSettings.guidedAltitudeAMSL.rawValue : false
     property bool _useDelta:            _flyViewSettings ? _flyViewSettings.guidedAltitudeDeltaMode.rawValue : false
     property real _sliderMaxChange:     _flyViewSettings ? _flyViewSettings.guidedAltitudeMaxChange.rawValue : 0
+    property real _distanceToGround:    _activeVehicle ? _activeVehicle.distanceSensors.rotationPitch270.value : NaN
+    
+    property real   altGainRange:           _useDelta ? _sliderMaxChange : Math.max(_sliderMaxAlt - _vehicleAltitude, 0)
+    property real   altLossRange:           _useDelta ? _sliderMaxChange : Math.max(_vehicleAltitude - _sliderMinAlt, 0)
 
     function reset() {
         altSlider.value = 0
@@ -67,16 +70,16 @@ Rectangle {
             wrapMode:               Text.WordWrap
             horizontalAlignment:    Text.AlignHCenter
             text:                   _useAMSL ? qsTr("New Alt(AMSL)") : qsTr("New Alt(rel)")
+            color:                  altField.color
         }
 
         QGCLabel {
             id:                         altField
             anchors.horizontalCenter:   parent.horizontalCenter
             text:                       newAltitudeAppUnits + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString
+            color:                      !isNaN(_distanceToGround) && (-altLossGain > _distanceToGround) ? qgcPal.warningText : qgcPal.text
 
-            property real   altGainRange:           _useDelta ? _sliderMaxChange : Math.max(_sliderMaxAlt - _vehicleAltitude, 0)
-            property real   altLossRange:           _useDelta ? _sliderMaxChange : Math.max(_vehicleAltitude - _sliderMinAlt, 0)
-            property real   altExp:                 Math.pow(altSlider.value, 3)
+            property real   altExp:                 Math.pow(altSlider.value, _sliderExponent)
             property real   altLossGain:            altExp * (altSlider.value > 0 ? altGainRange : altLossRange)
             property real   newAltitudeMeters:      _vehicleAltitude + altLossGain
             property real   newAltitudeAMSLMeters:  _vehicleAltitudeAMSL + altLossGain
@@ -84,7 +87,7 @@ Rectangle {
                                                         _useAMSL ? newAltitudeAMSLMeters : newAltitudeMeters).toFixed(1)
 
             function setToMinimumTakeoff() {
-                altSlider.value = Math.pow(_activeVehicle.minimumTakeoffAltitude() / altGainRange, 1.0/3.0)
+                altSlider.value = Math.pow(_activeVehicle.minimumTakeoffAltitude() / altGainRange, 1.0/_sliderExponent)
             }
         }
     }
@@ -101,6 +104,7 @@ Rectangle {
         maximumValue:       1
         zeroCentered:       true
         rotation:           180
+        thresholdIndicator:    _flying ? (1.0 - Math.pow(Math.max(0, Math.min(1, _distanceToGround / altLossRange)), 1.0/_sliderExponent)) * 0.5 : NaN
 
         // We want slide up to be positive values
         transform: Rotation {

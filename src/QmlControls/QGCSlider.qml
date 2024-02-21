@@ -23,6 +23,7 @@ Slider {
     property bool zeroCentered: false
     property bool displayValue: false
     property bool indicatorBarVisible: true
+    property real thresholdIndicator: NaN
 
     style: SliderStyle {
         groove: Item {
@@ -54,6 +55,21 @@ Slider {
                 Rectangle {
                     anchors.fill:   parent
                     color:          qgcPal.colorBlue
+                    border.color:   Qt.darker(color, 1.2)
+                    radius:         height/2
+                }
+            }
+            Item {
+                id:     thresholdIndicatorBar
+                clip:   true
+                visible: !isNaN(thresholdIndicator)
+                x:      0
+                width:  parent.width * Math.min(1, Math.max(0, thresholdIndicator))
+                height: parent.height
+
+                Rectangle {
+                    anchors.fill:   parent
+                    color:          qgcPal.colorRed
                     border.color:   Qt.darker(color, 1.2)
                     radius:         height/2
                 }
