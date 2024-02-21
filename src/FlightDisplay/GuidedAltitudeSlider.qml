@@ -30,6 +30,8 @@ Rectangle {
     property real _sliderMinAlt:        _flyViewSettings ? _flyViewSettings.guidedMinimumAltitude.rawValue : 0
     property bool _flying:              _activeVehicle ? _activeVehicle.flying : false
     property bool _useAMSL:             _flyViewSettings ? _flyViewSettings.guidedAltitudeAMSL.rawValue : false
+    property bool _useDelta:            _flyViewSettings ? _flyViewSettings.guidedAltitudeDeltaMode.rawValue : false
+    property real _sliderMaxChange:     _flyViewSettings ? _flyViewSettings.guidedAltitudeMaxChange.rawValue : 0
 
     function reset() {
         altSlider.value = 0
@@ -72,8 +74,8 @@ Rectangle {
             anchors.horizontalCenter:   parent.horizontalCenter
             text:                       newAltitudeAppUnits + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString
 
-            property real   altGainRange:           Math.max(_sliderMaxAlt - _vehicleAltitude, 0)
-            property real   altLossRange:           Math.max(_vehicleAltitude - _sliderMinAlt, 0)
+            property real   altGainRange:           _useDelta ? _sliderMaxChange : Math.max(_sliderMaxAlt - _vehicleAltitude, 0)
+            property real   altLossRange:           _useDelta ? _sliderMaxChange : Math.max(_vehicleAltitude - _sliderMinAlt, 0)
             property real   altExp:                 Math.pow(altSlider.value, 3)
             property real   altLossGain:            altExp * (altSlider.value > 0 ? altGainRange : altLossRange)
             property real   newAltitudeMeters:      _vehicleAltitude + altLossGain

@@ -223,6 +223,14 @@ Rectangle {
                                     fact:               _flyViewSettings.guidedAltitudeAMSL
                                 }
 
+                                FactCheckBox {
+                                    id:                 guidedAltitudeDeltaModeBox
+                                    Layout.columnSpan:  2
+                                    text:               qsTr("Use altitude delta mode")
+                                    visible:            guidedMinAltField.visible
+                                    fact:               _flyViewSettings.guidedAltitudeDeltaMode
+                                }
+
                                 QGCLabel {
                                     text:       qsTr("Minimum Altitude")
                                     visible:    guidedMinAltField.visible
@@ -231,6 +239,7 @@ Rectangle {
                                     id:                     guidedMinAltField
                                     Layout.preferredWidth:  _valueFieldWidth
                                     visible:                fact.visible
+                                    enabled:                !guidedAltitudeDeltaModeBox.checked
                                     fact:                   _flyViewSettings.guidedMinimumAltitude
                                 }
 
@@ -242,7 +251,20 @@ Rectangle {
                                     id:                     guidedMaxAltField
                                     Layout.preferredWidth:  _valueFieldWidth
                                     visible:                fact.visible
+                                    enabled:                !guidedAltitudeDeltaModeBox.checked
                                     fact:                   _flyViewSettings.guidedMaximumAltitude
+                                }
+
+                                QGCLabel {
+                                    text:       qsTr("Maximum Altitude Change")
+                                    visible:    guidedMaxAltField.visible
+                                }
+                                FactTextField {
+                                    id:                     guidedAltitudeMaxChangeField
+                                    Layout.preferredWidth:  _valueFieldWidth
+                                    visible:                fact.visible
+                                    enabled:                guidedAltitudeDeltaModeBox.checked
+                                    fact:                   _flyViewSettings.guidedAltitudeMaxChange
                                 }
 
                                 QGCLabel {

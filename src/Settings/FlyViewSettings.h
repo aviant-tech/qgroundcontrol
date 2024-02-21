@@ -21,6 +21,8 @@ public:
 
     DEFINE_SETTINGFACT(guidedMinimumAltitude)
     DEFINE_SETTINGFACT(guidedMaximumAltitude)
+    DEFINE_SETTINGFACT(guidedAltitudeMaxChange)
+    DEFINE_SETTINGFACT(guidedAltitudeDeltaMode)
     DEFINE_SETTINGFACT(guidedAltitudeAMSL)
     DEFINE_SETTINGFACT(showLogReplayStatusBar)
     DEFINE_SETTINGFACT(alternateInstrumentPanel)
