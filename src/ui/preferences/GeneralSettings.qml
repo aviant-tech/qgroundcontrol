@@ -215,6 +215,14 @@ Rectangle {
                                     Layout.alignment:   Qt.AlignHCenter
                                 }
 
+                                FactCheckBox {
+                                    id:                 guidedAltitudeAMSLBox
+                                    Layout.columnSpan:  2
+                                    text:               qsTr("Use AMSL")
+                                    visible:            guidedMinAltField.visible
+                                    fact:               _flyViewSettings.guidedAltitudeAMSL
+                                }
+
                                 QGCLabel {
                                     text:       qsTr("Minimum Altitude")
                                     visible:    guidedMinAltField.visible

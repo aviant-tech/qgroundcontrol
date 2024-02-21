@@ -18,6 +18,12 @@
     "default":     121.92
 },
 {
+    "name":             "guidedAltitudeAMSL",
+    "shortDesc": "Display altitude slider in AMSL.",
+    "type":             "bool",
+    "default":          false
+},
+{
     "name":             "showLogReplayStatusBar",
     "shortDesc": "Show/Hide Log Replay status bar",
     "type":             "bool",
