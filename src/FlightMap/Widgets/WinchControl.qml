@@ -282,7 +282,10 @@ Rectangle {
                         // Setting it explicitly. See src/comm/QGCMAVLink.h for details.
                         // TODO Use 0 (broadcast) instead of 42 to not hardcode component id?
                         // Or store id from received messages?
-                        _vehicle.sendCommand(42, 42600, 1, 1, _currentWinchCommand, 1, 1)
+                        // Length (param3) is set to 1m here, this is not used but it is
+                        // IMPORTANT that param3 is 1 since it is used by winch code to
+                        // distinguish between manual and mission commands.
+                        _vehicle.sendCommand(42, 42600, 1, 1, _currentWinchCommand, 1 /*MANUAL*/, 1)
                         disableWinchSlider()
                         uncheckInactiveButtons()
                     }
