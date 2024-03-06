@@ -29,6 +29,7 @@ Rectangle {
 
     property var    guidedController
     property var    altitudeSlider
+    property var    _flyViewSettings:     QGroundControl.settingsManager.flyViewSettings
 
     function show() {
         visible = true
@@ -90,7 +91,7 @@ Rectangle {
             Layout.minimumWidth:    _width
             Layout.maximumWidth:    _width
 
-            property real _width: Math.min((_actionWidth * 2) + _actionHorizSpacing, actionRow.width)
+            property real _width: Math.min((_actionWidth * 3) + _actionHorizSpacing * 2, actionRow.width)
 
             RowLayout {
                 id:         actionRow
@@ -126,6 +127,37 @@ Rectangle {
                                 _root.visible = false
                                 guidedController.confirmAction(modelData.action)
                             }
+                        }
+                    }
+                }
+                ColumnLayout {
+                    spacing:            ScreenTools.defaultFontPixelHeight / 2
+                    visible:            guidedController.showChangeAlt
+                    Layout.fillHeight:  true
+                    QGCButton {
+                        property real _step:  _flyViewSettings.guidedStepUpAltitude.rawValue
+                        text:                "Adjust "
+                                + QGroundControl.unitsConversion.metersToAppSettingsHorizontalDistanceUnits(_step).toFixed(1)
+                                + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString + " up"
+                        Layout.alignment:   Qt.AlignCenter
+                        Layout.fillWidth:   true
+
+                        onClicked: {
+                            _root.visible = false
+                            guidedController.confirmAction(guidedController.actionStepAlt, _step)
+                        }
+                    }
+                    QGCButton {
+                        property real _step:  _flyViewSettings.guidedStepDownAltitude.rawValue
+                        text:               "Adjust "
+                                + QGroundControl.unitsConversion.metersToAppSettingsHorizontalDistanceUnits(_step).toFixed(1)
+                                + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString + " down"
+                        Layout.alignment:   Qt.AlignCenter
+                        Layout.fillWidth:   true
+
+                        onClicked: {
+                            _root.visible = false
+                            guidedController.confirmAction(guidedController.actionStepAlt, -_step)
                         }
                     }
                 }

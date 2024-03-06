@@ -268,6 +268,28 @@ Rectangle {
                                 }
 
                                 QGCLabel {
+                                    text:       qsTr("Step up altitude")
+                                    visible:    guidedStepUpAltField.visible
+                                }
+                                FactTextField {
+                                    id:                     guidedStepUpAltField
+                                    Layout.preferredWidth:  _valueFieldWidth
+                                    visible:                fact.visible
+                                    fact:                   _flyViewSettings.guidedStepUpAltitude
+                                }
+
+                                QGCLabel {
+                                    text:       qsTr("Step down altitude")
+                                    visible:    guidedStepDownAltField.visible
+                                }
+                                FactTextField {
+                                    id:                     guidedStepDownAltField
+                                    Layout.preferredWidth:  _valueFieldWidth
+                                    visible:                fact.visible
+                                    fact:                   _flyViewSettings.guidedStepDownAltitude
+                                }
+
+                                QGCLabel {
                                     text:       qsTr("Go To Location Max Distance")
                                     visible:    maxGotoDistanceField.visible
                                 }
