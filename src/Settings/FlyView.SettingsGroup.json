@@ -18,6 +18,25 @@
     "default":     121.92
 },
 {
+    "name":             "guidedAltitudeMaxChange",
+    "shortDesc": "Maximum altitude change in delta mode for altitude slider.",
+    "type":             "double",
+    "units":            "m",
+    "default":          "100.0"
+},
+{
+    "name":             "guidedAltitudeDeltaMode",
+    "shortDesc": "Use a maximum change (up or down) for altitude slider, rather than maximum/minimum relative to home.",
+    "type":             "bool",
+    "default":          false
+},
+{
+    "name":             "guidedAltitudeAMSL",
+    "shortDesc": "Display altitude slider in AMSL.",
+    "type":             "bool",
+    "default":          false
+},
+{
     "name":             "showLogReplayStatusBar",
     "shortDesc": "Show/Hide Log Replay status bar",
     "type":             "bool",
