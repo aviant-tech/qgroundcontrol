@@ -395,7 +395,9 @@ FlightMap {
 
             sourceItem: MissionItemIndexLabel {
                 id:         itemIndexLabel
-                label:      qsTr("R", "rally point map item label")
+                // Rally point types: 0=Always, 1=MR only, 2=FW only
+                label:      object.type == 2 ? "F" : object.type == 1 ? "M" : "R"
+                important:  object.type == 2
             }
         }
     }
