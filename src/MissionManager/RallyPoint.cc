@@ -84,6 +84,7 @@ void RallyPoint::_factSetup(void)
     connect(&_longitudeFact, &Fact::valueChanged, this, &RallyPoint::_sendCoordinateChanged);
     connect(&_latitudeFact, &Fact::valueChanged, this, &RallyPoint::_sendCoordinateChanged);
     connect(&_altitudeFact, &Fact::valueChanged, this, &RallyPoint::_sendCoordinateChanged);
+    connect(&_typeFact, &Fact::valueChanged, this, &RallyPoint::_sendTypeChanged);
 }
 
 void RallyPoint::_cacheFactMetadata() {
@@ -141,4 +142,9 @@ void RallyPoint::setType(int type)
         _typeFact.setRawValue(type);
         emit typeChanged(type);
     }
+}
+
+void RallyPoint::_sendTypeChanged(void)
+{
+    emit typeChanged(type());
 }
