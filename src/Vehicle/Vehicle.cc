@@ -3627,6 +3627,8 @@ void Vehicle::_handleADSBVehicle(const mavlink_message_t& message)
         vehicleInfo.callsign = adsbVehicleMsg.callsign;
         vehicleInfo.availableFlags |= ADSBVehicle::CallsignAvailable;
 
+        vehicleInfo.emitterType = static_cast<decltype(vehicleInfo.emitterType)>(adsbVehicleMsg.emitter_type);
+
         if (adsbVehicleMsg.flags & ADSB_FLAGS_VALID_ALTITUDE) {
             vehicleInfo.altitude = (double)adsbVehicleMsg.altitude / 1e3;
             vehicleInfo.availableFlags |= ADSBVehicle::AltitudeAvailable;
