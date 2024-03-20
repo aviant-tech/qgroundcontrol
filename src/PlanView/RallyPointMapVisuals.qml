@@ -69,7 +69,9 @@ Item {
 
             sourceItem: MissionItemIndexLabel {
                 id:                 itemIndexLabel
-                label:              qsTr("R", "rally point map item label")
+                // Rally point types: 0=Always, 1=MR only, 2=FW only
+                label:              rallyPointObject.type == 2 ? "F" : rallyPointObject.type == 1 ? "M" : "R"
+                important:          rallyPointObject.type == 2
                 checked:            _editingLayer == _layerRallyPoints ? rallyPointObject === myRallyPointController.currentRallyPoint : false
                 highlightSelected:  true
                 onClicked:          myRallyPointController.currentRallyPoint = rallyPointObject
