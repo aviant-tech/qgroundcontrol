@@ -135,6 +135,20 @@ Rectangle {
                     visible:            guidedController.showChangeAlt
                     Layout.fillHeight:  true
                     QGCButton {
+                        // Use twice the configured "up-step" for this button
+                        property real _step: _flyViewSettings.guidedStepUpAltitude.rawValue * 2
+                        text:                "Adjust "
+                                + QGroundControl.unitsConversion.metersToAppSettingsHorizontalDistanceUnits(_step).toFixed(1)
+                                + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString + " up"
+                        Layout.alignment:   Qt.AlignCenter
+                        Layout.fillWidth:   true
+
+                        onClicked: {
+                            _root.visible = false
+                            guidedController.confirmAction(guidedController.actionStepAlt, _step)
+                        }
+                    }
+                    QGCButton {
                         property real _step:  _flyViewSettings.guidedStepUpAltitude.rawValue
                         text:                "Adjust "
                                 + QGroundControl.unitsConversion.metersToAppSettingsHorizontalDistanceUnits(_step).toFixed(1)
