@@ -69,15 +69,16 @@ Rectangle {
             anchors.right:          parent.right
             wrapMode:               Text.WordWrap
             horizontalAlignment:    Text.AlignHCenter
-            text:                   _useAMSL ? qsTr("New Alt(AMSL)") : qsTr("New Alt(rel)")
+            text:                   _useAMSL ? qsTr("New Alt\nAMSL") : qsTr("New Alt\nRel Home")
             color:                  altField.color
         }
 
         QGCLabel {
             id:                         altField
             anchors.horizontalCenter:   parent.horizontalCenter
-            text:                       newAltitudeAppUnits + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString
-            color:                      !isNaN(_distanceToGround) && (-altLossGain > _distanceToGround) ? qgcPal.warningText : qgcPal.text
+            horizontalAlignment:        Text.AlignHCenter
+            text:                       labelText
+            color:                      !isNaN(_distanceToGround) && ((-altLossGain > _distanceToGround) || (altLossGain > 120.0 - _distanceToGround)) ? qgcPal.warningText : qgcPal.text
 
             property real   altExp:                 Math.pow(altSlider.value, _sliderExponent)
             property real   altLossGain:            altExp * (altSlider.value > 0 ? altGainRange : altLossRange)
@@ -85,6 +86,10 @@ Rectangle {
             property real   newAltitudeAMSLMeters:  _vehicleAltitudeAMSL + altLossGain
             property string newAltitudeAppUnits:    QGroundControl.unitsConversion.metersToAppSettingsHorizontalDistanceUnits(
                                                         _useAMSL ? newAltitudeAMSLMeters : newAltitudeMeters).toFixed(1)
+            // Concatenate new altitude and unit with change relative to current altitude                                            
+            property string labelText:              newAltitudeAppUnits + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString
+                                                        + "\n(" + (altLossGain < 0 ? "" : "+") + QGroundControl.unitsConversion.metersToAppSettingsHorizontalDistanceUnits(altLossGain).toFixed(1)
+                                                        + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString + ")"
 
             function setToMinimumTakeoff() {
                 altSlider.value = Math.pow(_activeVehicle.minimumTakeoffAltitude() / altGainRange, 1.0/_sliderExponent)
