@@ -24,6 +24,8 @@ public:
     const QGCFenceCircle& operator=(const QGCFenceCircle& other);
 
     Q_PROPERTY(bool inclusion READ inclusion WRITE setInclusion NOTIFY inclusionChanged)
+    Q_PROPERTY(int fenceAction READ fenceAction WRITE setFenceAction NOTIFY fenceActionChanged)
+    Q_PROPERTY(int maxAltitude READ maxAltitude WRITE setMaxAltitude NOTIFY maxAltitudeChanged)
 
     /// Saves the QGCFenceCircle to the json object.
     ///     @param json Json object to save to
@@ -38,20 +40,33 @@ public:
     // Property methods
 
     bool inclusion      (void) const { return _inclusion; }
+    int  fenceAction    (void) const { return _fenceAction; }
+    int  maxAltitude    (void) const { return _inclusion ? _maxAltitude : 0; }
     void setInclusion   (bool inclusion);
+    void setFenceAction (int fenceAction);
+    void setMaxAltitude (int maxAltitude);
 
 signals:
     void inclusionChanged(bool inclusion);
+    void fenceActionChanged(int fenceAction);
+    void maxAltitudeChanged(int maxAltitude);
 
 private slots:
     void _setDirty(void);
 
 private:
+    constexpr static int DEFAULT_FENCE_ACTION = 0; // 0 - Use the value from the parameter
+    constexpr static int DEFAULT_MAX_ALTITUDE = 0; // 0 - Disabled
+
     void _init(void);
 
     bool _inclusion;
+    int _fenceAction{DEFAULT_FENCE_ACTION};
+    int _maxAltitude{DEFAULT_MAX_ALTITUDE};
 
     static const int _jsonCurrentVersion = 1;
 
     static const char* _jsonInclusionKey;
+    static const char* _jsonFenceActionKey;
+    static const char* _jsonMaxAltitudeKey;
 };

@@ -16,6 +16,7 @@ QGCFlickable {
 
     property var    myGeoFenceController
     property var    flightMap
+    property var    _aviantSettings:            QGroundControl.settingsManager.aviantSettings
 
     readonly property real  _editFieldWidth:    Math.min(width - _margin * 2, ScreenTools.defaultFontPixelWidth * 15)
     readonly property real  _margin:            ScreenTools.defaultFontPixelWidth / 2
@@ -154,7 +155,7 @@ QGCFlickable {
 
                     GridLayout {
                         Layout.fillWidth:   true
-                        columns:            3
+                        columns:            5
                         flow:               GridLayout.TopToBottom
                         visible:            polygonSection.checked && myGeoFenceController.polygons.count > 0
 
@@ -199,8 +200,59 @@ QGCFlickable {
                         }
 
                         QGCLabel {
-                            text:               qsTr("Delete")
+                            text:               qsTr("Max Altitude\nAMSL")
                             Layout.column:      2
+                            Layout.alignment:   Qt.AlignHCenter
+                        }
+
+                        Repeater {
+                            model: myGeoFenceController.polygons
+
+                            QGCTextField {
+                                text: object.maxAltitude == 0 ? "Disabled" : object.maxAltitude
+                                textColor: acceptableInput ? "black" : "red"
+                                unitsLabel: "m"
+                                showUnits: true
+                                validator: RegExpValidator{ regExp: /^[0-9]{1,5}|disabled$/i }
+                                enabled: object.inclusion
+
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 4)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 4)
+                                Layout.alignment:   Qt.AlignHCenter
+
+                                onEditingFinished: {
+                                    if (text.toUpperCase() == "DISABLED" || text == 0) {
+                                        object.maxAltitude = 0
+                                        text = "Disabled"
+                                    } else {
+                                        object.maxAltitude = parseInt(text)
+                                    }
+                                }
+                            }
+                        }
+
+                        QGCLabel {
+                            text:               qsTr("Action")
+                            Layout.column:      3
+                            Layout.alignment:   Qt.AlignHCenter
+                        }
+
+                        Repeater {
+                            model: myGeoFenceController.polygons
+
+                            QGCComboBox {
+                                currentIndex : object.fenceAction
+                                Layout.alignment:   Qt.AlignHCenter
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 4)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 4)
+                                model: myGeoFenceController.fenceActions
+                                onActivated: object.fenceAction = currentIndex
+                            }
+                        }
+
+                        QGCLabel {
+                            text:               qsTr("Delete")
+                            Layout.column:      4
                             Layout.alignment:   Qt.AlignHCenter
                         }
 
@@ -210,6 +262,8 @@ QGCFlickable {
                             QGCButton {
                                 text:               qsTr("Del")
                                 Layout.alignment:   Qt.AlignHCenter
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 5)
                                 onClicked:          myGeoFenceController.deletePolygon(index)
                             }
                         }
@@ -230,7 +284,7 @@ QGCFlickable {
                     GridLayout {
                         anchors.left:       parent.left
                         anchors.right:      parent.right
-                        columns:            4
+                        columns:            6
                         flow:               GridLayout.TopToBottom
                         visible:            polygonSection.checked && myGeoFenceController.circles.count > 0
 
@@ -285,14 +339,66 @@ QGCFlickable {
 
                             FactTextField {
                                 fact:               object.radius
-                                Layout.fillWidth:   true
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 5)
                                 Layout.alignment:   Qt.AlignHCenter
                             }
                         }
 
                         QGCLabel {
-                            text:               qsTr("Delete")
+                            text:               qsTr("Max Altitude\nAMSL")
                             Layout.column:      3
+                            Layout.alignment:   Qt.AlignHCenter
+                        }
+
+                        Repeater {
+                            model: myGeoFenceController.circles
+
+                            QGCTextField {
+                                text: object.maxAltitude == 0 ? "Disabled" : object.maxAltitude
+                                textColor: acceptableInput ? "black" : "red"
+                                unitsLabel: "m"
+                                showUnits: true
+                                validator: RegExpValidator{ regExp: /^[0-9]{1,5}|disabled$/i }
+                                enabled: object.inclusion
+
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.alignment:   Qt.AlignHCenter
+
+                                onEditingFinished: {
+                                    if (text.toUpperCase() == "DISABLED" || text == 0) {
+                                        object.maxAltitude = 0
+                                        text = "Disabled"
+                                    } else {
+                                        object.maxAltitude = parseInt(text)
+                                    }
+                                }
+                            }
+                        }
+
+                        QGCLabel {
+                            text:               qsTr("Action")
+                            Layout.column:      4
+                            Layout.alignment:   Qt.AlignHCenter
+                        }
+
+                        Repeater {
+                            model: myGeoFenceController.circles
+
+                            QGCComboBox {
+                                currentIndex : object.fenceAction
+                                Layout.alignment:   Qt.AlignHCenter
+                                Layout.maximumWidth: (geoFenceEditorRect.width / 5)
+                                Layout.minimumWidth: (geoFenceEditorRect.width / 5)
+                                model: myGeoFenceController.fenceActions
+                                onActivated: object.fenceAction = currentIndex
+                            }
+                        }
+
+                        QGCLabel {
+                            text:               qsTr("Delete")
+                            Layout.column:      5
                             Layout.alignment:   Qt.AlignHCenter
                         }
 
@@ -309,6 +415,7 @@ QGCFlickable {
 
                     SectionHeader {
                         id:             breachReturnSection
+                        visible:        !_aviantSettings.hideBreachReturnPoint.rawValue
                         anchors.left:   parent.left
                         anchors.right:  parent.right
                         text:           qsTr("Breach Return Point")
