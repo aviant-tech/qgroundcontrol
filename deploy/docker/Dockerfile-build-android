@@ -85,9 +85,9 @@ ENV ANDROID_NDK_LATEST_HOME=/opt/android/sdk/ndk/21.3.6528147/
 
 # Install gstreamer
 WORKDIR /tmp
-RUN wget --quiet https://gstreamer.freedesktop.org/data/pkg/android/1.18.5/gstreamer-1.0-android-universal-1.18.5.tar.xz
-WORKDIR /opt/gstreamer-1.0-android-universal-1.18.5
-RUN tar xf /tmp/gstreamer-1.0-android-universal-1.18.5.tar.xz -C .
+RUN wget --quiet https://gstreamer.freedesktop.org/data/pkg/android/1.18.6/gstreamer-1.0-android-universal-1.18.6.tar.xz
+WORKDIR /opt/gstreamer-1.0-android-universal-1.18.6
+RUN tar xf /tmp/gstreamer-1.0-android-universal-1.18.6.tar.xz -C .
 
 # Reconfigure locale
 RUN locale-gen en_US.UTF-8 && dpkg-reconfigure locales
@@ -97,4 +97,4 @@ RUN useradd user --create-home --home-dir /home/user --shell /bin/bash --uid 100
 USER user
 
 WORKDIR /project/build
-CMD [ "sh", "-c", "if [ -L /project/source/gstreamer-1.0-android-universal-1.18.5 ]; then rm -f /project/source/gstreamer-1.0-android-universal-1.18.5; fi && ln -fs /opt/gstreamer-1.0-android-universal-1.18.5 /project/source/gstreamer-1.0-android-universal-1.18.5 && qmake -r /project/source/qgroundcontrol.pro -spec android-clang CONFIG+=StableBuild CONFIG+=installer ANDROID_ABIS=\"armeabi-v7a\" && make -j$(nproc) && rm -f /project/source/gstreamer-1.0-android-universal-1.18.5" ]
+CMD [ "sh", "-c", "if [ -L /project/source/gstreamer-1.0-android-universal-1.18.6 ]; then rm -f /project/source/gstreamer-1.0-android-universal-1.18.6; fi && ln -fs /opt/gstreamer-1.0-android-universal-1.18.6 /project/source/gstreamer-1.0-android-universal-1.18.6 && qmake -r /project/source/qgroundcontrol.pro -spec android-clang CONFIG+=StableBuild CONFIG+=installer ANDROID_ABIS=\"armeabi-v7a\" && make -j$(nproc) && rm -f /project/source/gstreamer-1.0-android-universal-1.18.6" ]
