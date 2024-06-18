@@ -138,7 +138,7 @@ MapQuickItem {
                         }
                     }
                 } else if (_multiVehicle) {
-                    label += qsTr("Vehicle %1").arg(vehicle.id)
+                    label += vehicle.name
                 }
                 return label
             }
