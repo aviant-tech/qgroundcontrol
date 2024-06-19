@@ -512,6 +512,12 @@ Vehicle::~Vehicle()
 #endif
 }
 
+QString Vehicle::name() const
+{
+    // Deduce name from id for now, until we can receive more complex information from the vehicle
+    return QString("%1%2").arg(_id > 199 ? "TEST" : _id > 99 ? "NX" : "NT").arg(_id % 100, 2, 10, QLatin1Char('0'));
+}
+
 void Vehicle::prepareDelete()
 {
     if(_cameraManager) {

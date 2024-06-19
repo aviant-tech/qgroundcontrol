@@ -158,6 +158,7 @@ public:
     Q_ENUM(CheckList)
 
     Q_PROPERTY(int                  id                          READ id                                                             CONSTANT)
+    Q_PROPERTY(QString              name                        READ name                                                           CONSTANT)
     Q_PROPERTY(AutoPilotPlugin*     autopilot                   MEMBER _autopilotPlugin                                             CONSTANT)
     Q_PROPERTY(QGeoCoordinate       coordinate                  READ coordinate                                                     NOTIFY coordinateChanged)
     Q_PROPERTY(QGeoCoordinate       positionSetpoint            READ positionSetpoint                                               NOTIFY positionSetpointChanged)
@@ -462,6 +463,7 @@ public:
 
     // Property accesors
     int id() const{ return _id; }
+    QString name() const;
     MAV_AUTOPILOT firmwareType() const { return _firmwareType; }
     MAV_TYPE vehicleType() const { return _vehicleType; }
     QGCMAVLink::VehicleClass_t vehicleClass(void) const { return QGCMAVLink::vehicleClass(_vehicleType); }

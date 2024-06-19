@@ -29,8 +29,9 @@ QGCComboBox {
     property bool showIndicator: _multipleVehicles
 
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
-    property bool   _multipleVehicles:  QGroundControl.multiVehicleManager.vehicles.count > 1
+    property bool   _multipleVehicles:  QGroundControl.multiVehicleManager.vehicles.count > 0
     property var    _vehicleModel:      [ ]
+    property var    _vehicleIds:        [ ]
 
     Connections {
         target:         QGroundControl.multiVehicleManager.vehicles
@@ -43,10 +44,12 @@ QGCComboBox {
     function _updateVehicleModel() {
         var newCurrentIndex = -1
         var newModel = [ ]
+        var newIds = [ ]
         if (_multipleVehicles) {
             for (var i = 0; i < QGroundControl.multiVehicleManager.vehicles.count; i++) {
                 var vehicle = QGroundControl.multiVehicleManager.vehicles.get(i)
-                newModel.push(qsTr("Vehicle") + " " + vehicle.id)
+                newModel.push(vehicle.name)
+                newIds.push(vehicle.id)
 
                 if (vehicle.id === _activeVehicle.id) {
                     newCurrentIndex = i
@@ -55,13 +58,20 @@ QGCComboBox {
         }
         currentIndex = -1
         _vehicleModel = newModel
+        _vehicleIds = newIds
         currentIndex = newCurrentIndex
     }
 
     onActivated: {
-        var vehicleId = textAt(index).split(" ")[1]
-        var vehicle = QGroundControl.multiVehicleManager.getVehicleById(vehicleId)
-        QGroundControl.multiVehicleManager.activeVehicle = vehicle
+        var vehicle = QGroundControl.multiVehicleManager.getVehicleById(_vehicleIds[index])
+        if (vehicle) {
+            // Do not attempt to set the active vehicle to null if the index for any reason
+            // was wrong (should not happen)
+            QGroundControl.multiVehicleManager.activeVehicle = vehicle
+        } else {
+            // If there for some reason is a problem with the index
+            // (should not happen), reset the model
+            _updateVehicleModel()
+        }
     }
 }
-
