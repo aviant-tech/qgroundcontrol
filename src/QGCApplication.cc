@@ -724,24 +724,6 @@ QObject* QGCApplication::_rootQmlObject()
     return nullptr;
 }
 
-void QGCApplication::showCriticalVehicleMessage(const QString& message)
-{
-    // PreArm messages are handled by Vehicle and shown in Map
-    if (message.startsWith(QStringLiteral("PreArm")) || message.startsWith(QStringLiteral("preflight"), Qt::CaseInsensitive)) {
-        return;
-    }
-    QObject* rootQmlObject = _rootQmlObject();
-    if (rootQmlObject) {
-        QVariant varReturn;
-        QVariant varMessage = QVariant::fromValue(message);
-        QMetaObject::invokeMethod(_rootQmlObject(), "showCriticalVehicleMessage", Q_RETURN_ARG(QVariant, varReturn), Q_ARG(QVariant, varMessage));
-    } else if (runningUnitTests()) {
-        // Unit tests can run without UI
-        qDebug() << "QGCApplication::showCriticalVehicleMessage unittest" << message;
-    } else {
-        qWarning() << "Internal error";
-    }
-}
 
 void QGCApplication::showAppMessage(const QString& message, const QString& title)
 {

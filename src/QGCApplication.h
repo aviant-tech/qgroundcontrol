@@ -129,9 +129,6 @@ public slots:
     /// Get current language
     const QLocale getCurrentLanguage() { return _locale; }
 
-    /// Show non-modal vehicle message to the user
-    void showCriticalVehicleMessage(const QString& message);
-
     /// Show modal application message to the user
     void showAppMessage(const QString& message, const QString& title = QString());
 
