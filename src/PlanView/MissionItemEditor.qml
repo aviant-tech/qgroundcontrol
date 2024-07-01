@@ -137,7 +137,7 @@ Rectangle {
 
                 property real _padding: ScreenTools.comboBoxPadding
 
-                QGCLabel { text: missionItem.commandName }
+                QGCLabel { text: qsTr("%1: %2").arg(missionItem.sequenceNumber).arg(missionItem.commandName) }
 
                 QGCColoredImage {
                     height:             ScreenTools.defaultFontPixelWidth
@@ -175,7 +175,7 @@ Rectangle {
             height:                 commandPicker.height
             visible:                !missionItem.isCurrentItem || !missionItem.isSimpleItem || _waypointsOnlyMode || missionItem.isTakeoffItem
             verticalAlignment:      Text.AlignVCenter
-            text:                   missionItem.commandName
+            text:                   qsTr("%1: %2").arg(missionItem.sequenceNumber).arg(missionItem.commandName)
             color:                  _outerTextColor
         }
     }
