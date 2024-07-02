@@ -84,13 +84,16 @@ Item {
             border.color:   qgcPal.text
 
             function formatMessage(message) {
+                console.log(message)
                 message = message.replace(new RegExp("<#E>", "g"), "color: " + qgcPal.warningText + "; font: " + (ScreenTools.defaultFontPointSize.toFixed(0) - 1) + "pt monospace;");
                 message = message.replace(new RegExp("<#I>", "g"), "color: " + qgcPal.warningText + "; font: " + (ScreenTools.defaultFontPointSize.toFixed(0) - 1) + "pt monospace;");
                 message = message.replace(new RegExp("<#N>", "g"), "color: " + qgcPal.text + "; font: " + (ScreenTools.defaultFontPointSize.toFixed(0) - 1) + "pt monospace;");
+                console.log(message)
                 return message;
             }
 
             Component.onCompleted: {
+                console.log("on completed")
                 messageText.text = formatMessage(_activeVehicle.formattedMessages)
                 //-- Hack to scroll to last message
                 for (var i = 0; i < _activeVehicle.messageCount; i++)
@@ -101,6 +104,7 @@ Item {
             Connections {
                 target: _activeVehicle
                 onNewFormattedMessage :{
+                    console.log("New Message: ", formattedMessage)
                     messageText.append(formatMessage(formattedMessage))
                     //-- Hack to scroll down
                     messageFlick.flick(0,-500)

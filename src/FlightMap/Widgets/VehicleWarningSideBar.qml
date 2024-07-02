@@ -58,7 +58,7 @@ Rectangle {
             delegate: Rectangle {
                 width: vehicleWarningSideBarRect.width - 20
                 height: 50
-                color: "yellow"
+                color: qgcPal.colorOrange
                 radius: 5
 
                 Row {
@@ -101,20 +101,18 @@ Rectangle {
                 }
             }
         }
-    }
+        errorListModel.append({"errorMessage": "test"});
 
-    Connections {
-        target: QGroundControl.multiVehicleManager
-        onActiveVehicleChanged: {
-            updateErrorList()
-        }
     }
 
     Connections {
         target: _activeVehicle
-        onFormattedMessagesChanged: {
-            updateErrorList()
+        onNewFormattedMessage :{
+            console.log("append!!")
+            console.log(formattedMessage)
+            errorListModel.append({"errorMessage": formattedMessage})
+
         }
     }
-    
+
 }
