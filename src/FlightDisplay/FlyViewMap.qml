@@ -574,8 +574,20 @@ FlightMap {
             id: clickMenu
             property var coord
             QGCMenuItem {
-                text:           qsTr("Go to location")
-                visible:        globals.guidedControllerFlyView.showGotoLocation
+                function generateMenuItemText(coord) {
+                    const defaultText = qsTr("Go to location");
+                    if (!coord || !_activeVehicleCoordinate) {
+                        return defaultText;
+                    }
+                    let distance = _activeVehicleCoordinate.distanceTo(coord);
+                    if (distance !== undefined) {
+                        return defaultText + " (" + distance.toFixed(1) + "m)";
+                    }
+                    return defaultText;
+                }
+
+                text:    generateMenuItemText(clickMenu.coord)
+                visible: globals.guidedControllerFlyView.showGotoLocation
 
                 onTriggered: {
                     gotoLocationItem.show(clickMenu.coord)
