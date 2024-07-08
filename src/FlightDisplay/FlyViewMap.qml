@@ -185,6 +185,17 @@ FlightMap {
         }
     }
 
+    function generateLabelTextWithDistance(defaultText, coord) {
+        if (!coord || !_activeVehicleCoordinate) {
+            return defaultText;
+        }
+        const distance = _activeVehicleCoordinate.distanceTo(coord);
+        if (distance !== undefined) {
+            return defaultText + " (" + distance.toFixed(1) + "m)";
+        }
+        return defaultText;
+    }
+
     on_ActiveVehicleCoordinateChanged: {
         if (_keepMapCenteredOnVehicle && _activeVehicleCoordinate.isValid && !_disableVehicleTracking) {
             _root.center = _activeVehicleCoordinate
@@ -574,8 +585,9 @@ FlightMap {
             id: clickMenu
             property var coord
             QGCMenuItem {
-                text:           qsTr("Go to location")
-                visible:        globals.guidedControllerFlyView.showGotoLocation
+                property string defaultText: qsTr("Go to location");
+                text:                        _root.generateLabelTextWithDistance(defaultText, clickMenu.coord);
+                visible:                     globals.guidedControllerFlyView.showGotoLocation
 
                 onTriggered: {
                     gotoLocationItem.show(clickMenu.coord)
