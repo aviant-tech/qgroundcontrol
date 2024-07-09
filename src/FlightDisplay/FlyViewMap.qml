@@ -421,9 +421,21 @@ FlightMap {
         anchorPoint.x:  sourceItem.anchorPointX
         anchorPoint.y:  sourceItem.anchorPointY
         sourceItem: MissionItemIndexLabel {
+            function generateGoToText(coord) {
+                const defaultText = qsTr("Go here", "Go to location waypoint");
+                if (!coord || !_activeVehicleCoordinate) {
+                    return defaultText;
+                }
+                let distance = _activeVehicleCoordinate.distanceTo(coord);
+                if (distance !== undefined) {
+                    return defaultText + " (" + distance.toFixed(1) + "m)";
+                }
+                return defaultText;
+            }
+
             checked:    true
             index:      -1
-            label:      qsTr("Go here", "Go to location waypoint")
+            label:      generateGoToText(gotoLocationItem.coordinate)
         }
 
         property bool inGotoFlightMode: _activeVehicle ? _activeVehicle.flightMode === _activeVehicle.gotoFlightMode : false
