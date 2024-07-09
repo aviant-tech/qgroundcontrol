@@ -432,9 +432,10 @@ FlightMap {
         anchorPoint.x:  sourceItem.anchorPointX
         anchorPoint.y:  sourceItem.anchorPointY
         sourceItem: MissionItemIndexLabel {
-            checked:    true
-            index:      -1
-            label:      qsTr("Go here", "Go to location waypoint")
+            property string defaultText: qsTr("Go here", "Go to location waypoint");
+            checked:                     true
+            index:                       -1
+            label:                       _root.generateLabelTextWithDistance(defaultText, gotoLocationItem.coordinate);
         }
 
         property bool inGotoFlightMode: _activeVehicle ? _activeVehicle.flightMode === _activeVehicle.gotoFlightMode : false
