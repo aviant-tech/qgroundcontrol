@@ -436,6 +436,39 @@ FlightMap {
             checked:    true
             index:      -1
             label:      generateGoToText(gotoLocationItem.coordinate)
+
+            MouseArea {
+                id: goToDragArea
+                anchors.fill: parent
+                preventStealing: true  // Prevent parent items from stealing mouse events, resulting in dragging the map when dragging the gotoLocationItem
+                property point lastMousePosition
+                
+                function shouldBeDraggable() {
+                    return globals.guidedControllerFlyView.confirmDialog.visible && globals.guidedControllerFlyView.confirmDialog.action === globals.guidedControllerFlyView.actionGoto
+                }
+
+                cursorShape: shouldBeDraggable() ?  Qt.PointingHandCursor : Qt.ArrowCursor
+                enabled: shouldBeDraggable()
+
+                onPressed: {
+                    lastMousePosition = Qt.point(mouse.x, mouse.y)
+                }
+
+                onPositionChanged: {
+                    if (pressed) {
+                        const newCenter = mapToItem(_root, mouse.x, mouse.y)
+                        gotoLocationItem.coordinate = _root.toCoordinate(newCenter)
+                    }
+                }
+
+                onReleased: {
+                    const newCenter = mapToItem(_root, mouse.x, mouse.y)
+                    if (newCenter && newCenter !== lastMousePosition) {
+                        globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionGoto, gotoLocationItem.coordinate, gotoLocationItem)
+                        gotoLocationItem.show(gotoLocationItem.coordinate) // Show the goto indicator again as it gets hidden by confirmAction()
+                    }
+                }
+            }
         }
 
         property bool inGotoFlightMode: _activeVehicle ? _activeVehicle.flightMode === _activeVehicle.gotoFlightMode : false
