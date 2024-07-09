@@ -422,7 +422,7 @@ FlightMap {
         anchorPoint.y:  sourceItem.anchorPointY
         sourceItem: MissionItemIndexLabel {
             function generateGoToText(coord) {
-                const defaultText = qsTr("Go here", "Go to location waypoint");
+                const defaultText = gotoLocationItem.inGotoFlightMode ? qsTr("Going here", "Going to location waypoint") : qsTr("Go here", "Go to location waypoint");
                 if (!coord || !_activeVehicleCoordinate) {
                     return defaultText;
                 }
