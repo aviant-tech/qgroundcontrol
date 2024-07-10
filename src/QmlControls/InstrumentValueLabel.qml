@@ -78,5 +78,6 @@ ColumnLayout {
         font.pointSize:     ScreenTools.smallFontPointSize
         text:               instrumentValueData.text
         visible:            !_iconVisible
+        color:              instrumentValueData.isValidColor(instrumentValueData.currentColor) ? instrumentValueData.currentColor : qgcPal.text
     }
 }
