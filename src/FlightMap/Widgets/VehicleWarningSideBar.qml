@@ -74,10 +74,54 @@ Rectangle {
             Layout.preferredHeight:  contentHeight
 
             delegate: Rectangle {
+                id: warningItem
                 width:  errorListView.width
                 color:  qgcPal.alertBackground
                 height: rowLayout.implicitHeight + ScreenTools.defaultFontPixelWidth
                 radius: 5
+
+                property bool isNew: true
+
+                 SequentialAnimation {
+                    id: newWarningAnimation
+                    running: warningItem.isNew
+                    loops: 1
+                    ParallelAnimation {
+                        ColorAnimation {
+                            target: warningItem
+                            property: "color"
+                            from: qgcPal.alertBackground
+                            to: "yellow"
+                            duration: 200
+                        }
+                        NumberAnimation {
+                            target: warningItem
+                            property: "scale"
+                            from: 1.0
+                            to: 1.025
+                            duration: 200
+                            easing.type: Easing.OutQuad
+                        }
+                    }
+                    ParallelAnimation {
+                        ColorAnimation {
+                            target: warningItem
+                            property: "color"
+                            from: "yellow"
+                            to: qgcPal.alertBackground
+                            duration: 200
+                        }
+                        NumberAnimation {
+                            target: warningItem
+                            property: "scale"
+                            from: 1.025
+                            to: 1.0
+                            duration: 200
+                            easing.type: Easing.InQuad
+                        }
+                    }
+                    onStopped: warningItem.isNew = false
+                }
 
                 RowLayout {
                     id:              rowLayout
@@ -118,7 +162,7 @@ Rectangle {
         // This currently only catches warnings from the active vehicle. If we want to support multiple vehicles, we need to change this.
         onNewCriticalVehicleMessage :{
             // If we want to support multiple vehicles, we need to display the drone name in the message.
-            errorListModel.insert(0, {"errorMessage": message})
+            errorListModel.insert(0, {"errorMessage": message, "isNew": true})
         }
     }
 }
