@@ -259,6 +259,34 @@ Item {
                 duration:       2000
             }
         }
+
+        GridLayout {
+            columns:                1
+            rowSpacing:             _rowSpacing
+            columnSpacing:          _labelToValueSpacing
+            Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+            visible:                !_planMasterController.syncInProgress && _planMasterController.currentPlanFile && _planMasterController.currentPlanFile !== "" 
+
+            QGCLabel {
+                text: qsTr("Mission File") 
+                Layout.columnSpan:  1
+                font.pointSize: ScreenTools.smallFontPointSize;
+            }
+            
+            QGCLabel {
+                text:               extractFileName(_planMasterController.currentPlanFile)
+                Layout.columnSpan:  1
+                font.pointSize:     ScreenTools.smallFontPointSize
+                
+                function extractFileName(fullPath) {
+                    const parts = fullPath.split('/');
+                    return parts.pop();
+                }
+            }
+
+            Item { width: 1; height: 1 }
+
+        }
     }
 
     // Small mission download progress bar
