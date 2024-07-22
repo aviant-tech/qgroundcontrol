@@ -126,7 +126,7 @@ Item {
         anchors.leftMargin:     _margins
         anchors.left:           parent.left
         columnSpacing:          0
-        columns:                4
+        columns:                5
 
         GridLayout {
             columns:                8
@@ -269,23 +269,20 @@ Item {
 
             QGCLabel {
                 text: qsTr("Mission File") 
-                Layout.columnSpan:  1
                 font.pointSize: ScreenTools.smallFontPointSize;
             }
             
             QGCLabel {
                 text:               extractFileName(_planMasterController.currentPlanFile)
-                Layout.columnSpan:  1
-                font.pointSize:     ScreenTools.smallFontPointSize
+                font.pointSize:     _dataFontSize
+                Layout.minimumWidth:    _mediumValueWidth
                 
                 function extractFileName(fullPath) {
                     const parts = fullPath.split('/');
                     return parts.pop();
                 }
             }
-
             Item { width: 1; height: 1 }
-
         }
     }
 
