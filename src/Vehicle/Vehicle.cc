@@ -11,7 +11,6 @@
 #include <QDateTime>
 #include <QLocale>
 #include <QQuaternion>
-
 #include <Eigen/Eigen>
 
 #include "Vehicle.h"
@@ -1927,6 +1926,13 @@ QString Vehicle::formattedMessages()
 void Vehicle::clearMessages()
 {
     _toolbox->uasMessageHandler()->clearMessages();
+}
+
+void Vehicle::handleNewCriticalVehicleMessage(UASMessage* message)
+{
+    if (message) {
+        emit newCriticalVehicleMessage(message->getText());
+    }
 }
 
 void Vehicle::_handletextMessageReceived(UASMessage* message)

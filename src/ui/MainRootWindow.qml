@@ -570,6 +570,9 @@ ApplicationWindow {
     //-------------------------------------------------------------------------
     //-- Critical Vehicle Message Popup
 
+    // criticalVehicleMessagePopup and its functionality is commented out as it is replaced by VehicleWarningSideBar.qml
+    
+    /*
     property var    _vehicleMessageQueue:      []
     property string _vehicleMessage:     ""
 
@@ -686,6 +689,7 @@ ApplicationWindow {
             }
         }
     }
+    */
 
     //-------------------------------------------------------------------------
     //-- Indicator Popups

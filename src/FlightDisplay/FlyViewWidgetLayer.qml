@@ -149,6 +149,15 @@ Item {
         property bool _verticalCenter: !QGroundControl.settingsManager.flyViewSettings.alternateInstrumentPanel.rawValue && !_showWinchControlMenu
     }
     
+    VehicleWarningSideBar {
+        id:                     vehicleWarningSideBar
+        anchors.margins:        _toolsMargin
+        anchors.left:           parent.left
+        minWidth:               _rightPanelWidth
+        maxWidth:               _rightPanelWidth * 2  
+        availableHeight:        parent.height - (toolStrip.height + ScreenTools.defaultFontPixelHeight)
+    }
+
     WinchControl {
         id:                     winchControl
         anchors.margins:        _toolsMargin

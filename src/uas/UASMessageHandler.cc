@@ -202,7 +202,18 @@ void UASMessageHandler::handleTextMessage(int, int compId, int severity, QString
     emit textMessageCountChanged(count);
 
     if (_showErrorsInToolbar && message->severityIsError()) {
-        _app->showCriticalVehicleMessage(message->getText());
+        const QString messageText = message->getText();
+
+        // PreArm messages are handled by Vehicle and shown in Map
+        if (messageText.startsWith(QStringLiteral("PreArm")) || messageText.startsWith(QStringLiteral("preflight"), Qt::CaseInsensitive)) {
+            return;
+        }
+
+        // When moving to multi-drone, move logic from Vehicle to VehicleManager
+        if (_activeVehicle) {
+            _activeVehicle->handleNewCriticalVehicleMessage(message);
+        }
+        // If we are not connected to a vehicle, we will not be able to handle the message, could throw error
     }
 }
 

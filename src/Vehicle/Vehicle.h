@@ -842,6 +842,7 @@ public slots:
     void setVtolInFwdFlight                 (bool vtolInFwdFlight);
     void _offlineFirmwareTypeSettingChanged (QVariant varFirmwareType); // Should only be used by MissionControler to set firmware from Plan file
     void _offlineVehicleTypeSettingChanged  (QVariant varVehicleType);  // Should only be used by MissionController to set vehicle type from Plan file
+    void handleNewCriticalVehicleMessage    (UASMessage* message);
 
 signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
@@ -880,6 +881,7 @@ signals:
     void messageCountChanged            ();
     void formattedMessagesChanged       ();
     void newFormattedMessage            (QString formattedMessage);
+    void newCriticalVehicleMessage      (QString message);
     void latestErrorChanged             ();
     void longitudeChanged               ();
     void currentConfigChanged           ();
