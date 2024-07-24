@@ -74,6 +74,18 @@
     "default":             ""
 },
 {
+    "name": "kyteBackendUrl",
+    "shortDesc": "URL of kyte orders endpoint",
+    "type": "string",
+    "default": ""
+},
+{
+    "name": "kyteBackendToken",
+    "shortDesc": "Authentication token for kyte backend",
+    "type": "string",
+    "default": ""
+},
+{
     "name":                "hideBreachReturnPoint",
     "shortDesc":           "Hide breach return point",
     "longDesc":            "Hide breach return point that is not used by PX4 (use rally points)",

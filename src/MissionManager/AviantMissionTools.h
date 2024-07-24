@@ -10,6 +10,7 @@
 #pragma once
 
 #include <QObject>
+#include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -31,7 +32,9 @@ public:
     enum Operation {
         NoOperation,
         MissionValidation,
-        RallyPointHeight
+        RallyPointHeight,
+        FetchKyteOrders,
+        FetchKyteOrderMissionFile
     };
 
     enum MissionType {
@@ -53,6 +56,8 @@ public:
     
     Q_INVOKABLE void requestOperation(Operation operation);
     Q_INVOKABLE void cancelOperation(Operation operation);
+    Q_INVOKABLE void fetchKyteOrderMissions();
+    Q_INVOKABLE void downloadMissionFileFromOrder(int orderId);
 
     PlanMasterController* masterController       (void) const { return _masterController; }
     bool                  requestInProgress      (void) const { return _currentOperation != NoOperation; }
@@ -65,17 +70,23 @@ public:
 signals:
     void stateChanged          (void);
     void cancelPendingRequest  (void);
+    void kyteOrdersChanged     (QList<QJsonObject> orders);
 
 private slots:
     void _requestComplete (QNetworkReply *reply);
 
 private:
-    QUrl           _getUrl                      (Operation operation, QString base);
+    QUrl           _getMmsUrl                   (Operation operation, QString base);
+    QUrl           _getKyteBackendUrl           (Operation operation, QString base);
+    QUrl           _getKyteBackendUrl           (Operation operation, QString base, int orderId);
     void           _parseValidationResponse     (const QByteArray &bytes);
     void           _parseAndLoadMissionResponse (const QByteArray &bytes);
     static QString _getOperationName            (Operation operation);
     static QString _getMissionTypeName          (MissionType missionType);
     static bool    _missionTypeRequired(Operation operation);
+    void           _parseKyteOrdersResponse(const QByteArray &bytes);
+    bool           _validateFileHash(const QByteArray &fileData, const QByteArray &expectedHash);
+    void           _initiateNetworkRequest(Operation operationType, const QUrl& url);
 
     PlanMasterController*   _masterController;
     Operation               _currentOperation =     NoOperation;
@@ -85,4 +96,6 @@ private:
     QString                 _validationResult =     "Not validated";
     bool                    _validationConcluded =  false;
     QJsonDocument           _lastValidatedJson;
+    QList<QJsonObject>      _kyteOrders;
+    QByteArray              _expectedHash;
 };
