@@ -102,28 +102,31 @@ Item {
 
         QGCLabel {
             id:         gpsLock
-            visible:    _activeVehicle && _activeVehicle.gps.lock.enumStringValue !== ""
+            visible:    _activeVehicle && _activeVehicle.gps.lock && _activeVehicle.gps.lock.enumStringValue !== ""
             color:      getLockColor()
             text:       getLockText()
 
             function getLockColor() {
-                // Make the text orange if we don't have RTK lock.
-                // lockEnum === 3 is 3D lock, lockEnum === 4 is DPOS
                 if (!_activeVehicle) return qgcPal.buttonText
-                const lockEnum = _activeVehicle.gps.lock.enumIndex
-                if (lockEnum === 3 || lockEnum === 4) return "orange"
+                const lockString = _activeVehicle.gps.lock.enumStringValue
+                if (lockString.includes("RTK")) return qgcPal.colorRed
+                if (lockString.includes("3D")) return qgcPal.colorOrange
+                if (lockString.includes("2D") || lockString.includes("Static")) return qgcPal.colorBlue
+                if (lockString.includes("None")) return qgcPal.colorRed
                 return qgcPal.buttonText
             }
 
             function getLockText() {
-                // If enumIndex is 3, we have 3D lock. If enumIndex is 5 or 6, we have RTK lock.
+                // If it contains "RTK", we have RTK lock.
+                // If the lock string contains "3D" and not "RTK", we have 3D lock.
                 // As a pilot, I don't care if it's RTK fix or RTK Float, so we just show RTK.
                 if (!_activeVehicle) return ""
-                const lockEnum = _activeVehicle.gps.lock.enumIndex
-                if (lockEnum === 3) return "3D"
-                if (lockEnum === 5 || lockEnum === 6) return "RTK"
-
-                return _activeVehicle.gps.lock.enumStringValue
+                const lockString = _activeVehicle.gps.lock.enumStringValue
+                if (lockString.includes("RTK")) return "RTK"
+                if (lockString.includes("3D")) return "Lock"
+                if (lockString.includes("2D") || lockString.includes("Static")) return "Other"
+                if (lockString.includes("None")) return "None"
+                return lockString
             }
         }
     }
