@@ -94,17 +94,37 @@ Item {
         anchors.left:           gpsIcon.right
 
         QGCLabel {
-            anchors.horizontalCenter:   hdopValue.horizontalCenter
-            visible:                    _activeVehicle && !isNaN(_activeVehicle.gps.hdop.value)
+            anchors.horizontalCenter:   gpsLock.horizontalCenter
+            visible:                    _activeVehicle && _activeVehicle.gps.count.valueString !== ""
             color:                      qgcPal.buttonText
             text:                       _activeVehicle ? _activeVehicle.gps.count.valueString : ""
         }
 
         QGCLabel {
-            id:         hdopValue
-            visible:    _activeVehicle && !isNaN(_activeVehicle.gps.hdop.value)
-            color:      qgcPal.buttonText
-            text:       _activeVehicle ? _activeVehicle.gps.hdop.value.toFixed(1) : ""
+            id:         gpsLock
+            visible:    _activeVehicle && _activeVehicle.gps.lock.enumStringValue !== ""
+            color:      getLockColor()
+            text:       getLockText()
+
+            function getLockColor() {
+                // Make the text orange if we don't have RTK lock.
+                // lockEnum === 3 is 3D lock, lockEnum === 4 is DPOS
+                if (!_activeVehicle) return qgcPal.buttonText
+                const lockEnum = _activeVehicle.gps.lock.enumIndex
+                if (lockEnum === 3 || lockEnum === 4) return "orange"
+                return qgcPal.buttonText
+            }
+
+            function getLockText() {
+                // If enumIndex is 3, we have 3D lock. If enumIndex is 5 or 6, we have RTK lock.
+                // As a pilot, I don't care if it's RTK fix or RTK Float, so we just show RTK.
+                if (!_activeVehicle) return ""
+                const lockEnum = _activeVehicle.gps.lock.enumIndex
+                if (lockEnum === 3) return "3D"
+                if (lockEnum === 5 || lockEnum === 6) return "RTK"
+
+                return _activeVehicle.gps.lock.enumStringValue
+            }
         }
     }
 
