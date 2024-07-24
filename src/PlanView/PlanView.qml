@@ -184,6 +184,182 @@ Item {
         }
     }
 
+    Component {
+        id: promptForBrowsingKyteOrders
+
+        QGCPopupDialog {
+            id: ordersPopup
+            title: qsTr("Select mission from Kyte Orders")
+
+            width: Math.min(800, mainWindow.width - 2 * _margin)
+            anchors.centerIn: parent
+
+            property var kyteOrders: []
+
+            ColumnLayout {
+                id: contentColumn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: _margin
+                spacing: _margin
+
+                Rectangle {
+                    id: ordersContainer
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.min(600, ordersList.contentHeight + headerRect.height + 2 * _margin)
+                    color: "transparent"
+
+                    ColumnLayout {
+                        anchors.fill: parent
+
+                        Rectangle {
+                            id: headerRect
+                            Layout.fillWidth: true
+                            height: headerRow.height + 2 * _margin
+                            color: qgcPal.windowShade
+                            visible:                ordersPopup.kyteOrders.length !== 0
+
+                            RowLayout {
+                                id:                     headerRow
+                                anchors.left:           parent.left
+                                anchors.right:          parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.margins:        _margin
+                                spacing:                _margin
+
+                                QGCLabel {
+                                    Layout.preferredWidth: parent.width / 4
+                                    text:                  "Order ID"
+                                    font.bold:             true
+                                }
+
+                                QGCLabel {
+                                    Layout.preferredWidth: parent.width / 4
+                                    text:                  "Requested at"
+                                    font.bold:             true
+                                }
+
+                                QGCLabel {
+                                    Layout.preferredWidth: parent.width / 4
+                                    text:                  "Mission status"
+                                    font.bold:             true
+                                }
+
+                                QGCLabel {
+                                    Layout.preferredWidth: parent.width / 4
+                                    text:                  "Mission file"
+                                    font.bold:             true
+                                    horizontalAlignment:   Text.AlignHCenter
+                                }
+                            }
+                        }
+
+                        ListView {
+                            id:                ordersList
+                            Layout.fillWidth:  true
+                            Layout.fillHeight: true
+                            clip:              true
+                            model:             ordersPopup.kyteOrders
+
+                            delegate: Rectangle {
+                                width:  ordersList.width
+                                height: contentLayout.implicitHeight + 2 * _margin
+                                color:  index % 2 === 0 ? qgcPal.windowShadeDark : qgcPal.windowShade
+
+                                RowLayout {
+                                    id:              contentLayout
+                                    anchors.fill:    parent
+                                    anchors.margins: _margin
+                                    spacing:         _margin
+
+                                    QGCLabel {
+                                        Layout.preferredWidth: parent.width / 4
+                                        text:                  modelData && modelData.display_id !== undefined ? modelData.display_id : "Order ID not available"
+                                        wrapMode:              Text.WordWrap
+                                    }
+
+                                    QGCLabel {
+                                        Layout.preferredWidth: parent.width / 4
+                                        text:                  modelData && modelData.requested_ts ? removeMilliseconds(modelData.requested_ts) : "Requested time not available"
+                                        wrapMode:              Text.WordWrap
+                                        
+                                        function removeMilliseconds(dateString) {
+                                            if (!dateString) return "Date not available"
+                                            const formattedDate = dateString.replace(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d+)?(.*)/, "$1$3")
+                                            return formattedDate
+                                        }
+                                    }
+
+                                    QGCLabel {
+                                        Layout.preferredWidth: parent.width / 4
+                                        text:                  modelData && displayMissionStatus(modelData.mission_plan)
+                                        wrapMode:              Text.WordWrap
+
+                                        function displayMissionStatus(missionPlan) {
+                                            if (!missionPlan) {
+                                                return "Mission not available"
+                                            }
+                                            const qcStatus = missionPlan.qc_status
+                                            if (qcStatus) {
+                                                return qcStatus
+                                            }
+                                            const confluenceQcUrl = missionPlan.confluence_qc_url
+                                            if (confluenceQcUrl) {
+                                                return "QC in confluence"
+                                            }
+                                            return "Mission not QCed"
+                                        }
+                                    }
+                                    
+                                    Item {
+                                        Layout.fillHeight:     true
+                                        Layout.preferredWidth: parent.width / 4
+
+                                        QGCButton {
+                                            anchors.centerIn: parent
+                                            id:               missionButton
+                                            text:             qsTr("Select mission")
+                                            visible:          modelData && modelData.id && modelData.mission_plan
+                                            onClicked: {
+                                                _aviantMissionTools.downloadMissionFileFromOrder(modelData.id)
+                                                hideDialog()
+                                            }
+                                        }
+
+                                        QGCLabel {
+                                            anchors.centerIn: parent
+                                            id:               missionNotAvailableLabel
+                                            visible:          !modelData || !modelData.id || !modelData.mission_plan
+                                            text:             "Mission not available"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    QGCLabel {
+                        anchors.centerIn: parent
+                        visible:          ordersPopup.kyteOrders.length === 0
+                        text:             qsTr("No orders available")
+                    }
+                }
+            }
+
+            Component.onCompleted: {
+                _aviantMissionTools.fetchKyteOrderMissions()
+            }
+
+            Connections {
+                target: _aviantMissionTools
+                function onKyteOrdersChanged(orders) {
+                    ordersPopup.kyteOrders = orders
+                }
+            }
+        }
+    }
+
 
     Component {
         id: firmwareOrVehicleMismatchUploadDialogComponent
@@ -301,6 +477,10 @@ Item {
             fileDialog.selectExisting = false
             fileDialog.nameFilters =    ShapeFileHelper.fileDialogKMLFilters
             fileDialog.openForSave()
+        }
+
+        function browseKyteOrders() {
+            mainWindow.showPopupDialogFromComponent(promptForBrowsingKyteOrders)
         }
     }
 
@@ -1203,6 +1383,28 @@ Item {
                         }
                         dropPanel.hide()
                         _planMasterController.saveKmlToSelectedFile()
+                    }
+                }
+            }
+
+            SectionHeader {
+                id:                 downloadFromWebSection
+                Layout.fillWidth:   true
+                text:               qsTr("Download from web")
+            }
+
+            RowLayout {
+                Layout.fillWidth:   true
+                spacing:            _margin
+                visible:            downloadFromWebSection.visible
+
+                QGCButton {
+                    text:               qsTr("Kyte")
+                    Layout.fillWidth:   true
+                    enabled:            !_planMasterController.syncInProgress && _aviantSettings.kyteBackendUrl.rawValue != ""
+                    onClicked: {
+                        dropPanel.hide()
+                        _planMasterController.browseKyteOrders()
                     }
                 }
             }

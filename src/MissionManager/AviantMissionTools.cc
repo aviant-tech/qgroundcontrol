@@ -47,7 +47,7 @@ void AviantMissionTools::setMissionType(MissionType missionType)
     emit stateChanged();
 }
 
-QUrl AviantMissionTools::_getUrl(Operation operation, QString base)
+QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base)
 {
     switch (operation) {
         case MissionValidation:
@@ -61,6 +61,25 @@ QUrl AviantMissionTools::_getUrl(Operation operation, QString base)
     }
 }
 
+QUrl AviantMissionTools::_getKyteBackendUrl(Operation operation, QString base)
+{
+    switch (operation) {
+        case FetchKyteOrders:
+            return QUrl(base + "/orders/api/v2/orders/active/"); 
+        case NoOperation:
+        default:
+            return QUrl();
+    }
+}
+
+QUrl AviantMissionTools::_getKyteBackendUrl(Operation operation, QString base, int orderId) {
+    if (operation == FetchKyteOrderMissionFile) {
+        return QUrl(base + "/orders/api/v2/orders/" + QString::number(orderId) + "/mission-file/");
+    } else {
+        return _getKyteBackendUrl(operation, base);
+    }
+}
+
 QString AviantMissionTools::_getOperationName(Operation operation)
 {
     switch (operation) {
@@ -70,6 +89,8 @@ QString AviantMissionTools::_getOperationName(Operation operation)
             return QString("RallyPointHeight");
         case NoOperation:
             return QString("NoOperation");
+        case FetchKyteOrderMissionFile:
+            return QString("FetchKyteOrderMissionFile");
         default:
             return QString("Unknown");
     }
@@ -124,7 +145,7 @@ void AviantMissionTools::requestOperation(Operation operation)
     }
     
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
-    QUrl url = _getUrl(operation, aviantSettings->missionToolsUrl()->rawValue().toString());
+    QUrl url = _getMmsUrl(operation, aviantSettings->missionToolsUrl()->rawValue().toString());
     if (url.isEmpty()) {
         // The button is not active in UI if not the URL setting is set, so this should not happen
         // we will catch it, in case some unforeseen empty value parses to an empty URL,
@@ -259,6 +280,20 @@ void AviantMissionTools::_requestComplete(QNetworkReply *reply)
         case RallyPointHeight:
             _parseAndLoadMissionResponse(bytes);
             break;
+        case FetchKyteOrders:
+            _parseKyteOrdersResponse(bytes);
+            break;
+        case FetchKyteOrderMissionFile:
+            _expectedHash = reply->rawHeader("X-File-Hash");
+            if (_expectedHash.isEmpty()) {
+                qgcApp()->showAppMessage(tr("No hash received with mission file"), tr("Mission Tools"));
+            }
+            else if (_validateFileHash(bytes, _expectedHash)) {
+                _parseAndLoadMissionResponse(bytes);
+            } else {
+                qgcApp()->showAppMessage(tr("Mission file integrity check failed"), tr("Mission Tools"));
+            }
+            break;
         case NoOperation:
         default:
             // Ignore any error that leads to this (should not happen)
@@ -335,4 +370,78 @@ void AviantMissionTools::_parseAndLoadMissionResponse(const QByteArray &bytes)
     }
         
     qgcApp()->showAppMessage(tr("Operation successful"), tr("Mission Tools - ") + _getOperationName(_currentOperation));
+}
+
+void AviantMissionTools::_initiateNetworkRequest(Operation operationType, const QUrl& url)
+{
+    if (_currentOperation != NoOperation) {
+        qgcApp()->showAppMessage(tr("Another operation is in progress"), tr("Error"));
+        return;
+    }
+
+    if (url.isEmpty()) {
+        qgcApp()->showAppMessage(tr("Invalid URL for operation."), tr("Error"));
+        return;
+    }
+
+    AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
+
+    _networkRequest.setUrl(url);
+    _networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->kyteBackendToken()->rawValue().toString().toUtf8());
+
+    QSslConfiguration sslConf = _networkRequest.sslConfiguration();
+    sslConf.setPeerVerifyMode(aviantSettings->missionToolsInsecureHttps()->rawValue().toBool() ? QSslSocket::VerifyNone : QSslSocket::AutoVerifyPeer);
+    _networkRequest.setSslConfiguration(sslConf);
+
+    QNetworkReply *reply = _networkAccessManager->get(_networkRequest);
+
+    if (reply) {
+        connect(this, &AviantMissionTools::cancelPendingRequest, reply, &QNetworkReply::abort);
+        _currentOperation = operationType;
+        emit stateChanged();
+    } else {
+        qgcApp()->showAppMessage(tr("Failed to create network request."), tr("Error"));
+    }
+}
+
+void AviantMissionTools::fetchKyteOrderMissions()
+{
+    AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
+    QUrl url = _getKyteBackendUrl(FetchKyteOrders, aviantSettings->kyteBackendUrl()->rawValue().toString());
+    _initiateNetworkRequest(FetchKyteOrders, url);
+}
+
+void AviantMissionTools::downloadMissionFileFromOrder(int orderId)
+{
+    AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
+    QUrl url = _getKyteBackendUrl(FetchKyteOrderMissionFile, aviantSettings->kyteBackendUrl()->rawValue().toString(), orderId);
+    _initiateNetworkRequest(FetchKyteOrderMissionFile, url);
+}
+
+void AviantMissionTools::_parseKyteOrdersResponse(const QByteArray &bytes)
+{
+    QJsonDocument jsonDoc;
+    QString errorString;
+    if (!JsonHelper::isJsonFile(bytes, jsonDoc, errorString)) {
+        qgcApp()->showAppMessage(tr("Error parsing Kyte orders response: ") + errorString, tr("Error"));
+        return;
+    }
+
+    QJsonArray ordersArray = jsonDoc.array();
+    _kyteOrders.clear();
+    for (const QJsonValue &value : ordersArray) {
+        if (value.isObject()) {
+            _kyteOrders.append(value.toObject());
+        }
+    }
+    emit kyteOrdersChanged(_kyteOrders);
+}
+
+bool AviantMissionTools::_validateFileHash(const QByteArray &fileData, const QByteArray &expectedHash)
+{
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    hash.addData(fileData);
+    QByteArray calculatedHash = hash.result().toHex();
+    
+    return (calculatedHash == expectedHash);
 }
