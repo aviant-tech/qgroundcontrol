@@ -105,6 +105,17 @@ Item {
         fillMode:           Image.PreserveAspectFit
         color:              linkColor()
     }
+    QGCLabel {
+        id:                 telemLabel
+        text:               _activeVehicle.telemetryRRSSI
+        visible:            _activeVehicle
+        color:              linkColor()
+        font.pointSize:     ScreenTools.defaultFontPixelHeight
+        anchors.top:        parent.top
+        anchors.bottom:     parent.bottom
+        anchors.left:       telemIcon.right
+        anchors.leftMargin: ScreenTools.defaultFontPixelWidth
+    }
     MouseArea {
         anchors.fill: parent
         onClicked: {
