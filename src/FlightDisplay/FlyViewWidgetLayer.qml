@@ -153,6 +153,8 @@ Item {
         id:                     vehicleWarningSideBar
         anchors.margins:        _toolsMargin
         anchors.left:           parent.left
+        anchors.bottom:         parent.bottom
+        anchors.bottomMargin:   (_toolsMargin * 4) + telemetryPanel.valueArea.height
         minWidth:               _rightPanelWidth
         maxWidth:               _rightPanelWidth * 2  
         availableHeight:        parent.height - (toolStrip.height + ScreenTools.defaultFontPixelHeight)

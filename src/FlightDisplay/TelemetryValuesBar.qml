@@ -24,6 +24,7 @@ Rectangle {
     radius:             ScreenTools.defaultFontPixelWidth / 2
 
     property bool       bottomMode: true
+    property alias      valueArea: valueArea
 
     DeadMouseArea { anchors.fill: parent }
 

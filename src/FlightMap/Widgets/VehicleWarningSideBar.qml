@@ -24,11 +24,6 @@ Rectangle {
     property var _activeVehicle:        QGroundControl.multiVehicleManager.activeVehicle
     property int maxHeight:             parent.height * 0.5
     property int maxWidthBasedOnWindow: parent.width * 0.25
-
-    anchors {
-        bottom:       parent.bottom
-        bottomMargin: ScreenTools.defaultFontPixelWidth
-    }
     
     height:  Math.min(Math.min(vehicleWarningSideBarLayout.implicitHeight + ScreenTools.defaultFontPixelWidth, maxHeight), availableHeight)
     width:   Math.min(Math.max(maxWidthBasedOnWindow, minWidth), maxWidth)
