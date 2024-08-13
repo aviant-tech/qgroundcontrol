@@ -109,7 +109,7 @@ Item {
             function getLockColor() {
                 if (!_activeVehicle) return qgcPal.buttonText
                 const lockString = _activeVehicle.gps.lock.enumStringValue
-                if (lockString.includes("RTK")) return qgcPal.colorRed
+                if (lockString.includes("RTK")) return qgcPal.colorGreen
                 if (lockString.includes("3D")) return qgcPal.colorOrange
                 if (lockString.includes("2D") || lockString.includes("Static")) return qgcPal.colorBlue
                 if (lockString.includes("None")) return qgcPal.colorRed
