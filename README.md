@@ -26,3 +26,11 @@ Key Links:
 ### Running unit tests
 
 [Guide](https://aviant.atlassian.net/wiki/spaces/TECHNICAL/pages/994803739/Running+unit+tests)
+
+### Update the latest QGC version in AWS
+You need to have an AWS account with the necessary permissions for ECRPublic and configure the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
+1. Log in to AWS ecr public: `aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws`
+2. Pull the desired release (image tag) you want to set to latest: `docker pull public.ecr.aws/m7l5v7s4/qgroundcontrol:<release version>`
+3. Tag the release as "latest": `docker tag public.ecr.aws/m7l5v7s4/qgroundcontrol:<release version> public.ecr.aws/m7l5v7s4/qgroundcontrol:latest`
+4. Push the "latest" tag: `docker push public.ecr.aws/m7l5v7s4/qgroundcontrol:latest`
+5. Log out of AWS ecr public: `docker logout public.ecr.aws`

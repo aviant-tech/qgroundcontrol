@@ -96,7 +96,7 @@ jobs:
         working-directory: ${{ runner.temp }}/shadow_build_dir
         if: startsWith(github.ref, 'refs/tags/')
         run:  |
-              docker build --build-arg="APPIMAGE_PATH=${{ runner.temp }}/shadow_build_dir/package/${{ env.ARTIFACT }}" / -f ${SOURCE_DIR}/.github/docker/Dockerfile -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ github.ref_name }}
+              docker build --build-arg="APPIMAGE_PATH=${{ runner.temp }}/shadow_build_dir/package/${{ env.ARTIFACT }}" / -f ${SOURCE_DIR}/.github/docker/Dockerfile -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ github.ref_name }}
 
       - name: Push docker image to AWS ECR
         if: startsWith(github.ref, 'refs/tags/')
