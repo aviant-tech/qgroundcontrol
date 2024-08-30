@@ -9,6 +9,7 @@ CenterMapDropButton         1.0 CenterMapDropButton.qml
 CenterMapDropPanel          1.0 CenterMapDropPanel.qml
 CompassRing                 1.0 CompassRing.qml
 WinchControl                1.0 WinchControl.qml
+BatteryWidget               1.0 BatteryWidget.qml
 VehicleWarningSideBar       1.0 VehicleWarningSideBar.qml
 MapFitFunctions             1.0 MapFitFunctions.qml
 MapLineArrow                1.0 MapLineArrow.qml
