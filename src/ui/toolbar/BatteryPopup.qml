@@ -1,8 +1,12 @@
 import QtQuick 2.11
 import QtQuick.Layouts 1.11
+import QGroundControl 1.0
 import QGroundControl.Controls 1.0
 import QGroundControl.ScreenTools 1.0
 import QGroundControl.Palette 1.0
+import QGroundControl.SettingsManager 1.0
+import QGroundControl.FactSystem      1.0
+import QGroundControl.FactControls    1.0
 import MAVLink 1.0
 
 Item {
@@ -97,6 +101,70 @@ Item {
                             QGCLabel { text: object.temperature.valueString + " " + object.temperature.units; visible: batteryValuesAvailable.temperatureAvailable }
                             QGCLabel { text: object.function.enumStringValue;                                 visible: batteryValuesAvailable.functionAvailable }
                         }
+                    }
+                }
+            }
+            QGCLabel {
+                Layout.alignment: Qt.AlignCenter
+                text:             qsTr("Limits")
+                font.family:      ScreenTools.demiboldFontFamily
+            }
+
+            RowLayout {
+                id:      limitsRow
+                spacing: ScreenTools.defaultFontPixelWidth
+
+                FactPanelController { id: controller }
+
+                property var _aviantSettings: QGroundControl.settingsManager.aviantSettings
+
+                property Fact preDeliveryBingoLimit:  _aviantSettings.preDeliveryBingoLimit
+                property Fact postDeliveryBingoLimit: _aviantSettings.postDeliveryBingoLimit
+                property Fact batCapacity:            controller.getParameterFact(-1, "BAT1_CAPACITY")
+                property Fact batCriticalThreshold:   controller.getParameterFact(-1, "BAT_CRIT_THR")
+                property Fact batEmergencyThreshold:  controller.getParameterFact(-1, "BAT_EMERGEN_THR")
+
+                ColumnLayout {
+                    QGCLabel { text: limitsRow.preDeliveryBingoLimit.name }
+                    QGCLabel { text: limitsRow.postDeliveryBingoLimit.name }
+                    QGCLabel { 
+                        text:  limitsRow.batCriticalThreshold ? limitsRow.batCriticalThreshold.name : "N/A"
+                        color: qgcPal.colorOrange
+                    }
+                    QGCLabel {
+                        text:  limitsRow.batEmergencyThreshold ? limitsRow.batEmergencyThreshold.name : "N/A"
+                        color: qgcPal.colorRed
+                    }
+                    QGCLabel {
+                        text: limitsRow.batCapacity ? limitsRow.batCapacity.name : "N/A"
+                    }
+                }
+                ColumnLayout {
+                    QGCLabel { 
+                        text: limitsRow.preDeliveryBingoLimit ? limitsRow.preDeliveryBingoLimit.rawValue + " " + limitsRow.preDeliveryBingoLimit.units : "N/A"
+                    }
+                    QGCLabel { 
+                        text: limitsRow.postDeliveryBingoLimit ? limitsRow.postDeliveryBingoLimit.rawValue + " " + limitsRow.postDeliveryBingoLimit.units : "N/A"
+                    }
+                    QGCLabel {
+                        text: limitsRow.batCriticalThreshold && limitsRow.batCapacity ? 
+                            parent.thresholdPercentageToMah(limitsRow.batCriticalThreshold.rawValue, limitsRow.batCapacity.rawValue) + " " + limitsRow.batCapacity.units : 
+                            "N/A"
+                        color: qgcPal.colorOrange
+                    }
+                    QGCLabel {
+                        text: limitsRow.batEmergencyThreshold && limitsRow.batCapacity ? 
+                            parent.thresholdPercentageToMah(limitsRow.batEmergencyThreshold.rawValue, limitsRow.batCapacity.rawValue) + " " + limitsRow.batCapacity.units : 
+                            "N/A"
+                        color: qgcPal.colorRed
+                    }
+                    QGCLabel {
+                        text: limitsRow.batCapacity ? limitsRow.batCapacity.rawValue + " " + limitsRow.batCapacity.units : "N/A"
+                    }
+
+                    function thresholdPercentageToMah(remainingThresholdPercentage, capacityMah) {
+                        const consumedThreshold = 1 - remainingThresholdPercentage
+                        return (capacityMah * consumedThreshold).toFixed(0)
                     }
                 }
             }

@@ -815,6 +815,20 @@ Rectangle {
                                 fact:                   _aviantSettings.rssiAlert
                             }
                             QGCLabel {
+                                text:              _aviantSettings.preDeliveryBingoLimit.shortDescription
+                            }
+                            FactTextField {
+                                fact:              _aviantSettings.preDeliveryBingoLimit
+                                Layout.fillWidth:  true
+                            }
+                            QGCLabel {
+                                text:              _aviantSettings.postDeliveryBingoLimit.shortDescription
+                            }
+                            FactTextField {
+                                fact:              _aviantSettings.postDeliveryBingoLimit
+                                Layout.fillWidth:  true
+                            }
+                            QGCLabel {
                                 text:              _aviantSettings.missionToolsUrl.shortDescription
                             }
                             FactTextField {

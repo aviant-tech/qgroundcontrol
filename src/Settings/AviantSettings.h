@@ -27,6 +27,8 @@ public:
     DEFINE_SETTINGFACT(verticalConflictDistance)
     DEFINE_SETTINGFACT(rssiWarning)
     DEFINE_SETTINGFACT(rssiAlert)
+    DEFINE_SETTINGFACT(preDeliveryBingoLimit)
+    DEFINE_SETTINGFACT(postDeliveryBingoLimit)
     DEFINE_SETTINGFACT(missionToolsInsecureHttps)
     DEFINE_SETTINGFACT(missionToolsUrl)
     DEFINE_SETTINGFACT(missionToolsToken)
