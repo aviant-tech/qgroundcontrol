@@ -18,6 +18,7 @@ DECLARE_SETTINGGROUP(Aviant, "Aviant")
 }
 
 DECLARE_SETTINGSFACT(AviantSettings, showTrafficIndicators)
+DECLARE_SETTINGSFACT(AviantSettings, showBatteryWidget)
 DECLARE_SETTINGSFACT(AviantSettings, showWinchControlMenu)
 DECLARE_SETTINGSFACT(AviantSettings, horizontalConflictDistance)
 DECLARE_SETTINGSFACT(AviantSettings, verticalConflictDistance)
