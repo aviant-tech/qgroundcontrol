@@ -98,6 +98,7 @@ RoundButton                             1.0 RoundButton.qml
 SectionHeader                           1.0 SectionHeader.qml
 SetupPage                               1.0 SetupPage.qml
 SignalStrength                          1.0 SignalStrength.qml
+BatteryPopup                            1.0 BatteryPopup.qml
 SimpleItemMapVisuals                    1.0 SimpleItemMapVisuals.qml
 SliderSwitch                            1.0 SliderSwitch.qml
 SubMenuButton                           1.0 SubMenuButton.qml
