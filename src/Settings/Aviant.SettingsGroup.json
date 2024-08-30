@@ -11,6 +11,13 @@
     "default":     true
 },
 {
+    "name":        "showBatteryWidget",
+    "shortDesc":   "Show battery widget",
+    "longDesc":    "Show battery widget and hide battery indicator in toolbar",
+    "type":        "bool",
+    "default":     true
+},
+{
     "name":             "showWinchControlMenu",
     "shortDesc": "Show winch control menu",
     "longDesc":  "Shows the winch control menu buttons and slider",

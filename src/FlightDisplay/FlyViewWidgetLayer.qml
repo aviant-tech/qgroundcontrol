@@ -49,6 +49,7 @@ Item {
     property rect   _centerViewport:        Qt.rect(0, 0, width, height)
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property var    _aviantSettings:        QGroundControl.settingsManager.aviantSettings
+    property bool   _showBatteryWidget:     _aviantSettings.showBatteryWidget.rawValue
     property bool   _showWinchControlMenu:  _aviantSettings.showWinchControlMenu.rawValue
 
     QGCToolInsets {
@@ -156,6 +157,7 @@ Item {
         anchors.bottom:         winchControl.visible ? winchControl.top : parent.bottom
         width:                  _rightPanelWidth
         availableHeight:        parent.height - (winchControl.height + instrumentPanel.height + ScreenTools.defaultFontPixelHeight * 2)
+        visible:                _showBatteryWidget
     }
 
     VehicleWarningSideBar {
