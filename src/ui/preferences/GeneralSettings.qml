@@ -796,6 +796,11 @@ Rectangle {
                                 fact:                   _aviantSettings.verticalConflictDistance
                             }
                             FactCheckBox {
+                                id:         promptShowBatteryWidget
+                                text:       qsTr("Show battery widget")
+                                fact:       _aviantSettings.showBatteryWidget
+                            }
+                            FactCheckBox {
                                 id:         promptShowWinchControlMenu
                                 text:       qsTr("Show winch control menu")
                                 fact:       _aviantSettings.showWinchControlMenu
