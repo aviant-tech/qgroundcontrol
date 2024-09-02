@@ -11,6 +11,7 @@
 
 #include "FactGroup.h"
 #include "QGCMAVLink.h"
+#include "FactPanelController.h"
 
 class Vehicle;
 
@@ -19,20 +20,23 @@ class VehicleBatteryFactGroup : public FactGroup
     Q_OBJECT
 
 public:
-    VehicleBatteryFactGroup(uint8_t batteryId, QObject* parent = nullptr);
+    VehicleBatteryFactGroup(uint8_t batteryId, QObject* parent = nullptr, Vehicle* vehicle = nullptr);
 
-    Q_PROPERTY(Fact* id                 READ id                 CONSTANT)
-    Q_PROPERTY(Fact* function           READ function           CONSTANT)
-    Q_PROPERTY(Fact* type               READ type               CONSTANT)
-    Q_PROPERTY(Fact* temperature        READ temperature        CONSTANT)
-    Q_PROPERTY(Fact* voltage            READ voltage            CONSTANT)
-    Q_PROPERTY(Fact* current            READ current            CONSTANT)
-    Q_PROPERTY(Fact* mahConsumed        READ mahConsumed        CONSTANT)
-    Q_PROPERTY(Fact* percentRemaining   READ percentRemaining   CONSTANT)
-    Q_PROPERTY(Fact* timeRemaining      READ timeRemaining      CONSTANT)
-    Q_PROPERTY(Fact* timeRemainingStr   READ timeRemainingStr   CONSTANT)
-    Q_PROPERTY(Fact* chargeState        READ chargeState        CONSTANT)
-    Q_PROPERTY(Fact* instantPower       READ instantPower       CONSTANT)
+    Q_PROPERTY(Fact* id                     READ id                     CONSTANT)
+    Q_PROPERTY(Fact* function               READ function               CONSTANT)
+    Q_PROPERTY(Fact* type                   READ type                   CONSTANT)
+    Q_PROPERTY(Fact* temperature            READ temperature            CONSTANT)
+    Q_PROPERTY(Fact* voltage                READ voltage                CONSTANT)
+    Q_PROPERTY(Fact* current                READ current                CONSTANT)
+    Q_PROPERTY(Fact* mahConsumed            READ mahConsumed            CONSTANT)
+    Q_PROPERTY(Fact* percentRemaining       READ percentRemaining       CONSTANT)
+    Q_PROPERTY(Fact* timeRemaining          READ timeRemaining          CONSTANT)
+    Q_PROPERTY(Fact* timeRemainingStr       READ timeRemainingStr       CONSTANT)
+    Q_PROPERTY(Fact* chargeState            READ chargeState            CONSTANT)
+    Q_PROPERTY(Fact* instantPower           READ instantPower           CONSTANT)
+    Q_PROPERTY(Fact* timeUntilNextThreshold READ timeUntilNextThreshold CONSTANT)
+    Q_PROPERTY(Fact* nextThresholdName      READ nextThresholdName      CONSTANT)
+    Q_PROPERTY(Fact* maxCapacity            READ maxCapacity            CONSTANT)
 
     Fact* id                        () { return &_batteryIdFact; }
     Fact* function                  () { return &_batteryFunctionFact; }
@@ -46,6 +50,9 @@ public:
     Fact* timeRemaining             () { return &_timeRemainingFact; }
     Fact* timeRemainingStr          () { return &_timeRemainingStrFact; }
     Fact* chargeState               () { return &_chargeStateFact; }
+    Fact* timeUntilNextThreshold    () { return &_timeUntilNextThresholdFact; }
+    Fact* nextThresholdName         () { return &_nextThresholdNameFact; }
+    Fact* maxCapacity               () { return &_maxCapacityFact; }
 
     static const char* _batteryIdFactName;
     static const char* _batteryFunctionFactName;
@@ -59,7 +66,13 @@ public:
     static const char* _timeRemainingStrFactName;
     static const char* _chargeStateFactName;
     static const char* _instantPowerFactName;
+    static const char* _timeUntilNextThresholdFactName;
+    static const char* _nextThresholdNameFactName;
+    static const char* _maxCapacityFactName;
 
+
+    void updateTimeUntilNextThreshold();
+    
     static const char* _settingsGroup;
 
     /// Creates a new fact group for the battery id as needed and updates the Vehicle with it
@@ -67,6 +80,7 @@ public:
 
     // Overrides from FactGroup
     void handleMessage(Vehicle* vehicle, mavlink_message_t& message) override;
+
 
 private slots:
     void _timeRemainingChanged(QVariant value);
@@ -89,6 +103,15 @@ private:
     Fact            _timeRemainingStrFact;
     Fact            _chargeStateFact;
     Fact            _instantPowerFact;
+    Fact            _timeUntilNextThresholdFact;
+    Fact            _nextThresholdNameFact;
+    Fact            _maxCapacityFact;
+    struct ThresholdInfo {
+        double mahThreshold;
+        QString name;
+    };
+
+    QList<ThresholdInfo> _thresholds;
 
     static const char* _batteryFactGroupNamePrefix;
 };
