@@ -132,7 +132,33 @@ Rectangle {
                             font.pointSize: ScreenTools.mediumFontPointSize
                             text:           battery.percentRemaining.valueString + " " + battery.percentRemaining.units 
                         }
-                    }   
+                    }
+                    ColumnLayout {
+                        id: nextThresholdInfo
+                        spacing: ScreenTools.defaultFontPixelWidth / 2
+
+                        property string nextThreshold: battery ? battery.nextThresholdName.value : ""
+                        property real timeUntilNextThreshold: battery ? battery.timeUntilNextThreshold.value : -1
+
+                        visible: nextThreshold !== "" && timeUntilNextThreshold >= 0
+
+                        QGCLabel {
+                            Layout.fillWidth: true
+                            text:             nextThresholdInfo.nextThreshold
+                            color:            qgcPal.colorGrey
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                        }
+
+                        QGCLabel {
+                            Layout.fillWidth: true
+                            font.pointSize:   ScreenTools.mediumFontPointSize
+                            text: {
+                                const minutes = Math.floor(nextThresholdInfo.timeUntilNextThreshold / 60)
+                                return qsTr("%1 min").arg(minutes)
+                            }
+                        }
+                    }
                 }
 
                 Item {
