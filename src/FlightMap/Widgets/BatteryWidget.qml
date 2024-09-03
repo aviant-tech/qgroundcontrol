@@ -178,12 +178,45 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            mainWindow.showIndicatorPopup(batteryWidgetContainer, batteryPopup)
+            batteryPopup.open()
+        }
+    }
+
+    Popup {
+        id:             batteryPopup
+        padding:        ScreenTools.defaultFontPixelWidth * 0.75
+        modal:          true
+        focus:          true
+        closePolicy:    Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        background: Rectangle {
+            width:  loader.width
+            height: loader.height
+            color:  Qt.rgba(0,0,0,0)
+        }
+        Loader {
+            id:              loader
+            onLoaded: {
+                batteryPopup.x = -(getWidthOfChildren() + _toolsMargin * 2)
+            }
+            function getWidthOfChildren() {
+                // As loader.item is component with width and height 0, we need to access the child item
+                if (loader.item.children && loader.item.children.length > 0) {
+                    return loader.item.children[0].width
+                }
+                return 0
+            }
+        }
+        onOpened: {
+            loader.sourceComponent = batteryPopupComponent
+        }
+        onClosed: {
+            loader.sourceComponent = null
         }
     }
 
     Component {
-        id: batteryPopup
+        id: batteryPopupComponent
 
         BatteryPopup {}
     }
