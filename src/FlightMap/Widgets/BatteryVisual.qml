@@ -23,11 +23,12 @@ Item {
         radius:       width * 0.15
         
         FactPanelController { id: controller }
-
+        property bool vehicleReady: QGroundControl.multiVehicleManager.activeVehicle 
+                                    && QGroundControl.multiVehicleManager.activeVehicle.initialConnectComplete
         property Fact batConsumed:           batteryItem ? batteryItem.mahConsumed : null
-        property Fact batCapacity:           controller.getParameterFact(-1, "BAT1_CAPACITY")
-        property Fact batCriticalThreshold:  controller.getParameterFact(-1, "BAT_CRIT_THR")
-        property Fact batEmergencyThreshold: controller.getParameterFact(-1, "BAT_EMERGEN_THR")
+        property Fact batCapacity:           vehicleReady ? controller.getParameterFact(-1, "BAT1_CAPACITY") : null
+        property Fact batCriticalThreshold:  vehicleReady ? controller.getParameterFact(-1, "BAT_CRIT_THR") : null
+        property Fact batEmergencyThreshold: vehicleReady ? controller.getParameterFact(-1, "BAT_EMERGEN_THR") : null
 
         property real percentageRemaining:   batConsumed && batCapacity ? 100 - (batConsumed.rawValue * 100 / batCapacity.rawValue) : 0
         property real margin:                ScreenTools.defaultFontPixelHeight / 4
@@ -35,6 +36,9 @@ Item {
         border.width: margin
 
         function calculateBottomMargin(percentage) {
+            if (!vehicleReady || percentage === null || isNaN(percentage)) {
+                return margin;
+            }
             return margin + (height - margin * 2) * (percentage)
         }
 

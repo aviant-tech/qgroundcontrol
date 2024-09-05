@@ -52,6 +52,7 @@ VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* par
     , _timeUntilNextThresholdFact(0, _timeUntilNextThresholdFactName,    FactMetaData::valueTypeDouble)
     , _nextThresholdNameFact     (0, _nextThresholdNameFactName,         FactMetaData::valueTypeString)
     , _maxCapacityFact           (0, _maxCapacityFactName,               FactMetaData::valueTypeDouble)
+    , _vehicle                   (vehicle)
 {
     _addFact(&_batteryIdFact,               _batteryIdFactName);
     _addFact(&_batteryFunctionFact,         _batteryFunctionFactName);
@@ -84,32 +85,9 @@ VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* par
     _nextThresholdNameFact.setRawValue     ("");
     _maxCapacityFact.setRawValue           (qQNaN());
 
-    auto aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
-
-    Fact* batCapacityFact = vehicle->parameterManager()->getParameter(-1, "BAT1_CAPACITY");
-    Fact* batCritFact = vehicle->parameterManager()->getParameter(-1, "BAT_CRIT_THR");
-    Fact* batEmergenFact = vehicle->parameterManager()->getParameter(-1, "BAT_EMERGEN_THR");
-
-    int batCapacity = batCapacityFact ? batCapacityFact->rawValue().toInt() : 0;
-    double critThreshold = batCritFact ? batCritFact->rawValue().toDouble() : 0.0;
-    double emergenThreshold = batEmergenFact ? batEmergenFact->rawValue().toDouble() : 0.0;
-
-    _thresholds = {
-        {aviantSettings->preDeliveryBingoLimit()->rawValue().toDouble(), aviantSettings->preDeliveryBingoLimit()->shortDescription()},
-        {aviantSettings->postDeliveryBingoLimit()->rawValue().toDouble(), aviantSettings->postDeliveryBingoLimit()->shortDescription()},
-        {batCapacity * (1 - critThreshold), batCritFact->shortDescription()},
-        {batCapacity * (1 - emergenThreshold), batEmergenFact->shortDescription()}
-    };
-
-    // Sort thresholds in descending order
-    std::sort(_thresholds.begin(), _thresholds.end(), [](const ThresholdInfo& a, const ThresholdInfo& b) {
-        return a.mahThreshold < b.mahThreshold;
-    });
-
     connect(&_timeRemainingFact, &Fact::rawValueChanged, this, &VehicleBatteryFactGroup::_timeRemainingChanged);
-
-    if (batCapacityFact) {
-        _maxCapacityFact.setRawValue(batCapacityFact->rawValue());
+    if (_vehicle) {
+        connect(_vehicle->parameterManager(), &ParameterManager::parametersReadyChanged, this, &VehicleBatteryFactGroup::_parametersReady);
     }
 }
 
@@ -170,6 +148,47 @@ void VehicleBatteryFactGroup::handleMessage(Vehicle* vehicle, mavlink_message_t&
     case MAVLINK_MSG_ID_BATTERY_STATUS:
         _handleBatteryStatus(vehicle, message);
         break;
+    }
+}
+
+void VehicleBatteryFactGroup::_parametersReady(bool parametersReady)
+{
+    if (parametersReady) {
+        _loadBatteryParameters();
+        disconnect(_vehicle->parameterManager(), &ParameterManager::parametersReadyChanged, this, &VehicleBatteryFactGroup::_parametersReady);
+    }
+}
+
+void VehicleBatteryFactGroup::_loadBatteryParameters()
+{
+    auto aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
+
+    if (_vehicle &&  _vehicle->parameterManager()->parametersReady()) {
+        Fact* batCapacityFact = _vehicle->parameterManager()->getParameter(-1, "BAT1_CAPACITY");
+        Fact* batCritFact = _vehicle->parameterManager()->getParameter(-1, "BAT_CRIT_THR");
+        Fact* batEmergenFact = _vehicle->parameterManager()->getParameter(-1, "BAT_EMERGEN_THR");
+
+        int batCapacity = batCapacityFact ? batCapacityFact->rawValue().toInt() : 0;
+        double critThreshold = batCritFact ? batCritFact->rawValue().toDouble() : 0.0;
+        double emergenThreshold = batEmergenFact ? batEmergenFact->rawValue().toDouble() : 0.0;
+
+        _thresholds = {
+            {aviantSettings->preDeliveryBingoLimit()->rawValue().toDouble(), aviantSettings->preDeliveryBingoLimit()->shortDescription()},
+            {aviantSettings->postDeliveryBingoLimit()->rawValue().toDouble(), aviantSettings->postDeliveryBingoLimit()->shortDescription()},
+            {batCapacity * (1 - critThreshold), batCritFact->shortDescription()},
+            {batCapacity * (1 - emergenThreshold), batEmergenFact->shortDescription()}
+        };
+
+        // Sort thresholds in descending order
+        std::sort(_thresholds.begin(), _thresholds.end(), [](const ThresholdInfo& a, const ThresholdInfo& b) {
+            return a.mahThreshold < b.mahThreshold;
+        });
+
+        if (batCapacityFact) {
+            _maxCapacityFact.setRawValue(batCapacityFact->rawValue());
+        }
+        
+        disconnect(_vehicle->parameterManager(), &ParameterManager::parametersReadyChanged, this, &VehicleBatteryFactGroup::_loadBatteryParameters);
     }
 }
 

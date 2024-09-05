@@ -84,6 +84,8 @@ public:
 
 private slots:
     void _timeRemainingChanged(QVariant value);
+    void _parametersReady(bool parametersReady);
+
 
 private:
     static void                     _handleHighLatency          (Vehicle* vehicle, mavlink_message_t& message);
@@ -116,6 +118,10 @@ private:
     static const char* _batteryFactGroupNamePrefix;
 
     static constexpr qint64 ONE_MINUTE_IN_MS = 60000;
+    
+    Vehicle* _vehicle;
+
+    void _loadBatteryParameters();
 
     QVector<QPair<qint64, double>> _currentHistory;
 };
