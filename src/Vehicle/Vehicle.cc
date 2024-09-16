@@ -198,6 +198,12 @@ Vehicle::Vehicle(LinkInterface*             link,
 
     _vehicleLinkManager->_addLink(link);
 
+    QObject::connect(_vehicleLinkManager, &VehicleLinkManager::communicationLostChanged, this, [](bool is_lost) {
+        if(is_lost) { // Reset persisted consumed for batteries when communication is lost
+            VehicleBatteryFactGroup::resetPersistedConsumedForBatteries();
+        }
+    });
+
     // Set video stream to udp if running ArduSub and Video is disabled
     if (sub() && _settingsManager->videoSettings()->videoSource()->rawValue() == VideoSettings::videoDisabled) {
         _settingsManager->videoSettings()->videoSource()->setRawValue(VideoSettings::videoSourceUDPH264);
@@ -3286,6 +3292,9 @@ void Vehicle::_rebootCommandResultHandler(void* resultHandlerData, int /*compId*
         }
         qgcApp()->showAppMessage(tr("Vehicle reboot failed."));
     } else {
+        // here we are quite sure that device is soft rebooting
+        // closeVehicle itself is called in other scenarios, so we call persistConsumedForBatteries here
+        VehicleBatteryFactGroup::persistConsumedForBatteries();
         vehicle->closeVehicle();
     }
 }

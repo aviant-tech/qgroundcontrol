@@ -81,6 +81,8 @@ public:
     // Overrides from FactGroup
     void handleMessage(Vehicle* vehicle, mavlink_message_t& message) override;
 
+    static void persistConsumedForBatteries();
+    static void resetPersistedConsumedForBatteries();
 
 private slots:
     void _timeRemainingChanged(QVariant value);
@@ -121,4 +123,9 @@ private:
     Vehicle* _vehicle;
 
     void _loadBatteryParameters();
+
+    // for each battery status there are two values:
+    // 1st: value inherited from the last boot
+    // 2nd: current value, that upon soft boot will become 1st value
+    static QMap<uint8_t, QPair<double, double>> _lastKnownConsumed;
 };
