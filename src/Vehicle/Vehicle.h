@@ -436,7 +436,8 @@ public:
 
     /// Trigger camera using MAV_CMD_DO_DIGICAM_CONTROL command
     Q_INVOKABLE void triggerSimpleCamera(void);
-
+    QMap<uint8_t, double> collectBatteryConsumedData() const;
+    
 #if !defined(NO_ARDUPILOT_DIALECT)
     Q_INVOKABLE void flashBootloader();
 #endif

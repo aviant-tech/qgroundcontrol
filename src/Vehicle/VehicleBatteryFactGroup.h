@@ -81,6 +81,11 @@ public:
     // Overrides from FactGroup
     void handleMessage(Vehicle* vehicle, mavlink_message_t& message) override;
 
+    static void persistConsumedForVehicle(int vehicleId);
+    static void resetPersistedConsumedForVehicle(int vehicleId);
+    static void setCurrentConsumed(int vehicleId, uint8_t batteryId, double consumed);
+    static double getPersistedConsumed(int vehicleId, uint8_t batteryId);
+    
 
 private slots:
     void _timeRemainingChanged(QVariant value);
@@ -121,4 +126,6 @@ private:
     Vehicle* _vehicle;
 
     void _loadBatteryParameters();
+
+    static QMap<int, QMap<uint8_t, QPair<double, double>>> _persistedConsumed;
 };
