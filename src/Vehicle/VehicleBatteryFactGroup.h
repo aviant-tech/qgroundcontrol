@@ -84,6 +84,8 @@ public:
 
 private slots:
     void _timeRemainingChanged(QVariant value);
+    void _parametersReady(bool parametersReady);
+
 
 private:
     static void                     _handleHighLatency          (Vehicle* vehicle, mavlink_message_t& message);
@@ -114,4 +116,9 @@ private:
     QList<ThresholdInfo> _thresholds;
 
     static const char* _batteryFactGroupNamePrefix;
+
+    
+    Vehicle* _vehicle;
+
+    void _loadBatteryParameters();
 };
