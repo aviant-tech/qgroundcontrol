@@ -16,7 +16,6 @@ Rectangle {
     color:   qgcPal.window
     opacity: 0.9
     radius:  _toolsMargin / 2
-    visible: _activeVehicle != undefined
 
     // Overridden by parent
     property int availableHeight: 600
