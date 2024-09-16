@@ -1343,6 +1343,7 @@ private:
     ImageProtocolManager*           _imageProtocolManager       = nullptr;
     InitialConnectStateMachine*     _initialConnectStateMachine = nullptr;
     Actuators*                      _actuators                  = nullptr;
+    static bool                     _softrebootRequested;
 
     static const char* _rollFactName;
     static const char* _pitchFactName;

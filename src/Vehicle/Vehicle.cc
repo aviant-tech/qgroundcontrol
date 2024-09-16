@@ -111,6 +111,8 @@ const char* Vehicle::_estimatorStatusFactGroupName =    "estimatorStatus";
 const char* Vehicle::_terrainFactGroupName =            "terrain";
 const char* Vehicle::_hygrometerFactGroupName =         "hygrometer";
 
+bool Vehicle::_softrebootRequested{false};
+
 // Standard connected vehicle
 Vehicle::Vehicle(LinkInterface*             link,
                  int                        vehicleId,
@@ -197,6 +199,17 @@ Vehicle::Vehicle(LinkInterface*             link,
     _commonInit();
 
     _vehicleLinkManager->_addLink(link);
+
+    QObject::connect(_vehicleLinkManager, &VehicleLinkManager::communicationLostChanged, this, [](bool is_lost) {
+        if(is_lost && !_softrebootRequested) { // supposedly here this is not a intentional reboot - this trusts is NOT emitted on reboot....
+            VehicleBatteryFactGroup::resetBatteryValue();  // here we could be quite sure that next device is rebootin, closeFunction itself may have other intentions therefore doing this here
+        }
+    });
+
+
+    QObject::connect(this, &Vehicle::initialConnectComplete, this, [](){
+        _softrebootRequested = false;  // just reset the value
+    });
 
     // Set video stream to udp if running ArduSub and Video is disabled
     if (sub() && _settingsManager->videoSettings()->videoSource()->rawValue() == VideoSettings::videoDisabled) {
@@ -3286,6 +3299,8 @@ void Vehicle::_rebootCommandResultHandler(void* resultHandlerData, int /*compId*
         }
         qgcApp()->showAppMessage(tr("Vehicle reboot failed."));
     } else {
+        _softrebootRequested = true;
+        VehicleBatteryFactGroup::storeBatteryValue();  // here we could be quite sure that next device is rebootin, closeFunction itself may have other intentions therefore doing this here
         vehicle->closeVehicle();
     }
 }
