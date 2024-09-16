@@ -35,6 +35,8 @@ const char* VehicleBatteryFactGroup::_maxCapacityFactName            = "maxCapac
 
 const char* VehicleBatteryFactGroup::_settingsGroup =                       "Vehicle.battery";
 
+QMap<int, QMap<uint8_t, double>> VehicleBatteryFactGroup::_persistedConsumed;
+
 VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* parent, Vehicle* vehicle)
     : FactGroup                  (1000, ":/json/Vehicle/BatteryFact.json", parent)
     , _batteryIdFact             (0, _batteryIdFactName,                 FactMetaData::valueTypeUint8)
@@ -218,6 +220,23 @@ void VehicleBatteryFactGroup::_handleHighLatency2(Vehicle* vehicle, mavlink_mess
     group->_setTelemetryAvailable(true);
 }
 
+void VehicleBatteryFactGroup::persistConsumedForBatteries(int vehicleId, const QMap<uint8_t, double>& batteryConsumed)
+{
+    for (auto it = batteryConsumed.constBegin(); it != batteryConsumed.constEnd(); ++it) {
+        _persistedConsumed[vehicleId][it.key()] = it.value();
+    }
+}
+
+void VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(int vehicleId)
+{
+    _persistedConsumed.remove(vehicleId);
+}
+
+double VehicleBatteryFactGroup::getPersistedConsumed(int vehicleId, uint8_t batteryId)
+{
+    return _persistedConsumed.value(vehicleId).value(batteryId, 0.0);
+}
+
 void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_message_t& message)
 {
     mavlink_battery_status_t batteryStatus;
@@ -247,12 +266,22 @@ void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_mes
 
     double current = batteryStatus.current_battery == -1 ? qQNaN() : static_cast<double>(batteryStatus.current_battery) / 100.0;
     
+
+    double consumed;
+
+    if (batteryStatus.current_consumed < 0) {
+        consumed = qQNaN();
+    } else {
+        consumed = batteryStatus.current_consumed;
+        consumed += getPersistedConsumed(vehicle->id(), batteryStatus.id);
+    }
+
     group->function()->setRawValue          (batteryStatus.battery_function);
     group->type()->setRawValue              (batteryStatus.type);
     group->temperature()->setRawValue       (batteryStatus.temperature == INT16_MAX ?   qQNaN() : static_cast<double>(batteryStatus.temperature) / 100.0);
     group->voltage()->setRawValue           (totalVoltage);
     group->current()->setRawValue           (current);
-    group->mahConsumed()->setRawValue       (batteryStatus.current_consumed == -1  ?    qQNaN() : batteryStatus.current_consumed);
+    group->mahConsumed()->setRawValue       (consumed);
     group->percentRemaining()->setRawValue  (batteryStatus.battery_remaining == -1 ?    qQNaN() : batteryStatus.battery_remaining);
     group->timeRemaining()->setRawValue     (batteryStatus.time_remaining == 0 ?        qQNaN() : batteryStatus.time_remaining);
     group->chargeState()->setRawValue       (batteryStatus.charge_state);
