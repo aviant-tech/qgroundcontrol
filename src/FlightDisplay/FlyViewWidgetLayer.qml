@@ -49,7 +49,7 @@ Item {
     property rect   _centerViewport:        Qt.rect(0, 0, width, height)
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property var    _aviantSettings:        QGroundControl.settingsManager.aviantSettings
-    property bool   _showBatteryWidget:     _aviantSettings.showBatteryWidget.rawValue
+    property bool   _showBatteryWidget:     _activeVehicle != null && _aviantSettings.showBatteryWidget.rawValue
     property bool   _showWinchControlMenu:  _aviantSettings.showWinchControlMenu.rawValue
 
     QGCToolInsets {
