@@ -83,6 +83,7 @@ public:
 
     static void persistConsumedForBatteries(int vehicleId, const QMap<uint8_t, double>& batteryConsumed);
     static void resetPersistedConsumedForVehicle(int vehicleId);
+    static bool hasPersistedConsumedForVehicle(int vehicleId);
     static double getPersistedConsumed(int vehicleId, uint8_t batteryId);
 
 private slots:

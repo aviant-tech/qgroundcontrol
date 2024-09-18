@@ -223,13 +223,17 @@ void VehicleBatteryFactGroup::_handleHighLatency2(Vehicle* vehicle, mavlink_mess
 void VehicleBatteryFactGroup::persistConsumedForBatteries(int vehicleId, const QMap<uint8_t, double>& batteryConsumed)
 {
     for (auto it = batteryConsumed.constBegin(); it != batteryConsumed.constEnd(); ++it) {
-        _persistedConsumed[vehicleId][it.key()] = it.value();
+        _persistedConsumed[vehicleId][it.key()] = it.value() + 1;
     }
 }
 
 void VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(int vehicleId)
 {
     _persistedConsumed.remove(vehicleId);
+}
+
+bool VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(int vehicl) {
+    return _persistedConsumed.contains(vehicl);
 }
 
 double VehicleBatteryFactGroup::getPersistedConsumed(int vehicleId, uint8_t batteryId)
