@@ -213,6 +213,30 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
     _itemsRequested = false;
 }
 
+void MissionController::_updateBranchWaypoints(void)
+{
+    _branchItems.clear();
+    _branchItemNames.clear();
+
+    for (int i=0; i < _visualItems->count(); i++) {
+        if (_visualItems->value<VisualMissionItem*>(i)->isSimpleItem()) {
+            SimpleMissionItem* targetItem = _visualItems->value<SimpleMissionItem*>(i);
+
+            if (targetItem->command() == MAV_CMD_DO_JUMP) {
+
+                int waypointNumber = targetItem->missionItem().param1();
+                if (_itemsRequested) {
+                    waypointNumber += 1;
+                }
+                _branchItems.append(waypointNumber);
+
+                QString waypointStr = "Waypoint " + QString::number(waypointNumber);
+                _branchItemNames.append(waypointStr);
+            }
+        }
+    }
+}
+
 void MissionController::loadFromVehicle(void)
 {
     if (_masterController->offline()) {
@@ -1925,7 +1949,10 @@ void MissionController::_initAllVisualItems(void)
     connect(_visualItems, &QmlObjectListModel::dirtyChanged, this, &MissionController::_visualItemsDirtyChanged);
     connect(_visualItems, &QmlObjectListModel::countChanged, this, &MissionController::_updateContainsItems);
 
+    _updateBranchWaypoints();
+
     emit visualItemsChanged();
+    emit branchItemNamesChanged();
     emit containsItemsChanged(containsItems());
     emit plannedHomePositionChanged(plannedHomePosition());
 
@@ -2649,6 +2676,16 @@ QString MissionController::corridorScanComplexItemName(void) const
 QString MissionController::structureScanComplexItemName(void) const
 {
     return StructureScanComplexItem::name;
+}
+
+QStringList MissionController::branchItemNames(void) const
+{
+    return _branchItemNames;
+}
+
+int MissionController::branchItem(int index)
+{
+    return _branchItems[index];
 }
 
 void MissionController::_allItemsRemoved(void)
