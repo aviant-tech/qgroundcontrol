@@ -242,7 +242,7 @@ bool VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(int vehicleId) {
     if (_persistedConsumed.contains(vehicleId)) {
         const QMap<uint8_t, QPair<double, double>>& batteriesMap = _persistedConsumed[vehicleId];
         for (const auto& batteryPair : batteriesMap) {
-            if (batteryPair.second.first > 0) {
+            if (batteryPair.first > 0) {
                 return true;
             }
         }
