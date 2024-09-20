@@ -360,6 +360,8 @@ void Vehicle::stopTrackingFirmwareVehicleTypeChanges(void)
     disconnect(_settingsManager->appSettings()->offlineEditingVehicleClass(),  &Fact::rawValueChanged, this, &Vehicle::_offlineVehicleTypeSettingChanged);
 }
 
+
+
 void Vehicle::_commonInit()
 {
     _firmwarePlugin = _firmwarePluginManager->firmwarePluginForAutopilot(_firmwareType, _vehicleType);
@@ -1111,6 +1113,15 @@ void Vehicle::_handleAttitudeQuaternion(mavlink_message_t& message)
     pitchRate()->setRawValue(qRadiansToDegrees(rates[1]));
     yawRate()->setRawValue(qRadiansToDegrees(rates[2]));
 }
+
+void Vehicle::resetPersistedConsumedData() {
+    VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(_id);
+}
+
+bool Vehicle::hasPersistedConsumedData()  {
+    return VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(_id);
+}
+
 
 void Vehicle::_handleGpsRawInt(mavlink_message_t& message)
 {

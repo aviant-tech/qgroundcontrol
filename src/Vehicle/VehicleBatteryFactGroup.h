@@ -84,6 +84,7 @@ public:
     static void persistConsumedForVehicle(int vehicleId);
     static void resetPersistedConsumedForVehicle(int vehicleId);
     static void setCurrentConsumed(int vehicleId, uint8_t batteryId, double consumed);
+    static bool hasPersistedConsumedForVehicle(int vehicleId);
     static double getPersistedConsumed(int vehicleId, uint8_t batteryId);
     
 

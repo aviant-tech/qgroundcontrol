@@ -168,6 +168,16 @@ Item {
                     }
                 }
             }
+            QGCButton {
+                text: qsTr("Reset persisted consumed")
+                Layout.alignment: Qt.AlignHCenter
+                onClicked: {
+                    if (_activeVehicle) {
+                        _activeVehicle.resetPersistedConsumedData(_activeVehicle.id)
+                    }
+                }
+                visible: _activeVehicle && _activeVehicle.hasPersistedConsumedData(_activeVehicle.id)
+            }
         }
     }
 
