@@ -18,7 +18,8 @@ Rectangle {
     radius:  _toolsMargin / 2
 
     // Overridden by parent
-    property int availableHeight: 600
+    property int availableHeight:      600
+    property bool winchControlVisible: false
     
     implicitHeight: Math.min(batteryWidgetColumn.implicitHeight + ScreenTools.defaultFontPixelWidth, availableHeight)
 
@@ -188,14 +189,23 @@ Rectangle {
             color:  Qt.rgba(0,0,0,0)
         }
         Loader {
-            id:              loader
+            id: loader
             onLoaded: {
                 batteryPopup.x = -(getWidthOfChildren() + _toolsMargin * 2)
+                if (!batteryWidgetContainer.winchControlVisible) {
+                    batteryPopup.y = -(getHeightOfChildren() - (batteryWidgetContainer.height - _toolsMargin))
+                }
             }
             function getWidthOfChildren() {
-                // As loader.item is component with width and height 0, we need to access the child item
-                if (loader.item.children && loader.item.children.length > 0) {
+                // As loader.item is component with width and height 0, we need to access the child item to get the real width
+                if (loader.item && loader.item.children && loader.item.children.length > 0) {
                     return loader.item.children[0].width
+                }
+                return 0
+            }
+            function getHeightOfChildren() {
+                if (loader.item && loader.item.children && loader.item.children.length > 0) {
+                    return loader.item.children[0].height
                 }
                 return 0
             }

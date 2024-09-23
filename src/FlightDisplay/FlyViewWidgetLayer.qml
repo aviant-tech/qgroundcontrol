@@ -158,6 +158,7 @@ Item {
         width:                  _rightPanelWidth
         availableHeight:        parent.height - (winchControl.height + instrumentPanel.height + ScreenTools.defaultFontPixelHeight * 2)
         visible:                _showBatteryWidget
+        winchControlVisible:    winchControl.visible
     }
 
     VehicleWarningSideBar {
