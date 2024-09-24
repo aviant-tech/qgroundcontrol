@@ -11,6 +11,13 @@
     "default":     true
 },
 {
+    "name":        "showBatteryWidget",
+    "shortDesc":   "Show battery widget",
+    "longDesc":    "Show battery widget and hide battery indicator in toolbar",
+    "type":        "bool",
+    "default":     true
+},
+{
     "name":             "showWinchControlMenu",
     "shortDesc": "Show winch control menu",
     "longDesc":  "Shows the winch control menu buttons and slider",
@@ -52,6 +59,22 @@
     "units":        "dBm",
     "min":          -128.0,
     "max":          0.0
+},
+{
+    "name":        "preDeliveryBingoLimit",
+    "shortDesc":   "Pre-delivery bingo limit",
+    "type":        "double",
+    "default":      6800,
+    "units":        "mAh",
+    "min":          0
+},
+{
+    "name":        "postDeliveryBingoLimit",
+    "shortDesc":   "Post-delivery bingo limit",
+    "type":        "double",
+    "default":     10100,
+    "units":       "mAh",
+    "min":         0
 },
 {
     "name":                "missionToolsInsecureHttps",

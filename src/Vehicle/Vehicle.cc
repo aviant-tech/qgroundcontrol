@@ -198,6 +198,14 @@ Vehicle::Vehicle(LinkInterface*             link,
 
     _vehicleLinkManager->_addLink(link);
 
+     QObject::connect(_vehicleLinkManager, &VehicleLinkManager::communicationLostChanged, this, [this](bool is_lost) {
+        qDebug() << "Communication lost changed to " << is_lost << " for vehicle " << _id;
+        if(is_lost) { // Persist consumed for batteries of relevant vehicle when communication is lost
+            VehicleBatteryFactGroup::persistConsumedForVehicle(_id);
+        }
+    });
+
+
     // Set video stream to udp if running ArduSub and Video is disabled
     if (sub() && _settingsManager->videoSettings()->videoSource()->rawValue() == VideoSettings::videoDisabled) {
         _settingsManager->videoSettings()->videoSource()->setRawValue(VideoSettings::videoSourceUDPH264);
@@ -351,6 +359,8 @@ void Vehicle::stopTrackingFirmwareVehicleTypeChanges(void)
     disconnect(_settingsManager->appSettings()->offlineEditingFirmwareClass(),  &Fact::rawValueChanged, this, &Vehicle::_offlineFirmwareTypeSettingChanged);
     disconnect(_settingsManager->appSettings()->offlineEditingVehicleClass(),  &Fact::rawValueChanged, this, &Vehicle::_offlineVehicleTypeSettingChanged);
 }
+
+
 
 void Vehicle::_commonInit()
 {
@@ -1104,6 +1114,15 @@ void Vehicle::_handleAttitudeQuaternion(mavlink_message_t& message)
     yawRate()->setRawValue(qRadiansToDegrees(rates[2]));
 }
 
+void Vehicle::resetPersistedConsumedData() {
+    VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(_id);
+}
+
+bool Vehicle::hasPersistedConsumedData()  {
+    return VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(_id);
+}
+
+
 void Vehicle::_handleGpsRawInt(mavlink_message_t& message)
 {
     mavlink_gps_raw_int_t gpsRawInt;
@@ -1448,6 +1467,24 @@ void Vehicle::_handleSysStatus(mavlink_message_t& message)
         _onboardControlSensorsUnhealthy = newSensorsUnhealthy;
         emit sensorsUnhealthyBitsChanged(_onboardControlSensorsUnhealthy);
     }
+}
+
+QMap<uint8_t, double> Vehicle::collectBatteryConsumedData() const
+{
+    QMap<uint8_t, double> batteryConsumed;
+    
+    QmlObjectListModel* batteryList = const_cast<Vehicle*>(this)->batteries();
+    
+    for (int i = 0; i < batteryList->count(); ++i) {
+        VehicleBatteryFactGroup* battery = qobject_cast<VehicleBatteryFactGroup*>(batteryList->get(i));
+        if (battery) {
+            uint8_t batteryId = static_cast<uint8_t>(battery->id()->rawValue().toInt());
+            double consumed = battery->mahConsumed()->rawValue().toDouble();
+            batteryConsumed[batteryId] = consumed ;
+        }
+    }
+    
+    return batteryConsumed;
 }
 
 void Vehicle::_handleBatteryStatus(mavlink_message_t& message)
@@ -3286,6 +3323,10 @@ void Vehicle::_rebootCommandResultHandler(void* resultHandlerData, int /*compId*
         }
         qgcApp()->showAppMessage(tr("Vehicle reboot failed."));
     } else {
+        qDebug() << "Vehicle rebooted" << vehicle->id();
+        // here we are quite sure that device is soft rebooting
+        // closeVehicle itself is called in other scenarios, so we call persistConsumedForVehicle here
+        VehicleBatteryFactGroup::persistConsumedForVehicle(vehicle->id());
         vehicle->closeVehicle();
     }
 }

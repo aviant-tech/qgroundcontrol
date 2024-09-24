@@ -796,6 +796,11 @@ Rectangle {
                                 fact:                   _aviantSettings.verticalConflictDistance
                             }
                             FactCheckBox {
+                                id:         promptShowBatteryWidget
+                                text:       qsTr("Show battery widget")
+                                fact:       _aviantSettings.showBatteryWidget
+                            }
+                            FactCheckBox {
                                 id:         promptShowWinchControlMenu
                                 text:       qsTr("Show winch control menu")
                                 fact:       _aviantSettings.showWinchControlMenu
@@ -813,6 +818,20 @@ Rectangle {
                             FactTextField {
                                 Layout.preferredWidth:  _valueFieldWidth
                                 fact:                   _aviantSettings.rssiAlert
+                            }
+                            QGCLabel {
+                                text:              _aviantSettings.preDeliveryBingoLimit.shortDescription
+                            }
+                            FactTextField {
+                                fact:              _aviantSettings.preDeliveryBingoLimit
+                                Layout.fillWidth:  true
+                            }
+                            QGCLabel {
+                                text:              _aviantSettings.postDeliveryBingoLimit.shortDescription
+                            }
+                            FactTextField {
+                                fact:              _aviantSettings.postDeliveryBingoLimit
+                                Layout.fillWidth:  true
                             }
                             QGCLabel {
                                 text:              _aviantSettings.missionToolsUrl.shortDescription
