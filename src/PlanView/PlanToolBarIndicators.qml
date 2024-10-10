@@ -125,7 +125,7 @@ Item {
         anchors.bottom:         parent.bottom
         anchors.leftMargin:     _margins
         anchors.left:           parent.left
-        columnSpacing:          0
+        columnSpacing:          _smallValueWidth
         columns:                5
 
         GridLayout {
@@ -162,7 +162,6 @@ Item {
             QGCLabel {
                 text:                   _distanceText
                 font.pointSize:         _dataFontSize
-                Layout.minimumWidth:    _largeValueWidth
             }
 
             QGCLabel { text: qsTr("Gradient:"); font.pointSize: _dataFontSize; }
@@ -207,7 +206,6 @@ Item {
             QGCLabel {
                 text:                   _missionMaxTelemetryText
                 font.pointSize:         _dataFontSize
-                Layout.minimumWidth:    _largeValueWidth
             }
 
             QGCLabel { text: qsTr("Time:"); font.pointSize: _dataFontSize; }
@@ -282,7 +280,6 @@ Item {
                     return parts.pop();
                 }
             }
-            Item { width: 1; height: 1 }
         }
     }
 
