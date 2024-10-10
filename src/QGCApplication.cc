@@ -364,8 +364,8 @@ QGCApplication::QGCApplication(int &argc, char* argv[], bool unitTesting)
        connect(gpsManager, &GPSManager::satelliteUpdate,    this, &QGCApplication::_gpsNumSatellites);
    }
 #endif /* __mobile__ */
-
-    _checkForNewVersion();
+    // As we handle outdated version in multi-qgc setup, we don't need to check for new version
+    // _checkForNewVersion();
 }
 
 void QGCApplication::_exitWithError(QString errorMessage)
@@ -831,7 +831,6 @@ void QGCApplication::_qgcCurrentStableVersionDownloadComplete(QString /*remoteFi
 
             qDebug() << version;
 
-            /* As we handle outdated version in multi-qgc setup, we don't need to show this message
             int majorVersion, minorVersion, buildVersion;
             if (_parseVersionText(version, majorVersion, minorVersion, buildVersion)) {
                 if (_majorVersion < majorVersion ||
@@ -840,7 +839,6 @@ void QGCApplication::_qgcCurrentStableVersionDownloadComplete(QString /*remoteFi
                     showAppMessage(tr("There is a newer version of %1 available. You can download it from %2.").arg(applicationName()).arg(toolbox()->corePlugin()->stableDownloadLocation()), tr("New Version Available"));
                 }
             }
-            */
         }
     } else {
         qDebug() << "Download QGC stable version failed" << errorMsg;
