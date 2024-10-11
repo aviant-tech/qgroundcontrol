@@ -92,10 +92,7 @@ Item {
             if (_controllerProgressPct === 1) {
                 missionStats.visible = false
                 uploadCompleteText.visible = true
-                progressBar.visible = false
                 resetProgressTimer.start()
-            } else if (_controllerProgressPct > 0) {
-                progressBar.visible = true
             }
         }
     }
@@ -280,69 +277,6 @@ Item {
                     return parts.pop();
                 }
             }
-        }
-    }
-
-    // Small mission download progress bar
-    Rectangle {
-        id:             progressBar
-        anchors.left:   parent.left
-        anchors.bottom: parent.bottom
-        height:         4
-        width:          _controllerProgressPct * parent.width
-        color:          qgcPal.colorGreen
-        visible:        false
-
-        onVisibleChanged: {
-            if (visible) {
-                largeProgressBar._userHide = false
-            }
-        }
-    }
-
-    // Large mission download progress bar
-    Rectangle {
-        id:             largeProgressBar
-        anchors.bottom: parent.bottom
-        anchors.left:   parent.left
-        anchors.right:  parent.right
-        height:         parent.height
-        color:          qgcPal.window
-        visible:        _showLargeProgress
-
-        property bool _userHide:                false
-        property bool _showLargeProgress:       progressBar.visible && !_userHide && qgcPal.globalTheme === QGCPalette.Light
-
-        Connections {
-            target:                 QGroundControl.multiVehicleManager
-            onActiveVehicleChanged: largeProgressBar._userHide = false
-        }
-
-        Rectangle {
-            anchors.top:    parent.top
-            anchors.bottom: parent.bottom
-            width:          _controllerProgressPct * parent.width
-            color:          qgcPal.colorGreen
-        }
-
-        QGCLabel {
-            anchors.centerIn:   parent
-            text:               qsTr("Syncing Mission")
-            font.pointSize:     ScreenTools.largeFontPointSize
-        }
-
-        QGCLabel {
-            anchors.margins:    _margin
-            anchors.right:      parent.right
-            anchors.bottom:     parent.bottom
-            text:               qsTr("Click anywhere to hide")
-
-            property real _margin: ScreenTools.defaultFontPixelWidth / 2
-        }
-
-        MouseArea {
-            anchors.fill:   parent
-            onClicked:      largeProgressBar._userHide = true
         }
     }
 }
