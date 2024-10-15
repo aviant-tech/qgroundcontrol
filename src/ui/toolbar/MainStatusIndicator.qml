@@ -58,7 +58,19 @@ RowLayout {
                     }
                 } else {
                     if (_activeVehicle.readyToFlyAvailable) {
-                        if (_activeVehicle.readyToFly) {
+                        if (_activeVehicle.missionManagerError) {
+                            _mainStatusBGColor = "red"
+                            return "Error syncing mission: " + _activeVehicle.missionManagerError
+                        }
+                        else if (_activeVehicle.geoFenceManagerError) {
+                            _mainStatusBGColor = "red"
+                            return "Error syncing geofence: " + _activeVehicle.geoFenceManagerError
+                        }
+                        else if (_activeVehicle.rallyPointManagerError) {
+                            _mainStatusBGColor = "red"
+                            return "Error syncing rally points: " + _activeVehicle.rallyPointManagerError
+                        }
+                        else if (_activeVehicle.readyToFly) {
                             _mainStatusBGColor = "green"
                             return mainStatusLabel._readyToFlyText
                         } else {

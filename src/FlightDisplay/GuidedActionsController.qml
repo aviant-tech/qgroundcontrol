@@ -107,7 +107,7 @@ Item {
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property bool   _useChecklist:              QGroundControl.settingsManager.appSettings.useChecklist.rawValue && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
     property bool   _enforceChecklist:          _useChecklist && QGroundControl.settingsManager.appSettings.enforceChecklist.rawValue
-    property bool   _canArm:                    _activeVehicle ? (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) : false
+    property bool   _canArm:                    canArm()
 
     property bool showEmergenyStop:     _guidedActionsEnabled && !_hideEmergenyStop && _vehicleArmed && _vehicleFlying
     property bool showArm:              _guidedActionsEnabled && !_vehicleArmed && _canArm
@@ -281,6 +281,27 @@ Item {
         function onDisarmVehicleRequest() { disarmVehicleRequest() }
         function onVtolTransitionToFwdFlightRequest() { vtolTransitionToFwdFlightRequest() }
         function onVtolTransitionToMRFlightRequest() { vtolTransitionToMRFlightRequest() }
+    }
+
+    Connections {
+        target: _activeVehicle
+        function onRallyPointManagerErrorChanged() {
+            _canArm = canArm()
+        }
+        function onGeoFenceManagerErrorChanged() {
+            _canArm = canArm()
+        }
+        function onMissionManagerErrorChanged() {
+            _canArm = canArm()
+        }
+    }
+
+    function planError() {
+        return _activeVehicle && (_activeVehicle.missionManagerError != "" || _activeVehicle.geoFenceManagerError != "" || _activeVehicle.rallyPointManagerError != "")
+    }
+
+    function canArm() {
+        return _activeVehicle ? !planError() && (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) : false
     }
 
     function armVehicleRequest() {
