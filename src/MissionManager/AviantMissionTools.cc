@@ -368,7 +368,11 @@ void AviantMissionTools::_parseAndLoadMissionResponse(const QByteArray &bytes)
                 tr("Mission Tools - ") + _getOperationName(_currentOperation));
         return;
     }
-        
+
+    if (_currentOperation == FetchKyteOrderMissionFile) {
+        _masterController->clearCurrentPlanFile();
+    }
+
     qgcApp()->showAppMessage(tr("Operation successful"), tr("Mission Tools - ") + _getOperationName(_currentOperation));
 }
 

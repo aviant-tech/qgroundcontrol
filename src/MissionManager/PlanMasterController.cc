@@ -437,6 +437,12 @@ void PlanMasterController::loadFromFile(const QString& filename)
     }
 }
 
+void PlanMasterController::clearCurrentPlanFile()
+{
+    _currentPlanFile.clear();
+    emit currentPlanFileChanged();
+}
+
 QJsonDocument PlanMasterController::saveToJson()
 {
     QJsonObject planJson;
