@@ -478,10 +478,6 @@ Item {
             fileDialog.nameFilters =    ShapeFileHelper.fileDialogKMLFilters
             fileDialog.openForSave()
         }
-
-        function browseKyteOrders() {
-            mainWindow.showPopupDialogFromComponent(promptForBrowsingKyteOrders)
-        }
     }
 
     Connections {
@@ -1404,7 +1400,7 @@ Item {
                     enabled:            !_planMasterController.syncInProgress && _aviantSettings.kyteBackendUrl.rawValue != ""
                     onClicked: {
                         dropPanel.hide()
-                        _planMasterController.browseKyteOrders()
+                        mainWindow.showPopupDialogFromComponent(promptForBrowsingKyteOrders)
                     }
                 }
             }
