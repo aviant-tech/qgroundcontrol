@@ -203,7 +203,7 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
 
         _visualItems = newControllerMissionItems;
         _settingsItem = settingsItem;
-
+        _managerVehicle->clearMissionManagerError();
         MissionController::_scanForAdditionalSettings(_visualItems, _masterController);
 
         _initAllVisualItems();

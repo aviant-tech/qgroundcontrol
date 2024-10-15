@@ -247,6 +247,7 @@ void RallyPointController::_managerLoadComplete(void)
         setDirty(false);
         _setFirstPointCurrent();
         emit loadComplete();
+        _managerVehicle->clearRallyPointManagerError();
     }
     _itemsRequested = false;
 }
