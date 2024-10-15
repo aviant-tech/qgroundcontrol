@@ -259,6 +259,9 @@ public:
     Q_PROPERTY(bool                 requiresGpsFix              READ requiresGpsFix                                                 NOTIFY requiresGpsFixChanged)
     Q_PROPERTY(double               loadProgress                READ loadProgress                                                   NOTIFY loadProgressChanged)
     Q_PROPERTY(bool                 initialConnectComplete      READ isInitialConnectComplete                                       NOTIFY initialConnectComplete)
+    Q_PROPERTY(QString              missionManagerError         READ missionManagerError                                            NOTIFY missionManagerErrorChanged)
+    Q_PROPERTY(QString              geoFenceManagerError        READ geoFenceManagerError                                           NOTIFY geoFenceManagerErrorChanged)
+    Q_PROPERTY(QString              rallyPointManagerError      READ rallyPointManagerError                                         NOTIFY rallyPointManagerErrorChanged)
 
     // The following properties relate to Orbit status
     Q_PROPERTY(bool             orbitActive     READ orbitActive        NOTIFY orbitActiveChanged)
@@ -526,6 +529,10 @@ public:
     QString prearmError() const { return _prearmError; }
     void setPrearmError(const QString& prearmError);
 
+    void clearRallyPointManagerError();
+    void clearGeoFenceManagerError();
+    void clearMissionManagerError();
+
     QmlObjectListModel* cameraTriggerPoints () { return &_cameraTriggerPoints; }
 
     int  flowImageIndex() const{ return _flowImageIndex; }
@@ -559,6 +566,9 @@ public:
     int             messageCount                () const{ return _messageCount; }
     QString         formattedMessages           ();
     QString         latestError                 () { return _latestError; }
+    QString         missionManagerError         () const { return _missionManagerErrorMsg; }
+    QString         rallyPointManagerError      () const { return _rallyPointManagerErrorMsg; }
+    QString         geoFenceManagerError        () const { return _geoFenceManagerErrorMsg; }
     float           latitude                    () { return static_cast<float>(_coordinate.latitude()); }
     float           longitude                   () { return static_cast<float>(_coordinate.longitude()); }
     bool            mavPresent                  () { return _mav != nullptr; }
@@ -853,6 +863,9 @@ public slots:
     void handleNewCriticalVehicleMessage    (UASMessage* message);
 
 signals:
+    void missionManagerErrorChanged();
+    void geoFenceManagerErrorChanged();
+    void rallyPointManagerErrorChanged();
     void coordinateChanged              (QGeoCoordinate coordinate);
     void positionSetpointChanged        (QGeoCoordinate positionSetpoint);
     void joystickEnabledChanged         (bool enabled);
@@ -1119,7 +1132,9 @@ private:
     bool            _readyToFlyAvailable                    = false;
     bool            _readyToFly                             = false;
     bool            _allSensorsHealthy                      = true;
-
+    QString         _missionManagerErrorMsg;
+    QString         _geoFenceManagerErrorMsg;
+    QString         _rallyPointManagerErrorMsg;
     SysStatusSensorInfo _sysStatusSensorInfo;
 
     QGCCameraManager* _cameraManager = nullptr;
