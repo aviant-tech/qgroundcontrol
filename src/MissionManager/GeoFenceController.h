@@ -87,7 +87,8 @@ public:
     void   setBreachReturnPoint   (const QGeoCoordinate& breachReturnPoint);
     bool   isEmpty                (void) const;
     double progressPct            (void) const { return _progressPct; }
-
+    void   abortSync              (void);
+    void   setSkipPlanView        (bool skipPlanView);
 signals:
     void breachReturnPointChanged       (QGeoCoordinate breachReturnPoint);
     void editorQmlChanged               (QString editorQml);
@@ -122,6 +123,7 @@ private:
     bool                _itemsRequested =               false;
     Fact*               _px4ParamCircularFenceFact =    nullptr;
     double              _progressPct =                  0;
+    bool                _skipPlanView = false;
 
     static QMap<QString, FactMetaData*> _metaDataMap;
 

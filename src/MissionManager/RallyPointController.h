@@ -58,7 +58,8 @@ public:
     void   setCurrentRallyPoint   (QObject* rallyPoint);
     bool   isEmpty                (void) const;
     double progressPct            (void) const { return _progressPct; }
-
+    void   abortSync              (void);
+    void   setSkipPlanView        (bool skipPlanView);
 signals:
     void currentRallyPointChanged(QObject* rallyPoint);
     void loadComplete(void);
@@ -81,6 +82,7 @@ private:
     QObject*            _currentRallyPoint =    nullptr;
     bool                _itemsRequested =       false;
     double              _progressPct =          0;
+    bool                _skipPlanView =         false;
 
     static const int    _jsonCurrentVersion = 2;
     static const int    _jsonCurrentVersionWithRPType = 102;

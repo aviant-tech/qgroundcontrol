@@ -55,7 +55,7 @@ public:
     /// Removes all mission items from vehicle
     ///     Signals removeAllComplete when done
     void removeAll(void);
-
+    void cancelTransaction();
     /// Error codes returned in error signal
     typedef enum {
         InternalError,

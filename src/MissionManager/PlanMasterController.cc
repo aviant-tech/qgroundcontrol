@@ -154,6 +154,9 @@ void PlanMasterController::_activeVehicleChanged(Vehicle* activeVehicle)
         connect(_managerVehicle->missionManager(),      &MissionManager::sendComplete,              this, &PlanMasterController::_sendMissionComplete);
         connect(_managerVehicle->geoFenceManager(),     &GeoFenceManager::sendComplete,             this, &PlanMasterController::_sendGeoFenceComplete);
         connect(_managerVehicle->rallyPointManager(),   &RallyPointManager::sendComplete,           this, &PlanMasterController::_sendRallyPointsComplete);
+        connect(_managerVehicle->missionManager(),      &MissionManager::error,                     this, &PlanMasterController::_managerError);
+        connect(_managerVehicle->geoFenceManager(),     &GeoFenceManager::error,                    this, &PlanMasterController::_managerError);
+        connect(_managerVehicle->rallyPointManager(),   &RallyPointManager::error,                  this, &PlanMasterController::_managerError);
     }
 
     _offline = newOffline;
@@ -210,6 +213,17 @@ void PlanMasterController::_activeVehicleChanged(Vehicle* activeVehicle)
     emit dirtyChanged(dirty());
 
     _updatePlanCreatorsList();
+}
+
+void PlanMasterController::_managerError(int errorCode, const QString& errorMsg)
+{
+    _missionController.abortSync();
+    _missionController.setSkipPlanView(true);
+    _geoFenceController.abortSync();
+    _geoFenceController.setSkipPlanView(true);
+    _rallyPointController.abortSync();
+    _rallyPointController.setSkipPlanView(true);
+    removeAllFromVehicle();    
 }
 
 void PlanMasterController::loadFromVehicle(void)

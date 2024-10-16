@@ -251,9 +251,9 @@ public:
 
     int  batteryChangePoint         (void) const { return _missionFlightStatus.batteryChangePoint; }    ///< -1 for not supported, 0 for not needed
     int  batteriesRequired          (void) const { return _missionFlightStatus.batteriesRequired; }     ///< -1 for not supported
-
+    void setSkipPlanView            (bool skipPlanView);
     bool isEmpty                    (void) const;
-
+    void abortSync                  (void);
     QGroundControlQmlGlobal::AltMode globalAltitudeMode(void);
     QGroundControlQmlGlobal::AltMode globalAltitudeModeDefault(void);
     void setGlobalAltitudeMode(QGroundControlQmlGlobal::AltMode altMode);
@@ -398,6 +398,7 @@ private:
     double                      _minAMSLAltitude =              0;
     double                      _maxAMSLAltitude =              0;
     bool                        _missionContainsVTOLTakeoff =   false;
+    bool                        _skipPlanView =                 false;
 
     QGroundControlQmlGlobal::AltMode _globalAltMode = QGroundControlQmlGlobal::AltitudeModeRelative;
 

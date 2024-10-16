@@ -173,6 +173,11 @@ void RallyPointController::removeAll(void)
     setCurrentRallyPoint(nullptr);
 }
 
+void RallyPointController::setSkipPlanView(bool skipPlanView)
+{
+    _skipPlanView = skipPlanView;
+}
+
 void RallyPointController::removeAllFromVehicle(void)
 {
     if (_masterController->offline()) {
@@ -262,11 +267,13 @@ void RallyPointController::_managerSendComplete(bool error)
 
 void RallyPointController::_managerRemoveAllComplete(bool error)
 {
-    if (!error) {
+    if (!error && !(_skipPlanView && !_flyView)) {
         // Remove all from vehicle so we always update
         showPlanFromManagerVehicle();
     }
-}
+    if (_skipPlanView && !_flyView) {
+        setSkipPlanView(false);
+    }}
 
 void RallyPointController::addPoint(QGeoCoordinate point)
 {
@@ -370,4 +377,11 @@ void RallyPointController::_progressPctChanged(double progressPct)
 bool RallyPointController::isEmpty(void) const
 {
     return _points.count() == 0;
+}
+
+void RallyPointController::abortSync()
+{
+    if (_rallyPointManager && _rallyPointManager->inProgress()) {
+        _rallyPointManager->cancelTransaction();
+    }
 }
