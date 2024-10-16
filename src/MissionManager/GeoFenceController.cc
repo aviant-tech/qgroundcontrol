@@ -197,6 +197,13 @@ bool GeoFenceController::load(const QJsonObject& json, QString& errorString)
     return true;
 }
 
+void GeoFenceController::abortSync()
+{
+    if (_geoFenceManager && _geoFenceManager->inProgress()) {
+        _geoFenceManager->cancelTransaction();
+    }
+}
+
 void GeoFenceController::save(QJsonObject& json)
 {
     json[JsonHelper::jsonVersionKey] = _jsonCurrentVersion;
@@ -366,10 +373,18 @@ void GeoFenceController::_managerSendComplete(bool error)
 
 void GeoFenceController::_managerRemoveAllComplete(bool error)
 {
-    if (!error) {
+    if (!error && !(_skipPlanView && !_flyView)) {
         // Remove all from vehicle so we always update
         showPlanFromManagerVehicle();
     }
+    if (_skipPlanView && !_flyView) {
+        setSkipPlanView(false);
+    }
+}
+
+void GeoFenceController::setSkipPlanView(bool skipPlanView)
+{
+    _skipPlanView = skipPlanView;
 }
 
 bool GeoFenceController::containsItems(void) const
