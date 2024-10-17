@@ -36,9 +36,22 @@ Rectangle {
     property bool   _controllerValid:           _planMasterController !== undefined && _planMasterController !== null
     property real   _missionControllerProgressPct:     _controllerValid ? _planMasterController.missionController.progressPct : 0
     property real   _rallyPointControllerProgressPct: _controllerValid ? _planMasterController.rallyPointController.progressPct : 0
+    property real   _geoFenceControllerProgressPct:   _controllerValid ? _planMasterController.geoFenceController.progressPct : 0
 
     QGCPalette { id: qgcPal }
-    
+
+    // Geofence progress bar
+    Connections {
+        target: _controllerValid ? _planMasterController.geoFenceController : null
+        onProgressPctChanged: {
+            if (_geoFenceControllerProgressPct === 1) {
+                geoFenceProgressBar.visible = false
+            } else if (_geoFenceControllerProgressPct > 0) {
+                geoFenceProgressBar.visible = true
+            }
+        }
+    }  
+  
     // Rallypoiny progress bar
     Connections {
         target: _controllerValid ? _planMasterController.rallyPointController : null
@@ -196,6 +209,15 @@ Rectangle {
         anchors.left:   parent.left
         anchors.right:  parent.right
 
+        // Geofence download progress bar
+        Rectangle {
+            id:      geoFenceProgressBar
+            height:  _root.height * 0.05
+            width:   _geoFenceControllerProgressPct * parent.width
+            color:   qgcPal.colorBlue
+            visible: false
+        }
+
         // Rally point download progress bar
         Rectangle {
             id:      rallyPointProgressBar
@@ -249,9 +271,24 @@ Rectangle {
             function onActiveVehicleChanged(activeVehicle) { largeProgressBar._userHide = false }
         }
 
+        // Geofence download progress
+        Rectangle {
+            height:  parent.height / 4
+            color:   qgcPal.colorBlue
+            width:   _geoFenceControllerProgressPct * parent.width
+            visible: true
+
+            QGCLabel {
+                anchors.centerIn: parent
+                text:             qsTr("Geofence Downloading: %1%").arg(Math.round(_geoFenceControllerProgressPct * 100))
+                font.pointSize:   ScreenTools.defaultFontPointSize
+            }
+        }
+        
         // Rally point download progress
         Rectangle {
-            height:  parent.height / 3
+            height:  parent.height / 4
+            y:       parent.height / 4
             color:   qgcPal.colorRed
             width:   _rallyPointControllerProgressPct * parent.width
             visible: true
@@ -265,8 +302,8 @@ Rectangle {
         
         // Mission download progress
         Rectangle {
-            height:  parent.height / 3
-            y:       parent.height / 3
+            height:  parent.height / 4
+            y:       parent.height / 2
             color:   qgcPal.colorOrange
             width:   _missionControllerProgressPct * parent.width
             visible: true
@@ -280,8 +317,8 @@ Rectangle {
 
         // Parameter download progress
         Rectangle {
-            height:  parent.height / 3
-            y:       parent.height * 2 / 3
+            height:  parent.height / 4
+            y:       parent.height * 3 / 4
             color:   qgcPal.colorGreen
             width:   _activeVehicle ? _activeVehicle.loadProgress * parent.width : 0
             visible: true
