@@ -47,6 +47,7 @@ void ADSBVehicleManager::_cleanupStaleVehicles()
             _adsbVehicles.removeAt(i);
             _adsbICAOMap.remove(adsbVehicle->icaoAddress());
             adsbVehicle->deleteLater();
+            disconnect(adsbVehicle,   &ADSBVehicle::hiddenChanged, this, &ADSBVehicleManager::hasHiddenADSBVehicleChanged);
         }
     }
 }
@@ -62,6 +63,8 @@ void ADSBVehicleManager::adsbVehicleUpdate(const ADSBVehicle::VehicleInfo_t vehi
             ADSBVehicle* adsbVehicle = new ADSBVehicle(vehicleInfo, this);
             _adsbICAOMap[icaoAddress] = adsbVehicle;
             _adsbVehicles.append(adsbVehicle);
+            connect(adsbVehicle,   &ADSBVehicle::hiddenChanged, this, &ADSBVehicleManager::hasHiddenADSBVehicleChanged);
+            emit hasHiddenADSBVehicleChanged();
         }
     }
 }
@@ -190,4 +193,48 @@ void ADSBTCPLink::_parseLine(const QString& line)
             emit adsbVehicleUpdate(adsbInfo);
         }
     }
+}
+
+void ADSBVehicleManager::setHiddenForADSBVehicle(quint32 icaoAddress, bool hidden)
+{
+    if (_adsbICAOMap.contains(icaoAddress)) {
+        ADSBVehicle* adsbVehicle = _adsbICAOMap.value(icaoAddress);
+        if (adsbVehicle) {
+            adsbVehicle->setHidden(hidden);
+        }
+    } else {
+        qCDebug(ADSBVehicleManagerLog) << "ADSBVehicleManager: ICAO address not found";
+    }
+}
+
+
+
+bool ADSBVehicleManager::hasHiddenADSBVehicle()
+{
+    return hiddenADSBVehicles()->count() > 0;
+}
+
+
+QmlObjectListModel* ADSBVehicleManager::hiddenADSBVehicles()
+{
+    QmlObjectListModel* hiddenModel = new QmlObjectListModel(this);
+    for (int i=_adsbVehicles.count()-1; i>=0; i--) {
+        ADSBVehicle* adsbVehicle = _adsbVehicles.value<ADSBVehicle*>(i);
+        if (adsbVehicle && adsbVehicle->hidden()) {
+            hiddenModel->append(adsbVehicle);
+        }
+    }
+
+    return hiddenModel;
+}
+
+QmlObjectListModel* ADSBVehicleManager::visibleADSBVehicles() {
+    QmlObjectListModel* visibleModel = new QmlObjectListModel(this);
+    for (int i=_adsbVehicles.count()-1; i>=0; i--) {
+        ADSBVehicle* adsbVehicle = _adsbVehicles.value<ADSBVehicle*>(i);
+        if (!adsbVehicle->hidden()) {
+            visibleModel->append(adsbVehicle);
+        }
+    }
+    return visibleModel;
 }

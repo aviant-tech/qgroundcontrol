@@ -8,6 +8,9 @@
  ****************************************************************************/
 
 import QtQuick              2.3
+import QtQuick.Controls     1.2
+import QtQuick.Dialogs      1.2
+import QtQuick.Layouts      1.3
 import QtLocation           5.3
 import QtPositioning        5.3
 import QtGraphicalEffects   1.0
@@ -28,6 +31,8 @@ MapQuickItem {
     property real   size:           _adsbVehicle ? _adsbSize : _uavSize             /// Size for icon
     property bool   alert:          false                                           /// Collision alert
     property var    emitterType:    ADSBVehicle.EMITTER_TYPE_NO_INFO
+    property int    icaoAddress                                                     /// ICAO address for ADSB vehicle
+    property var    adsbVehicleManager: QGroundControl.adsbVehicleManager
 
     anchorPoint.x:  vehicleItem.width  / 2
     anchorPoint.y:  vehicleItem.height / 2
@@ -39,7 +44,7 @@ MapQuickItem {
     property real   _adsbSize:      ScreenTools.defaultFontPixelHeight * 2.5
     property var    _map:           map
     property bool   _multiVehicle:  QGroundControl.multiVehicleManager.vehicles.count > 1
-
+    
     sourceItem: Item {
         id:         vehicleItem
         width:      vehicleIcon.width
@@ -106,6 +111,37 @@ MapQuickItem {
                 origin.x:       vehicleIcon.width  / 2
                 origin.y:       vehicleIcon.height / 2
                 angle:          isNaN(heading) ? 0 : heading
+            }
+
+             MouseArea {
+                anchors.fill: parent
+                z: 100
+                enabled: true
+                onClicked: {
+                    if (_adsbVehicle) {
+                        mainWindow.showComponentDialog(hideAdsbVehicle, qsTr("Hide Vehicle"), mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.No)
+                    }
+                    else {
+                        console.log("Vehicle clicked")
+                    }
+                }
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+            }
+        }
+
+        Component {
+            id: hideAdsbVehicle
+            QGCViewMessage {
+                message:    "The selected adsb vehicle " + callsign + " will be hidden. Do you want to continue? You can show it again in the vehicle list."
+                function accept() {
+                    if (adsbVehicleManager && icaoAddress) {
+                        adsbVehicleManager.setHiddenForADSBVehicle(Number(icaoAddress), true)
+                    } else {
+                        mainWindow.showMessageDialog(qsTr("Error"), qsTr("ADSB vehicle manager or icao address not found"))
+                        console.log("ADSB vehicle manager or icao address not found")
+                    }
+                    hideDialog()
+                }
             }
         }
 

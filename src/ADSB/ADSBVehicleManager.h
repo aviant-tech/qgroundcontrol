@@ -53,16 +53,28 @@ class ADSBVehicleManager : public QGCTool {
 public:
     ADSBVehicleManager(QGCApplication* app, QGCToolbox* toolbox);
 
-    Q_PROPERTY(QmlObjectListModel* adsbVehicles READ adsbVehicles CONSTANT)
+    Q_PROPERTY(QmlObjectListModel* adsbVehicles        READ adsbVehicles CONSTANT)
+    Q_PROPERTY(QmlObjectListModel* hiddenADSBVehicles  READ hiddenADSBVehicles NOTIFY hasHiddenADSBVehicleChanged)
+    Q_PROPERTY(QmlObjectListModel* visibleADSBVehicles READ visibleADSBVehicles NOTIFY hasHiddenADSBVehicleChanged)
+    Q_PROPERTY(bool hasHiddenADSBVehicle               READ hasHiddenADSBVehicle NOTIFY hasHiddenADSBVehicleChanged)
 
     QmlObjectListModel* adsbVehicles(void) { return &_adsbVehicles; }
+    QmlObjectListModel* hiddenADSBVehicles(void);
+    QmlObjectListModel* visibleADSBVehicles(void);
+
+    bool hasHiddenADSBVehicle(void);
 
     // QGCTool overrides
     void setToolbox(QGCToolbox* toolbox) final;
 
+    Q_INVOKABLE void setHiddenForADSBVehicle(quint32 icaoAddress, bool hidden);
+
 public slots:
     void adsbVehicleUpdate  (const ADSBVehicle::VehicleInfo_t vehicleInfo);
     void _tcpError          (const QString errorMsg);
+
+signals:
+    void hasHiddenADSBVehicleChanged();
 
 private slots:
     void _cleanupStaleVehicles(void);

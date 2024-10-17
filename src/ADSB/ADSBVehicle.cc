@@ -73,3 +73,11 @@ bool ADSBVehicle::expired()
 {
     return _lastUpdateTimer.hasExpired(expirationTimeoutMs);
 }
+
+void ADSBVehicle::setHidden(bool hidden)
+{
+    if (hidden != _hidden) {
+        _hidden = hidden;
+        emit hiddenChanged();
+    }
+}
