@@ -300,6 +300,7 @@ FlightMap {
             heading:        object.heading
             alert:          object.alert
             emitterType:    object.emitterType
+            icaoAddress:    object.icaoAddress
             map:            _root
             z:              QGroundControl.zOrderVehicles
         }

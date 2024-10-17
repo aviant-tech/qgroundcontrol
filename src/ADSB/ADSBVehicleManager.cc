@@ -191,3 +191,36 @@ void ADSBTCPLink::_parseLine(const QString& line)
         }
     }
 }
+
+void ADSBVehicleManager::hideADSBVehicle(quint32 icaoAddress)
+{
+    qDebug() << "Hiding" << icaoAddress;
+    if (_adsbICAOMap.contains(icaoAddress)) {
+        ADSBVehicle* adsbVehicle = _adsbICAOMap.take(icaoAddress);
+        _adsbVehicles.removeOne(adsbVehicle);
+        _hiddenADSBICAOMap[icaoAddress] = adsbVehicle;
+        _hiddenADSBVehicles.append(adsbVehicle);
+        emit hiddenVehiclesChanged();
+    }
+}
+
+void ADSBVehicleManager::unhideADSBVehicle(uint32_t icaoAddress)
+{
+    if (_hiddenADSBICAOMap.contains(icaoAddress)) {
+        ADSBVehicle* adsbVehicle = _hiddenADSBICAOMap.take(icaoAddress);
+        _hiddenADSBVehicles.removeOne(adsbVehicle);
+        _adsbICAOMap[icaoAddress] = adsbVehicle;
+        _adsbVehicles.append(adsbVehicle);
+        emit hiddenVehiclesChanged();
+    }
+}
+
+bool ADSBVehicleManager::isADSBVehicleHidden(uint32_t icaoAddress) const
+{
+    return _hiddenADSBICAOMap.contains(icaoAddress);
+}
+
+bool ADSBVehicleManager::hasHiddenADSBVehicle() const
+{
+    return _hiddenADSBVehicles.count() > 0;
+}

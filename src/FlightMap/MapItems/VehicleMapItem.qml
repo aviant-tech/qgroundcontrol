@@ -8,6 +8,9 @@
  ****************************************************************************/
 
 import QtQuick              2.3
+import QtQuick.Controls     1.2
+import QtQuick.Dialogs      1.2
+import QtQuick.Layouts      1.3
 import QtLocation           5.3
 import QtPositioning        5.3
 import QtGraphicalEffects   1.0
@@ -28,6 +31,7 @@ MapQuickItem {
     property real   size:           _adsbVehicle ? _adsbSize : _uavSize             /// Size for icon
     property bool   alert:          false                                           /// Collision alert
     property var    emitterType:    ADSBVehicle.EMITTER_TYPE_NO_INFO
+    property int    icaoAddress                                                     /// ICAO address for ADSB vehicle
 
     anchorPoint.x:  vehicleItem.width  / 2
     anchorPoint.y:  vehicleItem.height / 2
@@ -39,12 +43,36 @@ MapQuickItem {
     property real   _adsbSize:      ScreenTools.defaultFontPixelHeight * 2.5
     property var    _map:           map
     property bool   _multiVehicle:  QGroundControl.multiVehicleManager.vehicles.count > 1
-
+    
     sourceItem: Item {
         id:         vehicleItem
         width:      vehicleIcon.width
         height:     vehicleIcon.height
         opacity:    _adsbVehicle || vehicle === _activeVehicle ? 1.0 : 0.5
+
+        MouseArea {
+            anchors.fill: parent
+            z: 2
+            hoverEnabled: true
+            enabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                console.log("Clicked on vehicle")
+                console.log(_adsbVehicle)
+                if (_adsbVehicle) {
+                    console.log("Showing dialog")
+                    console.log(mainWindow)
+                    mainWindow.showComponentDialog(hideAdsbVehicle, qsTr("Hide Vehicle"), mainWindow.showDialogDefaultWidth, StandardButton.Yes | StandardButton.No)
+                }
+            }
+            acceptedButtons: Qt.AllButtons  // Ensure the MouseArea responds to all mouse buttons
+            onEntered: {
+                console.log("Hover entered");
+            }
+            onExited: {
+                console.log("Hover exited");
+            }
+        }
 
         Rectangle {
             id:                 vehicleShadow
@@ -106,6 +134,26 @@ MapQuickItem {
                 origin.x:       vehicleIcon.width  / 2
                 origin.y:       vehicleIcon.height / 2
                 angle:          isNaN(heading) ? 0 : heading
+            }
+        }
+
+        Component {
+            id: hideAdsbVehicle
+            QGCViewMessage {
+                property var manager: QGroundControl.adsbVehicleManager
+
+                message:    "The selected adsb vehicle " + callsign + " will be hidden. Do you want to continue? You can show it again in the vehicle list."
+                function accept() {
+                    console.log("Hiding adsb vehicle")
+                    if (manager && icaoAddress) {
+                        console.log(icaoAddress)
+                        manager.hideADSBVehicle(Number(icaoAddress))
+                    } else {
+                        mainWindow.showMessageDialog(qsTr("Error"), qsTr("ADSB vehicle manager or icao address not found"))
+                        console.log("ADSB vehicle manager or icao address not found")
+                    }
+                    hideDialog()
+                }
             }
         }
 
