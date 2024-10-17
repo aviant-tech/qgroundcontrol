@@ -105,6 +105,8 @@ public:
     QJsonDocument saveToJson    ();
     bool          loadFromJson  (QJsonDocument jsonDoc, QString &errorString);
 
+    void          clearCurrentPlanFile ();
+
     Vehicle* controllerVehicle(void) { return _controllerVehicle; }
     Vehicle* managerVehicle(void) { return _managerVehicle; }
 
@@ -133,6 +135,7 @@ private slots:
     void _sendGeoFenceComplete      (void);
     void _sendRallyPointsComplete   (void);
     void _updatePlanCreatorsList    (void);
+    void _managerError              (int errorCode, const QString& errorMsg);
 #if defined(QGC_AIRMAP_ENABLED)
     void _startFlightPlanning       (void);
 #endif
