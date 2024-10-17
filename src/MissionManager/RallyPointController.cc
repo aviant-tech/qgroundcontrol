@@ -71,6 +71,7 @@ void RallyPointController::_managerVehicleChanged(Vehicle* managerVehicle)
     connect(_rallyPointManager, &RallyPointManager::sendComplete,       this, &RallyPointController::_managerSendComplete);
     connect(_rallyPointManager, &RallyPointManager::removeAllComplete,  this, &RallyPointController::_managerRemoveAllComplete);
     connect(_rallyPointManager, &RallyPointManager::inProgressChanged,  this, &RallyPointController::syncInProgressChanged);
+    connect(_rallyPointManager, &RallyPointManager::progressPct,        this, &RallyPointController::_progressPctChanged);
 
     //-- RallyPointController::supported() tests both the capability bit AND the protocol version.
     connect(_managerVehicle,    &Vehicle::capabilityBitsChanged,        this, &RallyPointController::supportedChanged);
@@ -354,6 +355,14 @@ bool RallyPointController::showPlanFromManagerVehicle (void)
             _managerLoadComplete();
             return false;
         }
+    }
+}
+
+void RallyPointController::_progressPctChanged(double progressPct)
+{
+    if (!QGC::fuzzyCompare(progressPct, _progressPct)) {
+        _progressPct = progressPct;
+        emit progressPctChanged(progressPct);
     }
 }
 

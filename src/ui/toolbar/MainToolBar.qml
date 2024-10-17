@@ -35,8 +35,21 @@ Rectangle {
     property var    _planMasterController:      globals.planMasterControllerPlanView
     property bool   _controllerValid:           _planMasterController !== undefined && _planMasterController !== null
     property real   _missionControllerProgressPct:     _controllerValid ? _planMasterController.missionController.progressPct : 0
+    property real   _rallyPointControllerProgressPct: _controllerValid ? _planMasterController.rallyPointController.progressPct : 0
 
     QGCPalette { id: qgcPal }
+    
+    // Rallypoiny progress bar
+    Connections {
+        target: _controllerValid ? _planMasterController.rallyPointController : null
+        onProgressPctChanged: {
+            if (_rallyPointControllerProgressPct === 1) {
+                rallyPointProgressBar.visible = false
+            } else if (_rallyPointControllerProgressPct > 0) {
+                rallyPointProgressBar.visible = true
+            }
+        }
+    }
 
     // Mission progress bar
     Connections {
@@ -183,6 +196,15 @@ Rectangle {
         anchors.left:   parent.left
         anchors.right:  parent.right
 
+        // Rally point download progress bar
+        Rectangle {
+            id:      rallyPointProgressBar
+            height:  _root.height * 0.05
+            width:   _rallyPointControllerProgressPct * parent.width
+            color:   qgcPal.colorRed
+            visible: false
+        }
+
         // Mission download progress bar
         Rectangle {
             id:      missionProgressBar
@@ -226,10 +248,25 @@ Rectangle {
             target:                 QGroundControl.multiVehicleManager
             function onActiveVehicleChanged(activeVehicle) { largeProgressBar._userHide = false }
         }
+
+        // Rally point download progress
+        Rectangle {
+            height:  parent.height / 3
+            color:   qgcPal.colorRed
+            width:   _rallyPointControllerProgressPct * parent.width
+            visible: true
+
+            QGCLabel {
+                anchors.centerIn: parent
+                text:             qsTr("Rally point Downloading: %1%").arg(Math.round(_rallyPointControllerProgressPct * 100))
+                font.pointSize:   ScreenTools.defaultFontPointSize
+            }
+        }
         
         // Mission download progress
         Rectangle {
-            height:  parent.height / 2
+            height:  parent.height / 3
+            y:       parent.height / 3
             color:   qgcPal.colorOrange
             width:   _missionControllerProgressPct * parent.width
             visible: true
@@ -243,8 +280,8 @@ Rectangle {
 
         // Parameter download progress
         Rectangle {
-            height:  parent.height / 2
-            y:       parent.height / 2
+            height:  parent.height / 3
+            y:       parent.height * 2 / 3
             color:   qgcPal.colorGreen
             width:   _activeVehicle ? _activeVehicle.loadProgress * parent.width : 0
             visible: true
