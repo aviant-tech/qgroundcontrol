@@ -268,6 +268,55 @@ FlightMap {
         }
     }
 
+
+    // Handle guided mode clicks
+    MouseArea {
+        anchors.fill: parent
+
+        QGCMenu {
+            id: clickMenu
+            property var coord
+            QGCMenuItem {
+                property string defaultText: qsTr("Go to location");
+                text:                        _root.generateLabelTextWithDistance(defaultText, clickMenu.coord);
+                visible:                     globals.guidedControllerFlyView.showGotoLocation
+
+                onTriggered: {
+                    globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionGoto, clickMenu.coord, gotoLocationItem)
+                    gotoLocationItem.show(clickMenu.coord)
+                }
+            }
+            QGCMenuItem {
+                text:           qsTr("Orbit at location")
+                visible:        globals.guidedControllerFlyView.showOrbit
+
+                onTriggered: {
+                    orbitMapCircle.show(clickMenu.coord)
+                    globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionOrbit, clickMenu.coord, orbitMapCircle)
+                }
+            }
+            QGCMenuItem {
+                text:           qsTr("ROI at location")
+                visible:        globals.guidedControllerFlyView.showROI
+
+                onTriggered: {
+                    roiLocationItem.show(clickMenu.coord)
+                    globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionROI, clickMenu.coord, roiLocationItem)
+                }
+            }
+        }
+
+        onClicked: {
+            if (globals.guidedControllerFlyView.showGotoLocation || globals.guidedControllerFlyView.showOrbit || globals.guidedControllerFlyView.showROI) {
+                orbitMapCircle.hide()
+                gotoLocationItem.hide()
+                var clickCoord = _root.toCoordinate(Qt.point(mouse.x, mouse.y), false /* clipToViewPort */)
+                clickMenu.coord = clickCoord
+                clickMenu.popup()
+            }
+        }
+    }
+
     // Add the vehicles to the map
     MapItemView {
         model: QGroundControl.multiVehicleManager.vehicles
@@ -609,54 +658,6 @@ FlightMap {
             checked:    true
             index:      -1
             label:      qsTr("Orbit", "Orbit waypoint")
-        }
-    }
-
-    // Handle guided mode clicks
-    MouseArea {
-        anchors.fill: parent
-
-        QGCMenu {
-            id: clickMenu
-            property var coord
-            QGCMenuItem {
-                property string defaultText: qsTr("Go to location");
-                text:                        _root.generateLabelTextWithDistance(defaultText, clickMenu.coord);
-                visible:                     globals.guidedControllerFlyView.showGotoLocation
-
-                onTriggered: {
-                    globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionGoto, clickMenu.coord, gotoLocationItem)
-                    gotoLocationItem.show(clickMenu.coord)
-                }
-            }
-            QGCMenuItem {
-                text:           qsTr("Orbit at location")
-                visible:        globals.guidedControllerFlyView.showOrbit
-
-                onTriggered: {
-                    orbitMapCircle.show(clickMenu.coord)
-                    globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionOrbit, clickMenu.coord, orbitMapCircle)
-                }
-            }
-            QGCMenuItem {
-                text:           qsTr("ROI at location")
-                visible:        globals.guidedControllerFlyView.showROI
-
-                onTriggered: {
-                    roiLocationItem.show(clickMenu.coord)
-                    globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionROI, clickMenu.coord, roiLocationItem)
-                }
-            }
-        }
-
-        onClicked: {
-            if (globals.guidedControllerFlyView.showGotoLocation || globals.guidedControllerFlyView.showOrbit || globals.guidedControllerFlyView.showROI) {
-                orbitMapCircle.hide()
-                gotoLocationItem.hide()
-                var clickCoord = _root.toCoordinate(Qt.point(mouse.x, mouse.y), false /* clipToViewPort */)
-                clickMenu.coord = clickCoord
-                clickMenu.popup()
-            }
         }
     }
 
