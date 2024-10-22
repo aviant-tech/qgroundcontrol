@@ -290,21 +290,6 @@ FlightMap {
             enabled:        _showProximityRadar
         }
     }
-    // Add ADSB vehicles to the map
-    MapItemView {
-        model: QGroundControl.adsbVehicleManager.visibleADSBVehicles
-        delegate: VehicleMapItem {
-            coordinate:     object.coordinate
-            altitude:       object.altitude
-            callsign:       object.callsign
-            heading:        object.heading
-            alert:          object.alert
-            emitterType:    object.emitterType
-            icaoAddress:    object.icaoAddress
-            map:            _root
-            z:              QGroundControl.zOrderVehicles
-        }
-    }
 
     // Add lines to ADSB vehicles to the map
     MapItemView {
@@ -657,6 +642,22 @@ FlightMap {
                 clickMenu.coord = clickCoord
                 clickMenu.popup()
             }
+        }
+    }
+
+    // Add ADSB vehicles to the map
+    MapItemView {
+        model: QGroundControl.adsbVehicleManager.visibleADSBVehicles
+        delegate: VehicleMapItem {
+            coordinate:     object.coordinate
+            altitude:       object.altitude
+            callsign:       object.callsign
+            heading:        object.heading
+            alert:          object.alert
+            emitterType:    object.emitterType
+            icaoAddress:    object.icaoAddress
+            map:            _root
+            z:              QGroundControl.zOrderVehicles
         }
     }
 
