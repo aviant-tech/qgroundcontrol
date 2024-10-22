@@ -27,6 +27,9 @@ RowLayout {
     property real   _margins:           ScreenTools.defaultFontPixelWidth
     property real   _spacing:           ScreenTools.defaultFontPixelWidth / 2
 
+    property var    _planMasterController: globals.planMasterControllerPlanView
+    property bool   _syncInProgress:       _planMasterController.syncInProgress
+
     QGCLabel {
         id:             mainStatusLabel
         text:           mainStatusText()
@@ -58,7 +61,11 @@ RowLayout {
                     }
                 } else {
                     if (_activeVehicle.readyToFlyAvailable) {
-                        if (_activeVehicle.missionManagerError) {
+                        if (_syncInProgress) {
+                            _mainStatusBGColor = "yellow"
+                            return "Syncing mission..."
+                        }
+                        else if (_activeVehicle.missionManagerError) {
                             _mainStatusBGColor = "red"
                             return "Error syncing mission: " + _activeVehicle.missionManagerError
                         }
