@@ -343,13 +343,13 @@ FlightMap {
     MapItemView {
         model: QGroundControl.adsbVehicleManager.visibleADSBVehicles
         delegate: VehicleMapItem {
-            coordinate:     object.coordinate
-            altitude:       object.altitude
-            callsign:       object.callsign
-            heading:        object.heading
-            alert:          object.alert
-            emitterType:    object.emitterType
-            icaoAddress:    object.icaoAddress
+            coordinate:     object ? object.coordinate : QtPositioning.coordinate(0, 0)
+            altitude:       object ? object.altitude : 0
+            callsign:       object ? object.callsign : ""
+            heading:        object ? object.heading : 0
+            alert:          object ? object.alert : false
+            emitterType:    object ? object.emitterType : 0
+            icaoAddress:    object ? object.icaoAddress : ""
             map:            _root
             z:              QGroundControl.zOrderVehicles
         }
