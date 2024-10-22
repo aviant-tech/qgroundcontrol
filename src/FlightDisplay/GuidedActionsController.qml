@@ -105,6 +105,8 @@ Item {
     readonly property int actionStepAlt:                    25
 
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
+    property var    _planMasterController:      globals.planMasterControllerPlanView
+    property bool   _syncInProgress:            _planMasterController.syncInProgress
     property bool   _useChecklist:              QGroundControl.settingsManager.appSettings.useChecklist.rawValue && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
     property bool   _enforceChecklist:          _useChecklist && QGroundControl.settingsManager.appSettings.enforceChecklist.rawValue
     property bool   _canArm:                    canArm()
@@ -296,12 +298,22 @@ Item {
         }
     }
 
+    Connections {
+        target: _planMasterController
+        function onSyncInProgressChanged() {
+            _syncInProgress = _planMasterController.syncInProgress
+            _canArm = canArm()
+        }
+    }
+
+
+
     function planError() {
         return _activeVehicle && (_activeVehicle.missionManagerError != "" || _activeVehicle.geoFenceManagerError != "" || _activeVehicle.rallyPointManagerError != "")
     }
 
     function canArm() {
-        return _activeVehicle ? !planError() && (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) : false
+        return _activeVehicle ? !planError() && (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) && !_syncInProgress : false
     }
 
     function armVehicleRequest() {
