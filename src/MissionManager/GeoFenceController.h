@@ -35,6 +35,7 @@ public:
     Q_PROPERTY(QGeoCoordinate       breachReturnPoint       READ breachReturnPoint      WRITE setBreachReturnPoint  NOTIFY breachReturnPointChanged)
     Q_PROPERTY(Fact*                breachReturnAltitude    READ breachReturnAltitude                               CONSTANT)
     Q_PROPERTY(QStringList          fenceActions            READ fenceActions                                       CONSTANT)
+    Q_PROPERTY(double               progressPct             READ progressPct                                        NOTIFY progressPctChanged)
 
     // Hack to expose PX4 circular fence controlled by GF_MAX_HOR_DIST
     Q_PROPERTY(double               paramCircularFence  READ paramCircularFence                             NOTIFY paramCircularFenceChanged)
@@ -83,14 +84,16 @@ public:
     QmlObjectListModel* circles                 (void) { return &_circles; }
     QGeoCoordinate      breachReturnPoint       (void) const { return _breachReturnPoint; }
 
-    void setBreachReturnPoint   (const QGeoCoordinate& breachReturnPoint);
-    bool isEmpty                (void) const;
+    void   setBreachReturnPoint   (const QGeoCoordinate& breachReturnPoint);
+    bool   isEmpty                (void) const;
+    double progressPct            (void) const { return _progressPct; }
 
 signals:
     void breachReturnPointChanged       (QGeoCoordinate breachReturnPoint);
     void editorQmlChanged               (QString editorQml);
     void loadComplete                   (void);
     void paramCircularFenceChanged      (void);
+    void progressPctChanged (double progressPct);
 
 private slots:
     void _polygonDirtyChanged       (bool dirty);
@@ -102,7 +105,8 @@ private slots:
     void _managerSendComplete       (bool error);
     void _managerRemoveAllComplete  (bool error);
     void _parametersReady           (void);
-    void _managerVehicleChanged      (Vehicle* managerVehicle);
+    void _managerVehicleChanged     (Vehicle* managerVehicle);
+    void _progressPctChanged        (double progressPct);
 
 private:
     void _init(void);
@@ -117,6 +121,7 @@ private:
     double              _breachReturnDefaultAltitude =  qQNaN();
     bool                _itemsRequested =               false;
     Fact*               _px4ParamCircularFenceFact =    nullptr;
+    double              _progressPct =                  0;
 
     static QMap<QString, FactMetaData*> _metaDataMap;
 
