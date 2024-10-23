@@ -107,6 +107,7 @@ Item {
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property var    _planMasterController:      globals.planMasterControllerPlanView
     property bool   _syncInProgress:            _planMasterController.syncInProgress
+    property bool   _dirty:                     _planMasterController.dirty
     property bool   _useChecklist:              QGroundControl.settingsManager.appSettings.useChecklist.rawValue && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
     property bool   _enforceChecklist:          _useChecklist && QGroundControl.settingsManager.appSettings.enforceChecklist.rawValue
     property bool   _canArm:                    canArm()
@@ -304,6 +305,10 @@ Item {
             _syncInProgress = _planMasterController.syncInProgress
             _canArm = canArm()
         }
+        function onDirtyChanged() {
+            _dirty = _planMasterController.dirty
+            _canArm = canArm()
+        }
     }
 
 
@@ -313,7 +318,7 @@ Item {
     }
 
     function canArm() {
-        return _activeVehicle ? !planError() && (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) && !_syncInProgress : false
+        return _activeVehicle ? !planError() && !_dirty && (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) && !_syncInProgress : false
     }
 
     function armVehicleRequest() {
