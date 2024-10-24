@@ -630,6 +630,21 @@ void PlanManager::_handleMissionAck(const mavlink_message_t& message)
     }
 }
 
+void PlanManager::cancelTransaction()
+{
+    if (_transactionInProgress != TransactionNone) {        
+        _transactionInProgress = TransactionNone;
+        emit inProgressChanged(false);
+
+        _disconnectFromMavlink();
+
+        // Clear mission-related state
+        _itemIndicesToRead.clear();
+        _itemIndicesToWrite.clear();
+        _retryCount = 0;
+    }
+}
+
 /// Called when a new mavlink message for out vehicle is received
 void PlanManager::_mavlinkMessageReceived(const mavlink_message_t& message)
 {

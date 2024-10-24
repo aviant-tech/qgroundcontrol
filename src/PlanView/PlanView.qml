@@ -478,10 +478,6 @@ Item {
             fileDialog.nameFilters =    ShapeFileHelper.fileDialogKMLFilters
             fileDialog.openForSave()
         }
-
-        function browseKyteOrders() {
-            mainWindow.showPopupDialogFromComponent(promptForBrowsingKyteOrders)
-        }
     }
 
     Connections {
@@ -1053,7 +1049,7 @@ Item {
                         map:            editorMap
                         masterController:  _planMasterController
                         missionItem:    object
-                        width:          parent.width
+                        width:          parent ? parent.width : 0
                         readOnly:       false
                         onClicked:      _missionController.setCurrentPlanViewSeqNum(object.sequenceNumber, false)
                         onRemove: {
@@ -1404,7 +1400,7 @@ Item {
                     enabled:            !_planMasterController.syncInProgress && _aviantSettings.kyteBackendUrl.rawValue != ""
                     onClicked: {
                         dropPanel.hide()
-                        _planMasterController.browseKyteOrders()
+                        mainWindow.showPopupDialogFromComponent(promptForBrowsingKyteOrders)
                     }
                 }
             }

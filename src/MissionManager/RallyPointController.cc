@@ -71,6 +71,7 @@ void RallyPointController::_managerVehicleChanged(Vehicle* managerVehicle)
     connect(_rallyPointManager, &RallyPointManager::sendComplete,       this, &RallyPointController::_managerSendComplete);
     connect(_rallyPointManager, &RallyPointManager::removeAllComplete,  this, &RallyPointController::_managerRemoveAllComplete);
     connect(_rallyPointManager, &RallyPointManager::inProgressChanged,  this, &RallyPointController::syncInProgressChanged);
+    connect(_rallyPointManager, &RallyPointManager::progressPct,        this, &RallyPointController::_progressPctChanged);
 
     //-- RallyPointController::supported() tests both the capability bit AND the protocol version.
     connect(_managerVehicle,    &Vehicle::capabilityBitsChanged,        this, &RallyPointController::supportedChanged);
@@ -172,6 +173,11 @@ void RallyPointController::removeAll(void)
     setCurrentRallyPoint(nullptr);
 }
 
+void RallyPointController::setSkipPlanView(bool skipPlanView)
+{
+    _skipPlanView = skipPlanView;
+}
+
 void RallyPointController::removeAllFromVehicle(void)
 {
     if (_masterController->offline()) {
@@ -246,6 +252,7 @@ void RallyPointController::_managerLoadComplete(void)
         setDirty(false);
         _setFirstPointCurrent();
         emit loadComplete();
+        _managerVehicle->clearRallyPointManagerError();
     }
     _itemsRequested = false;
 }
@@ -260,11 +267,13 @@ void RallyPointController::_managerSendComplete(bool error)
 
 void RallyPointController::_managerRemoveAllComplete(bool error)
 {
-    if (!error) {
+    if (!error && !(_skipPlanView && !_flyView)) {
         // Remove all from vehicle so we always update
         showPlanFromManagerVehicle();
     }
-}
+    if (_skipPlanView && !_flyView) {
+        setSkipPlanView(false);
+    }}
 
 void RallyPointController::addPoint(QGeoCoordinate point)
 {
@@ -357,7 +366,22 @@ bool RallyPointController::showPlanFromManagerVehicle (void)
     }
 }
 
+void RallyPointController::_progressPctChanged(double progressPct)
+{
+    if (!QGC::fuzzyCompare(progressPct, _progressPct)) {
+        _progressPct = progressPct;
+        emit progressPctChanged(progressPct);
+    }
+}
+
 bool RallyPointController::isEmpty(void) const
 {
     return _points.count() == 0;
+}
+
+void RallyPointController::abortSync()
+{
+    if (_rallyPointManager && _rallyPointManager->inProgress()) {
+        _rallyPointManager->cancelTransaction();
+    }
 }

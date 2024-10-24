@@ -203,7 +203,7 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
 
         _visualItems = newControllerMissionItems;
         _settingsItem = settingsItem;
-
+        _managerVehicle->clearMissionManagerError();
         MissionController::_scanForAdditionalSettings(_visualItems, _masterController);
 
         _initAllVisualItems();
@@ -389,6 +389,14 @@ VisualMissionItem* MissionController::insertTakeoffItem(QGeoCoordinate /*coordin
 
     return _takeoffMissionItem;
 }
+
+void MissionController::abortSync()
+{
+    if (_missionManager && _missionManager->inProgress()) {
+        _missionManager->cancelTransaction();
+    }
+}
+
 
 VisualMissionItem* MissionController::insertLandItem(QGeoCoordinate coordinate, int visualItemIndex, bool makeCurrentItem)
 {
@@ -2344,10 +2352,17 @@ void MissionController::_managerSendComplete(bool error)
 
 void MissionController::_managerRemoveAllComplete(bool error)
 {
-    if (!error) {
+    if (!error && !(_skipPlanView && !_flyView)) {
         // Remove all from vehicle so we always update
         showPlanFromManagerVehicle();
     }
+    if (_skipPlanView && !_flyView) {
+        setSkipPlanView(false);
+    }}
+
+void MissionController::setSkipPlanView(bool skipPlanView)
+{
+    _skipPlanView = skipPlanView;
 }
 
 bool MissionController::_isROIBeginItem(SimpleMissionItem* simpleItem)
