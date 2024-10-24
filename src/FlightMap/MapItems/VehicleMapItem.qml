@@ -45,6 +45,15 @@ MapQuickItem {
     property var    _map:           map
     property bool   _multiVehicle:  QGroundControl.multiVehicleManager.vehicles.count > 1
     
+    property var hideVehicleDialog
+
+    Component.onDestruction: {
+        if (hideVehicleDialog && hideVehicleDialog.opened) {
+            hideVehicleDialog.close()
+        }
+
+    }
+
     sourceItem: Item {
         id:         vehicleItem
         width:      vehicleIcon.width
@@ -113,28 +122,12 @@ MapQuickItem {
                 angle:          isNaN(heading) ? 0 : heading
             }
 
-            QGCMenu {
-                id: adsbVehicleClickMenu
-
-                QGCMenuItem {
-                    text: qsTr("Hide Vehicle")
-                    onTriggered: {
-                        if (adsbVehicleManager && icaoAddress) {
-                            adsbVehicleManager.setHiddenForADSBVehicle(Number(icaoAddress), true)
-                        } else {
-                            mainWindow.showMessageDialog(qsTr("Error"), qsTr("ADSB vehicle manager or icao address not found"))
-                            console.log("ADSB vehicle manager or icao address not found")
-                        }
-                    }
-                }
-            }
-
             MouseArea {
                 anchors.fill: parent
                 enabled:      _adsbVehicle
                 onClicked: {
                     if (_adsbVehicle) {
-                        adsbVehicleClickMenu.popup()
+                        hideVehicleDialog = mainWindow.showPopupDialogFromComponent(hideVehiclePopup, {callsign: callsign})
                     }
                 }
             }
@@ -172,6 +165,29 @@ MapQuickItem {
                     label += vehicle.name
                 }
                 return label
+            }
+        }
+    }
+
+    Component {
+        id: hideVehiclePopup
+        QGCPopupDialog {
+            title: qsTr("Hide vehicle " + callsign + "?")
+            buttons:    StandardButton.Yes | StandardButton.No
+
+            QGCLabel { text: qsTr("You can unhide it in the toolbar") }
+
+            function accept() {
+                if (adsbVehicleManager && icaoAddress) {
+                    adsbVehicleManager.setHiddenForADSBVehicle(Number(icaoAddress), true)
+                } else {
+                    mainWindow.showMessageDialog(qsTr("Error"), qsTr("ADSB vehicle manager or icao address not found"))
+                    console.log("ADSB vehicle manager or icao address not found")
+                }                
+                hideDialog()
+            }
+            function reject() {
+                hideDialog()
             }
         }
     }
