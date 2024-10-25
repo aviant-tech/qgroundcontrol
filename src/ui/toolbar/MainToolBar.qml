@@ -36,6 +36,7 @@ Rectangle {
     property bool   _controllerValid:                 _planMasterController !== undefined && _planMasterController !== null
     property real   _missionControllerProgressPct:    (_controllerValid && _planMasterController) ? _planMasterController.missionController.progressPct : 0
     property real   _rallyPointControllerProgressPct: (_controllerValid && _planMasterController) ? _planMasterController.rallyPointController.progressPct : 0
+    property real   _geoFenceControllerProgressPct:   (_controllerValid && _planMasterController) ? _planMasterController.geoFenceController.progressPct : 0
 
     QGCPalette { id: qgcPal }
 
@@ -164,6 +165,16 @@ Rectangle {
             }
         }
     }
+
+     // Geofence download progress bar
+    Rectangle {
+        anchors.bottom: parent.bottom
+        height:         _root.height * 0.075
+        width:          _geoFenceControllerProgressPct * parent.width
+        color:          qgcPal.colorBlue
+        visible:        _geoFenceControllerProgressPct > 0 && _geoFenceControllerProgressPct < 1 && !largeProgressBar.visible
+    }
+
     // Rally point download progress bar
     Rectangle {
         anchors.bottom: parent.bottom
@@ -210,6 +221,20 @@ Rectangle {
             function onActiveVehicleChanged(activeVehicle) { largeProgressBar._userHide = false }
         }
 
+        // Geofence download progress
+        Rectangle {
+            height:  parent.height / 2
+            color:   qgcPal.colorBlue
+            width:   _geoFenceControllerProgressPct * parent.width
+            visible: _geoFenceControllerProgressPct > 0 && _geoFenceControllerProgressPct < 1 && 
+
+            QGCLabel {
+                anchors.centerIn: parent
+                text:             qsTr("Geofence Downloading: %1%").arg(Math.round(_geoFenceControllerProgressPct * 100))
+                font.pointSize:   ScreenTools.defaultFontPointSize
+            }
+        }
+        
         // Rally point download progress
         Rectangle {
             height:  parent.height / 2
