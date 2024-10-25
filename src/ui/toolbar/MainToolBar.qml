@@ -29,12 +29,13 @@ Rectangle {
     readonly property int planViewToolbar:  1
     readonly property int simpleToolbar:    2
 
-    property var    _activeVehicle:                 QGroundControl.multiVehicleManager.activeVehicle
-    property bool   _communicationLost:             _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : false
-    property color  _mainStatusBGColor:             qgcPal.brandingPurple
-    property var    _planMasterController:          globals.planMasterControllerPlanView
-    property bool   _controllerValid:              _planMasterController !== undefined && _planMasterController !== null
-    property real   _missionControllerProgressPct: (_controllerValid && _planMasterController) ? _planMasterController.missionController.progressPct : 0
+    property var    _activeVehicle:                   QGroundControl.multiVehicleManager.activeVehicle
+    property bool   _communicationLost:               _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : false
+    property color  _mainStatusBGColor:               qgcPal.brandingPurple
+    property var    _planMasterController:            globals.planMasterControllerPlanView
+    property bool   _controllerValid:                 _planMasterController !== undefined && _planMasterController !== null
+    property real   _missionControllerProgressPct:    (_controllerValid && _planMasterController) ? _planMasterController.missionController.progressPct : 0
+    property real   _rallyPointControllerProgressPct: (_controllerValid && _planMasterController) ? _planMasterController.rallyPointController.progressPct : 0
 
     QGCPalette { id: qgcPal }
 
@@ -163,6 +164,14 @@ Rectangle {
             }
         }
     }
+    // Rally point download progress bar
+    Rectangle {
+        anchors.bottom: parent.bottom
+        height:         _root.height * 0.075
+        width:          _rallyPointControllerProgressPct * parent.width
+        color:          qgcPal.colorBlue
+        visible:        _rallyPointControllerProgressPct > 0 && _rallyPointControllerProgressPct < 1 && !largeProgressBar.visible
+    }
 
     // Mission download progress bar
     Rectangle {
@@ -199,6 +208,20 @@ Rectangle {
         Connections {
             target:                 QGroundControl.multiVehicleManager
             function onActiveVehicleChanged(activeVehicle) { largeProgressBar._userHide = false }
+        }
+
+        // Rally point download progress
+        Rectangle {
+            height:  parent.height / 2
+            color:   qgcPal.colorBlue
+            width:   _rallyPointControllerProgressPct * parent.width
+            visible: _rallyPointControllerProgressPct > 0 && _rallyPointControllerProgressPct < 1
+
+            QGCLabel {
+                anchors.centerIn: parent
+                text:             qsTr("Rally point Downloading: %1%").arg(Math.round(_rallyPointControllerProgressPct * 100))
+                font.pointSize:   ScreenTools.defaultFontPointSize
+            }
         }
         
         // Mission download progress

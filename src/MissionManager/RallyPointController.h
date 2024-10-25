@@ -32,6 +32,7 @@ public:
     Q_PROPERTY(QmlObjectListModel*  points                  READ points                                             CONSTANT)
     Q_PROPERTY(QString              editorQml               READ editorQml                                          CONSTANT)
     Q_PROPERTY(QObject*             currentRallyPoint       READ currentRallyPoint      WRITE setCurrentRallyPoint  NOTIFY currentRallyPointChanged)
+    Q_PROPERTY(double               progressPct             READ progressPct                                        NOTIFY progressPctChanged)
 
     Q_INVOKABLE void addPoint       (QGeoCoordinate point);
     Q_INVOKABLE void removePoint    (QObject* rallyPoint);
@@ -54,12 +55,14 @@ public:
     QString             editorQml               (void) const;
     QObject*            currentRallyPoint       (void) const { return _currentRallyPoint; }
 
-    void setCurrentRallyPoint   (QObject* rallyPoint);
-    bool isEmpty                (void) const;
+    void   setCurrentRallyPoint   (QObject* rallyPoint);
+    bool   isEmpty                (void) const;
+    double progressPct            (void) const { return _progressPct; }
 
 signals:
     void currentRallyPointChanged(QObject* rallyPoint);
     void loadComplete(void);
+    void progressPctChanged (double progressPct);
 
 private slots:
     void _managerLoadComplete       (void);
@@ -68,6 +71,7 @@ private slots:
     void _setFirstPointCurrent      (void);
     void _updateContainsItems       (void);
     void _managerVehicleChanged     (Vehicle* managerVehicle);
+    void _progressPctChanged        (double progressPct);
 
 private:
     Vehicle*            _managerVehicle =       nullptr;
@@ -76,6 +80,7 @@ private:
     QmlObjectListModel  _points;
     QObject*            _currentRallyPoint =    nullptr;
     bool                _itemsRequested =       false;
+    double              _progressPct =          0;
 
     static const int    _jsonCurrentVersion = 2;
     static const int    _jsonCurrentVersionWithRPType = 102;
