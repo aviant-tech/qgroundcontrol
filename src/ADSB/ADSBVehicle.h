@@ -106,7 +106,7 @@ private:
     double          _altitude;
     double          _heading;
     bool            _alert;
-    bool            _hidden;
+    bool            _hidden = false;
     EmitterType     _emitterType;
 
     QElapsedTimer   _lastUpdateTimer;
