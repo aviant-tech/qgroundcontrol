@@ -72,7 +72,6 @@ Item {
                 QGCListView {
                     id:                hiddenVehiclesList
                     anchors.margins:   ScreenTools.defaultFontPixelHeight
-                    spacing:           ScreenTools.defaultFontPixelHeight / 2
                     clip:              true
                     Layout.fillWidth:  true
 
@@ -82,9 +81,10 @@ Item {
                     model: adsbManager.adsbVehicles
                     
                     delegate: Item {
-                        height:  object.hidden ? adsbVehicleLabel.implicitHeight : 0
-                        width:   hiddenVehiclesList.width
-                        visible: object.hidden
+                        height:          object.hidden ? adsbVehicleLabel.implicitHeight : 0
+                        width:           hiddenVehiclesList.width
+                        visible:         object.hidden
+                        anchors.margins: ScreenTools.defaultFontPixelHeight
 
                         MouseArea {
                             anchors.fill: parent
@@ -115,7 +115,8 @@ Item {
                 }
 
                 QGCButton {
-                    text: qsTr("Unhide all")
+                    text:            qsTr("Unhide all")
+                    anchors.margins: ScreenTools.defaultFontPixelHeight
                     onClicked: {
                         adsbManager.unhideAllVehicles()
                     }
