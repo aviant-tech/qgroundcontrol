@@ -27,13 +27,7 @@ Item {
     width:          adsbIcon.width * 1.1
 
     property var  adsbManager:   QGroundControl.adsbVehicleManager
-    property bool showIndicator: adsbManager && adsbManager.hasHiddenADSBVehicle
-
-    onShowIndicatorChanged: {
-        if (!showIndicator) {
-            mainWindow.hideIndicatorPopup()
-        }
-    }
+    property bool showIndicator: adsbManager && adsbManager.adsbVehicles.count > 0
 
     Image {
         id:                 adsbIcon
@@ -85,11 +79,12 @@ Item {
                     Layout.preferredHeight: Math.min(contentHeight, 300)
                     Layout.maximumHeight:   300
 
-                    model: adsbManager.hiddenADSBVehicles
+                    model: adsbManager.adsbVehicles
                     
                     delegate: Item {
-                        height: adsbVehicleLabel.implicitHeight
-                        width:  hiddenVehiclesList.width
+                        height:  object.hidden ? adsbVehicleLabel.implicitHeight : 0
+                        width:   hiddenVehiclesList.width
+                        visible: object.hidden
 
                         MouseArea {
                             anchors.fill: parent

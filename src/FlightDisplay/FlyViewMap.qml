@@ -293,9 +293,9 @@ FlightMap {
 
     // Add lines to ADSB vehicles to the map
     MapItemView {
-        model: QGroundControl.adsbVehicleManager.visibleADSBVehicles
+        model: QGroundControl.adsbVehicleManager.adsbVehicles
         delegate: MapPolyline {
-            visible:    _showTrafficIndicators && get_proximity(object, _activeVehicle, _horizontalConflictDistance*2, _verticalConflictDistance*2)
+            visible:    _showTrafficIndicators && object ? !object.hidden && get_proximity(object, _activeVehicle, _horizontalConflictDistance*2, _verticalConflictDistance*2) : false
             line.width: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? 4 : 2
             line.color: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? "red" : "yellow"
             z:          QGroundControl.zOrderVehicles+1
@@ -647,7 +647,7 @@ FlightMap {
 
     // Add ADSB vehicles to the map
     MapItemView {
-        model: QGroundControl.adsbVehicleManager.visibleADSBVehicles
+        model: QGroundControl.adsbVehicleManager.adsbVehicles
         delegate: VehicleMapItem {
             coordinate:     object ? object.coordinate : QtPositioning.coordinate(0, 0)
             altitude:       object ? object.altitude : 0
@@ -658,6 +658,7 @@ FlightMap {
             icaoAddress:    object ? object.icaoAddress : ""
             map:            _root
             z:              QGroundControl.zOrderVehicles
+            visible:        object ? !object.hidden : false
         }
     }
 

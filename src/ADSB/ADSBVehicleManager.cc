@@ -46,14 +46,7 @@ void ADSBVehicleManager::_cleanupStaleVehicles()
             qCDebug(ADSBVehicleManagerLog) << "Expired" << QStringLiteral("%1").arg(adsbVehicle->icaoAddress(), 0, 16);
             _adsbVehicles.removeAt(i);
             _adsbICAOMap.remove(adsbVehicle->icaoAddress());
-            bool hidden = adsbVehicle->hidden();
-            disconnect(adsbVehicle, &ADSBVehicle::hiddenChanged, this, &ADSBVehicleManager::_adsbVehicleHiddenChanged);
             adsbVehicle->deleteLater();
-            if (hidden) {
-                emit hasHiddenADSBVehicleChanged();
-            } else {
-                emit hasVisibleADSBVehicleChanged();
-            }
         }
     }
 }
@@ -69,16 +62,8 @@ void ADSBVehicleManager::adsbVehicleUpdate(const ADSBVehicle::VehicleInfo_t vehi
             ADSBVehicle* adsbVehicle = new ADSBVehicle(vehicleInfo, this);
             _adsbICAOMap[icaoAddress] = adsbVehicle;
             _adsbVehicles.append(adsbVehicle);
-            connect(adsbVehicle, &ADSBVehicle::hiddenChanged, this, &ADSBVehicleManager::_adsbVehicleHiddenChanged);
-            emit hasVisibleADSBVehicleChanged(); // Emit hasVisible as new vehicle is visible
         }
     }
-}
-
-void ADSBVehicleManager::_adsbVehicleHiddenChanged()
-{
-    emit hasHiddenADSBVehicleChanged();
-    emit hasVisibleADSBVehicleChanged();
 }
 
 void ADSBVehicleManager::_tcpError(const QString errorMsg)
@@ -215,38 +200,6 @@ void ADSBVehicleManager::setHiddenForADSBVehicle(quint32 icaoAddress, bool hidde
     } else {
         qCDebug(ADSBVehicleManagerLog) << "ADSBVehicleManager: ICAO address not found";
     }
-}
-
-
-
-bool ADSBVehicleManager::hasHiddenADSBVehicle()
-{
-    return hiddenADSBVehicles()->count() > 0;
-}
-
-
-QmlObjectListModel* ADSBVehicleManager::hiddenADSBVehicles()
-{
-    QmlObjectListModel* hiddenModel = new QmlObjectListModel(this);
-    for (int i=_adsbVehicles.count()-1; i>=0; i--) {
-        ADSBVehicle* adsbVehicle = _adsbVehicles.value<ADSBVehicle*>(i);
-        if (adsbVehicle && adsbVehicle->hidden()) {
-            hiddenModel->append(adsbVehicle);
-        }
-    }
-
-    return hiddenModel;
-}
-
-QmlObjectListModel* ADSBVehicleManager::visibleADSBVehicles() {
-    QmlObjectListModel* visibleModel = new QmlObjectListModel(this);
-    for (int i=_adsbVehicles.count()-1; i>=0; i--) {
-        ADSBVehicle* adsbVehicle = _adsbVehicles.value<ADSBVehicle*>(i);
-        if (adsbVehicle && !adsbVehicle->hidden()) {
-            visibleModel->append(adsbVehicle);
-        }
-    }
-    return visibleModel;
 }
 
 void ADSBVehicleManager::unhideAllVehicles() {

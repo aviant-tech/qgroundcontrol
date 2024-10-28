@@ -145,7 +145,7 @@ MapQuickItem {
                 if (!visible) return ""
 
                 var label = ""
-                if (_adsbVehicle) {
+                if (_adsbVehicle && _activeVehicle) {
                     label += callsign
                     if (coordinate.isValid && _activeVehicle.coordinate.isValid) {
                         var distance = coordinate.distanceTo(_activeVehicle.coordinate)
