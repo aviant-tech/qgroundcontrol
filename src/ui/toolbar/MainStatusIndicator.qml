@@ -29,6 +29,8 @@ RowLayout {
 
     property var    _planMasterController: globals.planMasterControllerPlanView
     property bool   _syncInProgress:       _planMasterController.syncInProgress
+    property bool   _dirty:                _planMasterController.dirty
+
 
     QGCLabel {
         id:             mainStatusLabel
@@ -76,6 +78,10 @@ RowLayout {
                         else if (_activeVehicle.rallyPointManagerError) {
                             _mainStatusBGColor = "red"
                             return "Error syncing rally points: " + _activeVehicle.rallyPointManagerError
+                        }
+                        else if (_dirty) {
+                            _mainStatusBGColor = "yellow"
+                            return qsTr("Mission not uploaded to vehicle")
                         }
                         else if (_activeVehicle.readyToFly) {
                             _mainStatusBGColor = "green"
