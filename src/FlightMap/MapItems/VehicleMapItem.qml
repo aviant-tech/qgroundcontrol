@@ -8,6 +8,9 @@
  ****************************************************************************/
 
 import QtQuick              2.3
+import QtQuick.Controls     1.2
+import QtQuick.Dialogs      1.2
+import QtQuick.Layouts      1.3
 import QtLocation           5.3
 import QtPositioning        5.3
 import QtGraphicalEffects   1.0
@@ -28,6 +31,8 @@ MapQuickItem {
     property real   size:           _adsbVehicle ? _adsbSize : _uavSize             /// Size for icon
     property bool   alert:          false                                           /// Collision alert
     property var    emitterType:    ADSBVehicle.EMITTER_TYPE_NO_INFO
+    property int    icaoAddress                                                     /// ICAO address for ADSB vehicle
+    property var    adsbVehicleManager: QGroundControl.adsbVehicleManager
 
     anchorPoint.x:  vehicleItem.width  / 2
     anchorPoint.y:  vehicleItem.height / 2
@@ -39,6 +44,15 @@ MapQuickItem {
     property real   _adsbSize:      ScreenTools.defaultFontPixelHeight * 2.5
     property var    _map:           map
     property bool   _multiVehicle:  QGroundControl.multiVehicleManager.vehicles.count > 1
+    
+    property var hideVehicleDialog
+
+    Component.onDestruction: {
+        if (hideVehicleDialog && hideVehicleDialog.opened) {
+            hideVehicleDialog.close()
+        }
+
+    }
 
     sourceItem: Item {
         id:         vehicleItem
@@ -107,6 +121,16 @@ MapQuickItem {
                 origin.y:       vehicleIcon.height / 2
                 angle:          isNaN(heading) ? 0 : heading
             }
+
+            MouseArea {
+                anchors.fill: parent
+                enabled:      _adsbVehicle
+                onClicked: {
+                    if (_adsbVehicle) {
+                        hideVehicleDialog = mainWindow.showPopupDialogFromComponent(hideVehiclePopup, {callsign: callsign})
+                    }
+                }
+            }
         }
 
         QGCMapLabel {
@@ -121,7 +145,7 @@ MapQuickItem {
                 if (!visible) return ""
 
                 var label = ""
-                if (_adsbVehicle) {
+                if (_adsbVehicle && _activeVehicle) {
                     label += callsign
                     if (coordinate.isValid && _activeVehicle.coordinate.isValid) {
                         var distance = coordinate.distanceTo(_activeVehicle.coordinate)
@@ -141,6 +165,29 @@ MapQuickItem {
                     label += vehicle.name
                 }
                 return label
+            }
+        }
+    }
+
+    Component {
+        id: hideVehiclePopup
+        QGCPopupDialog {
+            title: qsTr("Hide vehicle " + callsign + "?")
+            buttons:    StandardButton.Yes | StandardButton.No
+
+            QGCLabel { text: qsTr("You can unhide it in the toolbar") }
+
+            function accept() {
+                if (adsbVehicleManager && icaoAddress) {
+                    adsbVehicleManager.setHiddenForADSBVehicle(Number(icaoAddress), true)
+                } else {
+                    mainWindow.showMessageDialog(qsTr("Error"), qsTr("ADSB vehicle manager or icao address not found"))
+                    console.log("ADSB vehicle manager or icao address not found")
+                }                
+                hideDialog()
+            }
+            function reject() {
+                hideDialog()
             }
         }
     }

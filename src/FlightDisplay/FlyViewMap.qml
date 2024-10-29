@@ -290,26 +290,12 @@ FlightMap {
             enabled:        _showProximityRadar
         }
     }
-    // Add ADSB vehicles to the map
-    MapItemView {
-        model: QGroundControl.adsbVehicleManager.adsbVehicles
-        delegate: VehicleMapItem {
-            coordinate:     object.coordinate
-            altitude:       object.altitude
-            callsign:       object.callsign
-            heading:        object.heading
-            alert:          object.alert
-            emitterType:    object.emitterType
-            map:            _root
-            z:              QGroundControl.zOrderVehicles
-        }
-    }
 
     // Add lines to ADSB vehicles to the map
     MapItemView {
         model: QGroundControl.adsbVehicleManager.adsbVehicles
         delegate: MapPolyline {
-            visible:    _showTrafficIndicators && get_proximity(object, _activeVehicle, _horizontalConflictDistance*2, _verticalConflictDistance*2)
+            visible:    _showTrafficIndicators && object ? !object.hidden && get_proximity(object, _activeVehicle, _horizontalConflictDistance*2, _verticalConflictDistance*2) : false
             line.width: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? 4 : 2
             line.color: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? "red" : "yellow"
             z:          QGroundControl.zOrderVehicles+1
@@ -656,6 +642,23 @@ FlightMap {
                 clickMenu.coord = clickCoord
                 clickMenu.popup()
             }
+        }
+    }
+
+    // Add ADSB vehicles to the map
+    MapItemView {
+        model: QGroundControl.adsbVehicleManager.adsbVehicles
+        delegate: VehicleMapItem {
+            coordinate:     object ? object.coordinate : QtPositioning.coordinate(0, 0)
+            altitude:       object ? object.altitude : 0
+            callsign:       object ? object.callsign : ""
+            heading:        object ? object.heading : 0
+            alert:          object ? object.alert : false
+            emitterType:    object ? object.emitterType : 0
+            icaoAddress:    object ? object.icaoAddress : ""
+            map:            _root
+            z:              QGroundControl.zOrderVehicles
+            visible:        object ? !object.hidden : false
         }
     }
 

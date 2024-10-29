@@ -72,6 +72,7 @@ public:
     Q_PROPERTY(double           altitude    READ altitude       NOTIFY altitudeChanged)     // NaN for not available
     Q_PROPERTY(double           heading     READ heading        NOTIFY headingChanged)      // NaN for not available
     Q_PROPERTY(bool             alert       READ alert          NOTIFY alertChanged)        // Collision path
+    Q_PROPERTY(bool             hidden      READ hidden         NOTIFY hiddenChanged)       // Hidden from fly view map
     Q_PROPERTY(EmitterType      emitterType READ emitterType    NOTIFY emitterTypeChanged)  // Vechicle type (MAVLink ADSB_EMITTER_TYPE)
 
     int             icaoAddress (void) const { return static_cast<int>(_icaoAddress); }
@@ -80,9 +81,11 @@ public:
     double          altitude    (void) const { return _altitude; }
     double          heading     (void) const { return _heading; }
     bool            alert       (void) const { return _alert; }
+    bool            hidden      (void) const { return _hidden; }
     EmitterType     emitterType (void) const { return _emitterType; }
 
     void update(const VehicleInfo_t& vehicleInfo);
+    void setHidden(bool hidden);
 
     /// check if the vehicle is expired and should be removed
     bool expired();
@@ -93,6 +96,7 @@ signals:
     void altitudeChanged    ();
     void headingChanged     ();
     void alertChanged       ();
+    void hiddenChanged      ();
     void emitterTypeChanged ();
 
 private:
@@ -102,6 +106,7 @@ private:
     double          _altitude;
     double          _heading;
     bool            _alert;
+    bool            _hidden = false;
     EmitterType     _emitterType;
 
     QElapsedTimer   _lastUpdateTimer;

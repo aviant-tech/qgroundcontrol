@@ -60,6 +60,9 @@ public:
     // QGCTool overrides
     void setToolbox(QGCToolbox* toolbox) final;
 
+    Q_INVOKABLE void unhideAllVehicles(void);
+    Q_INVOKABLE void setHiddenForADSBVehicle(quint32 icaoAddress, bool hidden);
+
 public slots:
     void adsbVehicleUpdate  (const ADSBVehicle::VehicleInfo_t vehicleInfo);
     void _tcpError          (const QString errorMsg);

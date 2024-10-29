@@ -191,3 +191,22 @@ void ADSBTCPLink::_parseLine(const QString& line)
         }
     }
 }
+
+void ADSBVehicleManager::setHiddenForADSBVehicle(quint32 icaoAddress, bool hidden)
+{
+    ADSBVehicle* adsbVehicle = _adsbICAOMap.value(icaoAddress);
+    if (adsbVehicle) {
+        adsbVehicle->setHidden(hidden);
+    } else {
+        qCDebug(ADSBVehicleManagerLog) << "ADSBVehicleManager: ICAO address not found";
+    }
+}
+
+void ADSBVehicleManager::unhideAllVehicles() {
+    for (int i=_adsbVehicles.count()-1; i>=0; i--) {
+        ADSBVehicle* adsbVehicle = _adsbVehicles.value<ADSBVehicle*>(i);
+        if (adsbVehicle) {
+            adsbVehicle->setHidden(false);
+        }
+    }
+}
