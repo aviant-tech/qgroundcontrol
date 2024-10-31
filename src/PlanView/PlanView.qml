@@ -400,12 +400,15 @@ Item {
             globals.planMasterControllerPlanView = _planMasterController
         }
 
+        /*
+        We never want to discard the mission in plan view, so we remove the popup alltogehter
         onPromptForPlanUsageOnVehicleChange: {
             if (!_promptForPlanUsageShowing) {
                 _promptForPlanUsageShowing = true
                 mainWindow.showPopupDialogFromComponent(promptForPlanUsageOnVehicleChangePopupComponent)
             }
         }
+        */
 
         function waitingOnIncompleteDataMessage(save) {
             var saveOrUpload = save ? qsTr("Save") : qsTr("Upload")
