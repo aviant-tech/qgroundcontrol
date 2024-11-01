@@ -27,6 +27,11 @@ RowLayout {
     property real   _margins:           ScreenTools.defaultFontPixelWidth
     property real   _spacing:           ScreenTools.defaultFontPixelWidth / 2
 
+    property var    _planMasterController: globals.planMasterControllerPlanView
+    property bool   _syncInProgress:       _planMasterController.syncInProgress
+    property bool   _dirty:                _planMasterController.dirty
+
+
     QGCLabel {
         id:             mainStatusLabel
         text:           mainStatusText()
@@ -58,7 +63,27 @@ RowLayout {
                     }
                 } else {
                     if (_activeVehicle.readyToFlyAvailable) {
-                        if (_activeVehicle.readyToFly) {
+                        if (_syncInProgress) {
+                            _mainStatusBGColor = "yellow"
+                            return "Syncing mission..."
+                        }
+                        else if (_activeVehicle.missionManagerError) {
+                            _mainStatusBGColor = "red"
+                            return "Error syncing mission: " + _activeVehicle.missionManagerError
+                        }
+                        else if (_activeVehicle.geoFenceManagerError) {
+                            _mainStatusBGColor = "red"
+                            return "Error syncing geofence: " + _activeVehicle.geoFenceManagerError
+                        }
+                        else if (_activeVehicle.rallyPointManagerError) {
+                            _mainStatusBGColor = "red"
+                            return "Error syncing rally points: " + _activeVehicle.rallyPointManagerError
+                        }
+                        else if (_dirty) {
+                            _mainStatusBGColor = "yellow"
+                            return qsTr("Mission not uploaded to vehicle")
+                        }
+                        else if (_activeVehicle.readyToFly) {
                             _mainStatusBGColor = "green"
                             return mainStatusLabel._readyToFlyText
                         } else {

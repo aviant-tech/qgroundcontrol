@@ -114,6 +114,7 @@ void GeoFenceController::_managerVehicleChanged(Vehicle* managerVehicle)
     connect(_geoFenceManager, &GeoFenceManager::sendComplete,                   this, &GeoFenceController::_managerSendComplete);
     connect(_geoFenceManager, &GeoFenceManager::removeAllComplete,              this, &GeoFenceController::_managerRemoveAllComplete);
     connect(_geoFenceManager, &GeoFenceManager::inProgressChanged,              this, &GeoFenceController::syncInProgressChanged);
+    connect(_geoFenceManager, &GeoFenceManager::progressPct,                    this, &GeoFenceController::_progressPctChanged);
 
     //-- GeoFenceController::supported() tests both the capability bit AND the protocol version.
     connect(_managerVehicle,  &Vehicle::capabilityBitsChanged,                  this, &GeoFenceController::supportedChanged);
@@ -352,6 +353,7 @@ void GeoFenceController::_managerLoadComplete(void)
         emit loadComplete();
     }
     _itemsRequested = false;
+    _managerVehicle->clearGeoFenceManagerError();
 }
 
 void GeoFenceController::_managerSendComplete(bool error)
@@ -520,6 +522,14 @@ void GeoFenceController::_parametersReady(void)
     _px4ParamCircularFenceFact = _managerVehicle->parameterManager()->getParameter(FactSystem::defaultComponentId, _px4ParamCircularFence);
     connect(_px4ParamCircularFenceFact, &Fact::rawValueChanged, this, &GeoFenceController::paramCircularFenceChanged);
     emit paramCircularFenceChanged();
+}
+
+void GeoFenceController::_progressPctChanged(double progressPct)
+{
+    if (!QGC::fuzzyCompare(progressPct, _progressPct)) {
+        _progressPct = progressPct;
+        emit progressPctChanged(progressPct);
+    }
 }
 
 bool GeoFenceController::isEmpty(void) const

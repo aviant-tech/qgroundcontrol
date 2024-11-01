@@ -437,6 +437,12 @@ void PlanMasterController::loadFromFile(const QString& filename)
     }
 }
 
+void PlanMasterController::clearCurrentPlanFile()
+{
+    _currentPlanFile.clear();
+    emit currentPlanFileChanged();
+}
+
 QJsonDocument PlanMasterController::saveToJson()
 {
     QJsonObject planJson;
@@ -588,6 +594,7 @@ void PlanMasterController::removeAllFromVehicle(void)
         if (_rallyPointController.supported()) {
             _rallyPointController.removeAllFromVehicle();
         }
+        _currentPlanFile.clear();
         setDirty(false);
     } else {
         qWarning() << "PlanMasterController::removeAllFromVehicle called while offline";

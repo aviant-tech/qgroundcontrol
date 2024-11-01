@@ -85,47 +85,13 @@ Item {
         return complete
     }
 
-    // Progress bar
-    Connections {
-        target: _controllerValid ? _planMasterController.missionController : null
-        onProgressPctChanged: {
-            if (_controllerProgressPct === 1) {
-                missionStats.visible = false
-                uploadCompleteText.visible = true
-                progressBar.visible = false
-                resetProgressTimer.start()
-            } else if (_controllerProgressPct > 0) {
-                progressBar.visible = true
-            }
-        }
-    }
-
-    Timer {
-        id:             resetProgressTimer
-        interval:       5000
-        onTriggered: {
-            missionStats.visible = true
-            uploadCompleteText.visible = false
-        }
-    }
-
-    QGCLabel {
-        id:                     uploadCompleteText
-        anchors.fill:           parent
-        font.pointSize:         ScreenTools.largeFontPointSize
-        horizontalAlignment:    Text.AlignHCenter
-        verticalAlignment:      Text.AlignVCenter
-        text:                   qsTr("Done")
-        visible:                false
-    }
-
     GridLayout {
         id:                     missionStats
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
         anchors.leftMargin:     _margins
         anchors.left:           parent.left
-        columnSpacing:          0
+        columnSpacing:          _smallValueWidth
         columns:                5
 
         GridLayout {
@@ -162,7 +128,6 @@ Item {
             QGCLabel {
                 text:                   _distanceText
                 font.pointSize:         _dataFontSize
-                Layout.minimumWidth:    _largeValueWidth
             }
 
             QGCLabel { text: qsTr("Gradient:"); font.pointSize: _dataFontSize; }
@@ -207,7 +172,6 @@ Item {
             QGCLabel {
                 text:                   _missionMaxTelemetryText
                 font.pointSize:         _dataFontSize
-                Layout.minimumWidth:    _largeValueWidth
             }
 
             QGCLabel { text: qsTr("Time:"); font.pointSize: _dataFontSize; }
@@ -245,7 +209,7 @@ Item {
             id:          uploadButton
             text:        _controllerDirty ? qsTr("Upload Required") : qsTr("Upload")
             enabled:     !_controllerSyncInProgress
-            visible:     !_controllerOffline && !_controllerSyncInProgress && !uploadCompleteText.visible
+            visible:     !_controllerOffline && !_controllerSyncInProgress
             primary:     _controllerDirty
             onClicked:   _planMasterController.upload()
 
@@ -282,70 +246,6 @@ Item {
                     return parts.pop();
                 }
             }
-            Item { width: 1; height: 1 }
-        }
-    }
-
-    // Small mission download progress bar
-    Rectangle {
-        id:             progressBar
-        anchors.left:   parent.left
-        anchors.bottom: parent.bottom
-        height:         4
-        width:          _controllerProgressPct * parent.width
-        color:          qgcPal.colorGreen
-        visible:        false
-
-        onVisibleChanged: {
-            if (visible) {
-                largeProgressBar._userHide = false
-            }
-        }
-    }
-
-    // Large mission download progress bar
-    Rectangle {
-        id:             largeProgressBar
-        anchors.bottom: parent.bottom
-        anchors.left:   parent.left
-        anchors.right:  parent.right
-        height:         parent.height
-        color:          qgcPal.window
-        visible:        _showLargeProgress
-
-        property bool _userHide:                false
-        property bool _showLargeProgress:       progressBar.visible && !_userHide && qgcPal.globalTheme === QGCPalette.Light
-
-        Connections {
-            target:                 QGroundControl.multiVehicleManager
-            onActiveVehicleChanged: largeProgressBar._userHide = false
-        }
-
-        Rectangle {
-            anchors.top:    parent.top
-            anchors.bottom: parent.bottom
-            width:          _controllerProgressPct * parent.width
-            color:          qgcPal.colorGreen
-        }
-
-        QGCLabel {
-            anchors.centerIn:   parent
-            text:               qsTr("Syncing Mission")
-            font.pointSize:     ScreenTools.largeFontPointSize
-        }
-
-        QGCLabel {
-            anchors.margins:    _margin
-            anchors.right:      parent.right
-            anchors.bottom:     parent.bottom
-            text:               qsTr("Click anywhere to hide")
-
-            property real _margin: ScreenTools.defaultFontPixelWidth / 2
-        }
-
-        MouseArea {
-            anchors.fill:   parent
-            onClicked:      largeProgressBar._userHide = true
         }
     }
 }

@@ -2266,18 +2266,49 @@ void Vehicle::_missionManagerError(int errorCode, const QString& errorMsg)
 {
     Q_UNUSED(errorCode);
     qgcApp()->showAppMessage(tr("Mission transfer failed. Error: %1").arg(errorMsg));
+    if (_missionManagerErrorMsg != errorMsg) {
+        _missionManagerErrorMsg = errorMsg;
+        emit missionManagerErrorChanged();
+    }
+}
+
+void Vehicle::clearMissionManagerError()
+{
+    _missionManagerErrorMsg = "";
+    emit missionManagerErrorChanged();
 }
 
 void Vehicle::_geoFenceManagerError(int errorCode, const QString& errorMsg)
 {
     Q_UNUSED(errorCode);
     qgcApp()->showAppMessage(tr("GeoFence transfer failed. Error: %1").arg(errorMsg));
+    if (_geoFenceManagerErrorMsg != errorMsg) {
+        _geoFenceManagerErrorMsg = errorMsg;
+        emit geoFenceManagerErrorChanged();
+    }
+}
+
+void Vehicle::clearGeoFenceManagerError()
+{
+    _geoFenceManagerErrorMsg = "";
+    emit geoFenceManagerErrorChanged();
 }
 
 void Vehicle::_rallyPointManagerError(int errorCode, const QString& errorMsg)
 {
     Q_UNUSED(errorCode);
     qgcApp()->showAppMessage(tr("Rally Point transfer failed. Error: %1").arg(errorMsg));
+    if (_rallyPointManagerErrorMsg != errorMsg) {
+        qDebug() << "Rally Point transfer failed. Error: " << errorMsg;
+        _rallyPointManagerErrorMsg = errorMsg;
+        emit rallyPointManagerErrorChanged();
+    }
+}
+
+void Vehicle::clearRallyPointManagerError()
+{
+    _rallyPointManagerErrorMsg = "";
+    emit rallyPointManagerErrorChanged();
 }
 
 void Vehicle::_clearCameraTriggerPoints()

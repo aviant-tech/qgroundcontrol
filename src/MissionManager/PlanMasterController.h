@@ -105,6 +105,8 @@ public:
     QJsonDocument saveToJson    ();
     bool          loadFromJson  (QJsonDocument jsonDoc, QString &errorString);
 
+    void          clearCurrentPlanFile ();
+
     Vehicle* controllerVehicle(void) { return _controllerVehicle; }
     Vehicle* managerVehicle(void) { return _managerVehicle; }
 

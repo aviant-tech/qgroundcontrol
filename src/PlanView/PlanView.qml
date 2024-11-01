@@ -400,12 +400,15 @@ Item {
             globals.planMasterControllerPlanView = _planMasterController
         }
 
+        /*
+        We never want to discard the mission in plan view, so we remove the popup alltogehter
         onPromptForPlanUsageOnVehicleChange: {
             if (!_promptForPlanUsageShowing) {
                 _promptForPlanUsageShowing = true
                 mainWindow.showPopupDialogFromComponent(promptForPlanUsageOnVehicleChangePopupComponent)
             }
         }
+        */
 
         function waitingOnIncompleteDataMessage(save) {
             var saveOrUpload = save ? qsTr("Save") : qsTr("Upload")
@@ -477,10 +480,6 @@ Item {
             fileDialog.selectExisting = false
             fileDialog.nameFilters =    ShapeFileHelper.fileDialogKMLFilters
             fileDialog.openForSave()
-        }
-
-        function browseKyteOrders() {
-            mainWindow.showPopupDialogFromComponent(promptForBrowsingKyteOrders)
         }
     }
 
@@ -1053,7 +1052,7 @@ Item {
                         map:            editorMap
                         masterController:  _planMasterController
                         missionItem:    object
-                        width:          parent.width
+                        width:          parent ? parent.width : 0
                         readOnly:       false
                         onClicked:      _missionController.setCurrentPlanViewSeqNum(object.sequenceNumber, false)
                         onRemove: {
@@ -1404,7 +1403,7 @@ Item {
                     enabled:            !_planMasterController.syncInProgress && _aviantSettings.kyteBackendUrl.rawValue != ""
                     onClicked: {
                         dropPanel.hide()
-                        _planMasterController.browseKyteOrders()
+                        mainWindow.showPopupDialogFromComponent(promptForBrowsingKyteOrders)
                     }
                 }
             }
