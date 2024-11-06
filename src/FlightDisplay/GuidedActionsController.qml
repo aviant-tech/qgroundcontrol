@@ -164,6 +164,9 @@ Item {
     property bool __orbitSupported:         _activeVehicle ? !_hideOrbit && _activeVehicle.orbitModeSupported : false
     property bool __flightMode:             _flightMode
 
+    property bool _geoFenceSupported:     _planMasterController ? _planMasterController.geoFenceController.supported : false
+    property bool _rallyPointSupported:   _planMasterController ? _planMasterController.rallyPointController.supported : false
+
     function _outputState() {
         if (_corePlugin.guidedActionsControllerLogging()) {
             console.log(qsTr("_activeVehicle(%1) _vehicleArmed(%2) guidedModeSupported(%3) _vehicleFlying(%4) _vehicleWasFlying(%5) _vehicleInRTLMode(%6) pauseVehicleSupported(%7) _vehiclePaused(%8) _flightMode(%9) _missionItemCount(%10) roiSupported(%11) orbitSupported(%12) _missionActive(%13) _hideROI(%14) _hideOrbit(%15)").arg(_activeVehicle ? 1 : 0).arg(_vehicleArmed ? 1 : 0).arg(__guidedModeSupported ? 1 : 0).arg(_vehicleFlying ? 1 : 0).arg(_vehicleWasFlying ? 1 : 0).arg(_vehicleInRTLMode ? 1 : 0).arg(__pauseVehicleSupported ? 1 : 0).arg(_vehiclePaused ? 1 : 0).arg(_flightMode).arg(_missionItemCount).arg(__roiSupported).arg(__orbitSupported).arg(_missionActive).arg(_hideROI).arg(_hideOrbit))
@@ -318,7 +321,18 @@ Item {
     }
 
     function canArm() {
-        return _activeVehicle ? !planError() && !_dirty && (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) && !_syncInProgress : false
+        if (!_activeVehicle) {
+            return false
+        }
+
+        if (!_geoFenceSupported || !_rallyPointSupported) {
+            return false
+        }
+
+        return !planError() && 
+               !_dirty && 
+               (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) && 
+               !_syncInProgress
     }
 
     function armVehicleRequest() {
