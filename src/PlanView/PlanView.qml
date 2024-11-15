@@ -437,7 +437,13 @@ Item {
             }
             switch (_missionController.sendToVehiclePreCheck()) {
                 case MissionController.SendToVehiclePreCheckStateOk:
-                    sendToVehicle()
+                    if (_geoFenceController && !_geoFenceController.supported)  {
+                        mainWindow.showMessageDialog(qsTr("Send To Vehicle"), qsTr("Autopilot version does not support GeoFence. Restart QGC to load new autopilot version."))
+                    } else if (_rallyPointController && !_rallyPointController.supported) {
+                        mainWindow.showMessageDialog(qsTr("Send To Vehicle"), qsTr("Autopilot version does not support Rally Points. Restart QGC to load new autopilot version."))
+                    } else {
+                        sendToVehicle()
+                    }
                     break
                 case MissionController.SendToVehiclePreCheckStateActiveMission:
                     mainWindow.showMessageDialog(qsTr("Send To Vehicle"), qsTr("Current mission must be paused prior to uploading a new Plan"))
