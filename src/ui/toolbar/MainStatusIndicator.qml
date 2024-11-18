@@ -31,6 +31,8 @@ RowLayout {
     property bool   _syncInProgress:       _planMasterController.syncInProgress
     property bool   _dirty:                _planMasterController.dirty
 
+    property bool _geoFenceSupported:     _planMasterController ? _planMasterController.geoFenceController.supported : false
+    property bool _rallyPointSupported:   _planMasterController ? _planMasterController.rallyPointController.supported : false
 
     QGCLabel {
         id:             mainStatusLabel
@@ -78,6 +80,14 @@ RowLayout {
                         else if (_activeVehicle.rallyPointManagerError) {
                             _mainStatusBGColor = "red"
                             return "Error syncing rally points: " + _activeVehicle.rallyPointManagerError
+                        }
+                        else if (!_geoFenceSupported) {
+                            _mainStatusBGColor = "red"
+                            return "Geofence is not supported"
+                        }
+                        else if (!_rallyPointSupported) {
+                            _mainStatusBGColor = "red"
+                            return "Rally points are not supported"
                         }
                         else if (_dirty) {
                             _mainStatusBGColor = "yellow"
