@@ -74,7 +74,8 @@ public:
     Q_PROPERTY(bool             alert       READ alert          NOTIFY alertChanged)        // Collision path
     Q_PROPERTY(bool             hidden      READ hidden         NOTIFY hiddenChanged)       // Hidden from fly view map
     Q_PROPERTY(EmitterType      emitterType READ emitterType    NOTIFY emitterTypeChanged)  // Vechicle type (MAVLink ADSB_EMITTER_TYPE)
-
+    Q_PROPERTY(bool             oldSignal   READ oldSignal      NOTIFY oldSignalChanged)    // True if the vehicle has not been updated for a while
+    
     int             icaoAddress (void) const { return static_cast<int>(_icaoAddress); }
     QString         callsign    (void) const { return _callsign; }
     QGeoCoordinate  coordinate  (void) const { return _coordinate; }
@@ -83,12 +84,17 @@ public:
     bool            alert       (void) const { return _alert; }
     bool            hidden      (void) const { return _hidden; }
     EmitterType     emitterType (void) const { return _emitterType; }
-
+    bool            oldSignal   (void) const { return _oldSignal; }
+    
     void update(const VehicleInfo_t& vehicleInfo);
     void setHidden(bool hidden);
+    void setIsOldSignal(bool isOld);
 
     /// check if the vehicle is expired and should be removed
     bool expired();
+    // Check if the vehicle is old and should be marked as such
+    bool isOldSignal();
+
 
 signals:
     void coordinateChanged  ();
@@ -98,6 +104,7 @@ signals:
     void alertChanged       ();
     void hiddenChanged      ();
     void emitterTypeChanged ();
+    void oldSignalChanged   ();
 
 private:
     uint32_t        _icaoAddress;
@@ -107,10 +114,13 @@ private:
     double          _heading;
     bool            _alert;
     bool            _hidden = false;
+    bool            _oldSignal = false;
     EmitterType     _emitterType;
 
     QElapsedTimer   _lastUpdateTimer;
 
+
+    static constexpr qint64 oldSignalMs = 60000;   ///< timeout with no update in ms after which the vehicle is marked as old.
     static constexpr qint64 expirationTimeoutMs = 120000;   ///< timeout with no update in ms after which the vehicle is removed.
                                                             ///< AirMap sends updates for each vehicle every second.
 };

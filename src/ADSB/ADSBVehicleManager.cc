@@ -39,7 +39,7 @@ void ADSBVehicleManager::setToolbox(QGCToolbox* toolbox)
 
 void ADSBVehicleManager::_cleanupStaleVehicles()
 {
-    // Remove all expired ADSB vehicles
+    // Remove all expired ADSB vehicles, and mark old ones
     for (int i=_adsbVehicles.count()-1; i>=0; i--) {
         ADSBVehicle* adsbVehicle = _adsbVehicles.value<ADSBVehicle*>(i);
         if (adsbVehicle->expired()) {
@@ -47,6 +47,13 @@ void ADSBVehicleManager::_cleanupStaleVehicles()
             _adsbVehicles.removeAt(i);
             _adsbICAOMap.remove(adsbVehicle->icaoAddress());
             adsbVehicle->deleteLater();
+        }
+        else {
+            if (adsbVehicle->isOldSignal()) {
+                adsbVehicle->setIsOldSignal(true);
+            } else {
+                adsbVehicle->setIsOldSignal(false);
+            }
         }
     }
 }
