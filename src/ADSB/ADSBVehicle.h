@@ -121,7 +121,7 @@ private:
 
 
     static constexpr qint64 oldSignalMs = 60000;   ///< timeout with no update in ms after which the vehicle is marked as old.
-    static constexpr qint64 expirationTimeoutMs = 120000;   ///< timeout with no update in ms after which the vehicle is removed.
+    static constexpr qint64 expirationTimeoutMs = 240000;   ///< timeout with no update in ms after which the vehicle is removed.
                                                             ///< AirMap sends updates for each vehicle every second.
 };
 
