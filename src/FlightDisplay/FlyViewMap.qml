@@ -659,6 +659,7 @@ FlightMap {
             map:            _root
             z:              QGroundControl.zOrderVehicles
             visible:        object ? !object.hidden : false
+            oldSignal:      object ? object.oldSignal : false
         }
     }
 

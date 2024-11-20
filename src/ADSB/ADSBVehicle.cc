@@ -31,6 +31,8 @@ void ADSBVehicle::update(const VehicleInfo_t& vehicleInfo)
         return;
     }
 
+    setIsOldSignal(false);
+
 	if (vehicleInfo.emitterType != _emitterType) {
             _emitterType = vehicleInfo.emitterType;
             emit emitterTypeChanged();
@@ -67,6 +69,24 @@ void ADSBVehicle::update(const VehicleInfo_t& vehicleInfo)
         }
     }
     _lastUpdateTimer.restart();
+}
+
+bool ADSBVehicle::isOldSignal()
+{
+    return _lastUpdateTimer.hasExpired(oldSignalMs);
+}
+
+void ADSBVehicle::setIsOldSignal(bool isOldSignal)
+{
+    if (_oldSignal != isOldSignal) {
+        if (!isOldSignal && _oldSignal) {
+            qCDebug(ADSBVehicleManagerLog) << "Signal restored" << QStringLiteral("%1").arg(_icaoAddress, 0, 16);
+        } else {
+            qCDebug(ADSBVehicleManagerLog) << "Old signal" << QStringLiteral("%1").arg(_icaoAddress, 0, 16);
+        }
+        _oldSignal = isOldSignal;
+        emit oldSignalChanged();
+    }
 }
 
 bool ADSBVehicle::expired()

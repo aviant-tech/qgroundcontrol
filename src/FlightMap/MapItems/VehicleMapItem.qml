@@ -32,6 +32,7 @@ MapQuickItem {
     property bool   alert:          false                                           /// Collision alert
     property var    emitterType:    ADSBVehicle.EMITTER_TYPE_NO_INFO
     property int    icaoAddress                                                     /// ICAO address for ADSB vehicle
+    property bool   oldSignal:      false                                           /// True if the signal is old
     property var    adsbVehicleManager: QGroundControl.adsbVehicleManager
 
     anchorPoint.x:  vehicleItem.width  / 2
@@ -58,8 +59,13 @@ MapQuickItem {
         id:         vehicleItem
         width:      vehicleIcon.width
         height:     vehicleIcon.height
-        opacity:    _adsbVehicle || vehicle === _activeVehicle ? 1.0 : 0.5
-
+        opacity:    {
+            if (_adsbVehicle) {
+                return oldSignal ? 0.4 : 1.0
+            } else {
+                return vehicle === _activeVehicle ? 1.0 : 0.5
+            }
+        }
         Rectangle {
             id:                 vehicleShadow
             anchors.fill:       vehicleIcon
@@ -175,7 +181,7 @@ MapQuickItem {
             title: qsTr("Hide vehicle " + callsign + "?")
             buttons:    StandardButton.Yes | StandardButton.No
 
-            QGCLabel { text: qsTr("You can unhide it in the toolbar") }
+            QGCLabel { text: qsTr("You can unhide it in the toolbar.") }
 
             function accept() {
                 if (adsbVehicleManager && icaoAddress) {
@@ -183,7 +189,7 @@ MapQuickItem {
                 } else {
                     mainWindow.showMessageDialog(qsTr("Error"), qsTr("ADSB vehicle manager or icao address not found"))
                     console.log("ADSB vehicle manager or icao address not found")
-                }                
+                }
                 hideDialog()
             }
             function reject() {
