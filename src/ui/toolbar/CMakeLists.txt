@@ -4,6 +4,7 @@ add_custom_target(UiToolbarQml
 		BatteryIndicator.qml
 		BatteryPopup.qml
 		GPSIndicator.qml
+		GPS2Indicator.qml
 		GPSRTKIndicator.qml
 		JoystickIndicator.qml
 		LinkIndicator.qml
