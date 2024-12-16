@@ -36,14 +36,25 @@ AviantMissionTools::~AviantMissionTools()
     _networkAccessManager = nullptr;
 }
     
-void AviantMissionTools::setMissionType(MissionType missionType)
+void AviantMissionTools::setTakeoffType(TakeoffType takeoffType)
 {
-    if (missionType == _missionType) return;
+    if (takeoffType == _takeoffType) return;
 
     // Invalidate prior mission validation when type changes:
     _lastValidatedJson = QJsonDocument();
     _validationResult = "Not validated";
-    _missionType = missionType;
+    _takeoffType = takeoffType;
+    emit stateChanged();
+}
+
+void AviantMissionTools::setWinchType(WinchType winchType)
+{
+    if (winchType == _winchType) return;
+
+    // Invalidate prior mission validation when type changes:
+    _lastValidatedJson = QJsonDocument();
+    _validationResult = "Not validated";
+    _winchType = winchType;
     emit stateChanged();
 }
 
@@ -96,30 +107,64 @@ QString AviantMissionTools::_getOperationName(Operation operation)
     }
 }
 
-// Returns the name that is used in request parameter mission_type
-QString AviantMissionTools::_getMissionTypeName(MissionType missionType)
+// Returns the name that is used in request parameter "takeoff"
+QString AviantMissionTools::_getTakeoffTypeName(TakeoffType takeoffType)
 {
-    switch (missionType) {
-        case NotSet:
+    switch (takeoffType) {
+        case TakeoffTypeNotSet:
             return QString("NOT_SET");
-        case FixedWing:
-            return QString("FIXED_WING");
-        case Winch:
-            return QString("WINCH");
-        case CustomWinch:
-            return QString("CUSTOM_WINCH");
+        case Headless:
+            return QString("HEADLESS");
+        case VTOL:
+            return QString("VTOL");
+        default:
+            return QString("UNKNOWN");
+    }
+}
+// Returns the name that is used in request parameter "winch"
+QString AviantMissionTools::_getWinchTypeName(WinchType winchType)
+{
+    switch (winchType) {
+        case WinchTypeNotSet:
+            return QString("NOT_SET");
+        case NoWinch:
+            return QString("NONE");
+        case V1:
+            return QString("V1");
+        case V2:
+            return QString("V2");
+        case V3:
+            return QString("V3");
+        case Custom:
+            return QString("CUSTOM");
         default:
             return QString("UNKNOWN");
     }
 }
 
-QStringList AviantMissionTools::missionTypeList(void) const
+QStringList AviantMissionTools::takeoffTypeList(void) const
 {
-    return {"None", "Fixed wing", "Winch", "Custom winch"};
+    return {"---", "VTOL", "Headless"};
 }
 
+QStringList AviantMissionTools::winchTypeList(void) const
+{
+    return {"---", "None", "V1", "V2", "V3", "Custom"};
+}
 
-bool AviantMissionTools::_missionTypeRequired(Operation operation)
+bool AviantMissionTools::_takeoffTypeRequired(Operation operation)
+{
+    switch (operation) {
+        case MissionValidation:
+            return true;
+        case RallyPointHeight:
+        case NoOperation:
+        default:
+            return false;
+    }
+}
+
+bool AviantMissionTools::_winchTypeRequired(Operation operation)
 {
     switch (operation) {
         case MissionValidation:
@@ -138,9 +183,10 @@ void AviantMissionTools::requestOperation(Operation operation)
     // Check if a request is currently outstanding
     if (_currentOperation != NoOperation) return;
 
-    // Tell user to set MissionType if required and not set
-    if (_missionTypeRequired(operation) && _missionType == NotSet) {
-        qgcApp()->showAppMessage(tr("Mission type must be set in order to use this operation."), _getOperationName(operation));
+    // Tell user to set TakeoffType/WinchType if required and not set
+    if ((_winchTypeRequired(operation) && _winchType == WinchTypeNotSet) ||
+            (_takeoffTypeRequired(operation) && _takeoffType == TakeoffTypeNotSet)) {
+        qgcApp()->showAppMessage(tr("Takeoff/winch type must be set in order to use this operation."), _getOperationName(operation));
         return;
     }
     
@@ -185,12 +231,17 @@ void AviantMissionTools::requestOperation(Operation operation)
             return;
     }
 
-    if (missionPayload && _missionType != NotSet) {
-        // Add mission_type part (if given) no matter if the requested operation
-        // needs it or not. If not needed, it will be ignored by the planning tool.
+    if (missionPayload && _takeoffTypeRequired(operation)) {
         QHttpPart typePart;
-        typePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"mission_type\""));
-        typePart.setBody(_getMissionTypeName(_missionType).toUtf8());
+        typePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"takeoff\""));
+        typePart.setBody(_getTakeoffTypeName(_takeoffType).toUtf8());
+        missionPayload->append(typePart);
+    }
+
+    if (missionPayload && _winchTypeRequired(operation)) {
+        QHttpPart typePart;
+        typePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"winch\""));
+        typePart.setBody(_getWinchTypeName(_winchType).toUtf8());
         missionPayload->append(typePart);
     }
 
