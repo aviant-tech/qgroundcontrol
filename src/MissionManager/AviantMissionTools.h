@@ -37,21 +37,32 @@ public:
         FetchKyteOrderMissionFile
     };
 
-    enum MissionType {
-        NotSet,
-        FixedWing,
-        Winch,
-        CustomWinch
+    enum TakeoffType {
+        TakeoffTypeNotSet,
+        VTOL,
+        Headless
+    };
+    
+    enum WinchType {
+        WinchTypeNotSet,
+        NoWinch,
+        V1,
+        V2,
+        V3,
+        Custom
     };
 
     Q_ENUM(Operation)
-    Q_ENUM(MissionType)
+    Q_ENUM(TakeoffType)
+    Q_ENUM(WinchType)
     
     Q_PROPERTY(PlanMasterController* masterController  READ masterController  CONSTANT)
     Q_PROPERTY(bool                  requestInProgress READ requestInProgress                      NOTIFY   stateChanged)
     Q_PROPERTY(Operation             currentOperation  READ currentOperation                       NOTIFY   stateChanged)
-    Q_PROPERTY(MissionType           missionType       READ missionType       WRITE setMissionType NOTIFY   stateChanged)
-    Q_PROPERTY(QStringList           missionTypeList   READ missionTypeList   CONSTANT)
+    Q_PROPERTY(TakeoffType           takeoffType       READ takeoffType       WRITE setTakeoffType NOTIFY   stateChanged)
+    Q_PROPERTY(WinchType             winchType         READ winchType         WRITE setWinchType   NOTIFY   stateChanged)
+    Q_PROPERTY(QStringList           takeoffTypeList   READ takeoffTypeList   CONSTANT)
+    Q_PROPERTY(QStringList           winchTypeList     READ winchTypeList     CONSTANT)
     Q_PROPERTY(QString               validationResult  READ validationResult                       NOTIFY   stateChanged)
     
     Q_INVOKABLE void requestOperation(Operation operation);
@@ -62,9 +73,12 @@ public:
     PlanMasterController* masterController       (void) const { return _masterController; }
     bool                  requestInProgress      (void) const { return _currentOperation != NoOperation; }
     Operation             currentOperation       (void) const { return _currentOperation; }
-    MissionType           missionType            (void) const { return _missionType; }
-    QStringList           missionTypeList        (void) const;
-    void                  setMissionType         (MissionType missionType);
+    TakeoffType           takeoffType            (void) const { return _takeoffType; }
+    WinchType             winchType              (void) const { return _winchType; }
+    QStringList           takeoffTypeList        (void) const;
+    QStringList           winchTypeList          (void) const;
+    void                  setTakeoffType         (TakeoffType takeoffType);
+    void                  setWinchType           (WinchType winchType);
     QString               validationResult       (void) const { return _validationResult; }
 
 signals:
@@ -82,15 +96,18 @@ private:
     void           _parseValidationResponse     (const QByteArray &bytes);
     void           _parseAndLoadMissionResponse (const QByteArray &bytes);
     static QString _getOperationName            (Operation operation);
-    static QString _getMissionTypeName          (MissionType missionType);
-    static bool    _missionTypeRequired(Operation operation);
+    static QString _getTakeoffTypeName          (TakeoffType takeoffType);
+    static QString _getWinchTypeName            (WinchType winchType);
+    static bool    _takeoffTypeRequired(Operation operation);
+    static bool    _winchTypeRequired(Operation operation);
     void           _parseKyteOrdersResponse(const QByteArray &bytes);
     bool           _validateFileHash(const QByteArray &fileData, const QByteArray &expectedHash);
     void           _initiateNetworkRequest(Operation operationType, const QUrl& url);
 
     PlanMasterController*   _masterController;
     Operation               _currentOperation =     NoOperation;
-    MissionType             _missionType =          NotSet;
+    TakeoffType             _takeoffType =          TakeoffTypeNotSet;
+    WinchType               _winchType =            WinchTypeNotSet;
     QNetworkAccessManager*  _networkAccessManager = nullptr;
     QNetworkRequest         _networkRequest;
     QString                 _validationResult =     "Not validated";

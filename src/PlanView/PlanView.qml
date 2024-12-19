@@ -1474,8 +1474,14 @@ Item {
             spacing:    _margin
             width:      Math.min(_validationPanelMaxWidth, Math.max(_validationPanelMinWidth, validationSummaryLabel.implicitWidth))
 
+            function typesSet() {
+                if (_aviantMissionTools.takeoffType == AviantMissionTools.TakeoffTypeNotSet) return false
+                if (_aviantMissionTools.winchType == AviantMissionTools.WinchTypeNotSet) return false
+                return true
+            }
+
             Component.onCompleted: {
-                if (_aviantMissionTools.missionType != AviantMissionTools.NotSet) {
+                if (typesSet()) {
                     _aviantMissionTools.requestOperation(AviantMissionTools.MissionValidation)
                 }
             }
@@ -1486,44 +1492,57 @@ Item {
                 text:               qsTr("Mission Validation")
             }
 
-            ColumnLayout { 
-                visible:            missionValidationSection.checked
-                spacing:    _margin
-            
-                RowLayout {
-                    Layout.fillWidth:   true
-                    spacing:            _margin
+            GridLayout {
+                columns:           2
+                Layout.fillWidth:  true
 
-                    QGCLabel {
-                        text:               qsTr("Mission type:")
-                    }
-
-                    QGCComboBox {
-                        sizeToContents:     true
-                        model:              _aviantMissionTools.missionTypeList
-                        currentIndex:       _aviantMissionTools.missionType
-                        onActivated: {
-                            _aviantMissionTools.missionType = index
-                             if (_aviantMissionTools.missionType != AviantMissionTools.NotSet) {
-                                 _aviantMissionTools.requestOperation(AviantMissionTools.MissionValidation)
-                             }
-                        }
-                    }
-                }
-                
                 QGCLabel {
-                    id:                 validationSummaryLabel
-                    Layout.fillWidth:   true
-                    text:               _aviantMissionTools.validationResult
+                    Layout.preferredWidth:  parent.width / 4
+                    text:                   qsTr("Takeoff type:")
                 }
 
-                QGCButton {
-                    text:               qsTr("Cancel")
-                    Layout.fillWidth:   true
-                    visible:            _aviantMissionTools.currentOperation == AviantMissionTools.MissionValidation
-                    onClicked: {
-                        _aviantMissionTools.cancelOperation(AviantMissionTools.MissionValidation)
+                QGCComboBox {
+                    Layout.fillWidth:  true
+                    model:             _aviantMissionTools.takeoffTypeList
+                    currentIndex:      _aviantMissionTools.takeoffType
+                    onActivated: {
+                        _aviantMissionTools.takeoffType = index
+                         if (typesSet()) {
+                             _aviantMissionTools.requestOperation(AviantMissionTools.MissionValidation)
+                         }
                     }
+                }
+
+                QGCLabel {
+                    Layout.preferredWidth:  parent.width / 4
+                    text:                   qsTr("Winch type:")
+                }
+
+                QGCComboBox {
+                    Layout.fillWidth:   true
+                    model:              _aviantMissionTools.winchTypeList
+                    currentIndex:       _aviantMissionTools.winchType
+                    onActivated: {
+                        _aviantMissionTools.winchType = index
+                         if (typesSet()) {
+                             _aviantMissionTools.requestOperation(AviantMissionTools.MissionValidation)
+                         }
+                    }
+                }
+            }
+            
+            QGCLabel {
+                id:                 validationSummaryLabel
+                Layout.fillWidth:   true
+                text:               _aviantMissionTools.validationResult
+            }
+
+            QGCButton {
+                text:               qsTr("Cancel")
+                Layout.fillWidth:   true
+                visible:            _aviantMissionTools.currentOperation == AviantMissionTools.MissionValidation
+                onClicked: {
+                    _aviantMissionTools.cancelOperation(AviantMissionTools.MissionValidation)
                 }
             }
         }
@@ -1543,22 +1562,33 @@ Item {
                 text:               qsTr("Mission settings")
             }
             
-            RowLayout {
-                Layout.fillWidth:   true
-                spacing:            _margin
-                visible:            missionToolsSettingsSection.checked
+            GridLayout {
+                columns:           2
+                Layout.fillWidth:  true
+                visible:           missionToolsSettingsSection.checked
 
                 QGCLabel {
-                    Layout.fillWidth:   true
-                    text:               qsTr("Mission type:")
+                    Layout.preferredWidth:  parent.width / 4
+                    text:                   qsTr("Takeoff type:")
                 }
 
                 QGCComboBox {
                     Layout.fillWidth:   true
-                    sizeToContents:     true
-                    model:              _aviantMissionTools.missionTypeList
-                    currentIndex:       _aviantMissionTools.missionType
-                    onActivated:        _aviantMissionTools.missionType = index
+                    model:              _aviantMissionTools.takeoffTypeList
+                    currentIndex:       _aviantMissionTools.takeoffType
+                    onActivated:        _aviantMissionTools.takeoffType = index
+                }
+
+                QGCLabel {
+                    Layout.preferredWidth:  parent.width / 4
+                    text:                   qsTr("Winch type:")
+                }
+
+                QGCComboBox {
+                    Layout.fillWidth:   true
+                    model:              _aviantMissionTools.winchTypeList
+                    currentIndex:       _aviantMissionTools.winchType
+                    onActivated:        _aviantMissionTools.winchType = index
                 }
             }
 
