@@ -18,5 +18,7 @@ COPY ${APPIMAGE_PATH} /app
 RUN chmod 755 /app
 WORKDIR /app
 USER qgc
+# Reconfigure locale
+RUN locale-gen en_US.UTF-8 && dpkg-reconfigure locales
 ENV APPIMAGE_EXTRACT_AND_RUN=1
 CMD ["./QGroundControl.AppImage"]
