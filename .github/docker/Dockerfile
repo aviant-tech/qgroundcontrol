@@ -10,7 +10,8 @@ ENV PATH /usr/lib/ccache:$QT_DESKTOP/bin:$PATH
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Oslo
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install curl libsdl2-dev gstreamer1.0-gl qt5-default libxcb-xinerama0 -y
+RUN apt-get install curl libsdl2-dev gstreamer1.0-gl qt5-default libxcb-xinerama0 locales -y
+RUN rm -rf /var/lib/apt/lists/*
 RUN groupadd -r qgc -g 1000 && useradd -m -u 1000 -r -g qgc qgc
 RUN mkdir app
 ARG APPIMAGE_PATH="./QGroundControl.AppImage"
@@ -18,5 +19,7 @@ COPY ${APPIMAGE_PATH} /app
 RUN chmod 755 /app
 WORKDIR /app
 USER qgc
+# Reconfigure locale
+RUN locale-gen en_US.UTF-8 && dpkg-reconfigure locales
 ENV APPIMAGE_EXTRACT_AND_RUN=1
 CMD ["./QGroundControl.AppImage"]
