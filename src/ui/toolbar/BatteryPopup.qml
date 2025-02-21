@@ -16,7 +16,6 @@ Item {
         id: batteryValuesAvailableComponent
 
         QtObject {
-            property bool functionAvailable:        battery.function.rawValue !== MAVLink.MAV_BATTERY_FUNCTION_UNKNOWN
             property bool temperatureAvailable:     !isNaN(battery.temperature.rawValue)
             property bool currentAvailable:         !isNaN(battery.current.rawValue)
             property bool mahConsumedAvailable:     !isNaN(battery.mahConsumed.rawValue)
@@ -64,14 +63,19 @@ Item {
                                 property var battery: object
                             }
 
-                            QGCLabel { text: qsTr("Battery %1").arg(object.id.rawValue) }
-                            QGCLabel { text: qsTr("Charge State");   visible: batteryValuesAvailable.chargeStateAvailable }
-                            QGCLabel { text: qsTr("Remaining");      visible: batteryValuesAvailable.timeRemainingAvailable }
+                            QGCLabel {
+                                text:     qsTr("Battery %1").arg(object.id.rawValue)
+                                visible:  _activeVehicle.batteries > 1
+                            }
                             QGCLabel { text: qsTr("Remaining") }
-                            QGCLabel { text: qsTr("Voltage") }
-                            QGCLabel { text: qsTr("Consumed");       visible: batteryValuesAvailable.mahConsumedAvailable }
-                            QGCLabel { text: qsTr("Temperature");    visible: batteryValuesAvailable.temperatureAvailable }
-                            QGCLabel { text: qsTr("Function");       visible: batteryValuesAvailable.functionAvailable }
+                            QGCLabel {
+                                text:     object.hasPersistedConsumed ? qsTr("Persistent consumed") : qsTr("Consumed")
+                                visible:  batteryValuesAvailable.mahConsumedAvailable
+                            }
+                            QGCLabel {
+                                text:     qsTr("Temperature")
+                                visible:  batteryValuesAvailable.temperatureAvailable
+                            }
                         }
                     }
                 }
@@ -92,22 +96,37 @@ Item {
                                 property var battery: object
                             }
 
-                            QGCLabel { text: "" }
-                            QGCLabel { text: object.chargeState.enumStringValue;                              visible: batteryValuesAvailable.chargeStateAvailable }
-                            QGCLabel { text: object.timeRemainingStr.value;                                   visible: batteryValuesAvailable.timeRemainingAvailable }
-                            QGCLabel { text: object.percentRemaining.valueString + " " + object.percentRemaining.units }
-                            QGCLabel { text: object.voltage.valueString + " " + object.voltage.units }
+                            QGCLabel { text: ""; visible: _activeVehicle.batteries > 1}
+                            QGCLabel { text: object.consumedBasedRemaining.valueString + " " + object.consumedBasedRemaining.units }
                             QGCLabel { text: object.mahConsumed.valueString + " " + object.mahConsumed.units; visible: batteryValuesAvailable.mahConsumedAvailable }
                             QGCLabel { text: object.temperature.valueString + " " + object.temperature.units; visible: batteryValuesAvailable.temperatureAvailable }
-                            QGCLabel { text: object.function.enumStringValue;                                 visible: batteryValuesAvailable.functionAvailable }
                         }
                     }
                 }
+            }
+            QGCButton {
+                text: qsTr("Reset persisted consumed")
+                Layout.alignment: Qt.AlignHCenter
+                onClicked: {
+                    if (_activeVehicle) {
+                        _activeVehicle.resetPersistedConsumedData(_activeVehicle.id)
+                    }
+                }
+                visible: _activeVehicle && _activeVehicle.hasPersistedConsumedData(_activeVehicle.id)
             }
             QGCLabel {
                 Layout.alignment: Qt.AlignCenter
                 text:             qsTr("Limits")
                 font.family:      ScreenTools.demiboldFontFamily
+            }
+            
+            QGCLabel {
+                visible:  _activeVehicle && _activeVehicle.hasPersistedConsumedData(_activeVehicle.id)
+                text:     "NB! When flying multiple\n"
+                          + "flights on the same battery,\n"
+                          + "failsafe limits will not\n"
+                          + "work as intended. Manual\n"
+                          + "intervention will be needed."
             }
 
             RowLayout {
@@ -167,16 +186,6 @@ Item {
                         return (capacityMah * consumedThreshold).toFixed(0)
                     }
                 }
-            }
-            QGCButton {
-                text: qsTr("Reset persisted consumed")
-                Layout.alignment: Qt.AlignHCenter
-                onClicked: {
-                    if (_activeVehicle) {
-                        _activeVehicle.resetPersistedConsumedData(_activeVehicle.id)
-                    }
-                }
-                visible: _activeVehicle && _activeVehicle.hasPersistedConsumedData(_activeVehicle.id)
             }
         }
     }
