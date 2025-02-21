@@ -30,6 +30,8 @@ public:
     DEFINE_SETTINGFACT(rssiAlert)
     DEFINE_SETTINGFACT(preDeliveryBingoLimit)
     DEFINE_SETTINGFACT(postDeliveryBingoLimit)
+    DEFINE_SETTINGFACT(persistentConsumeWarnLimit)
+    DEFINE_SETTINGFACT(showTimeUntilLimit)
     DEFINE_SETTINGFACT(missionToolsInsecureHttps)
     DEFINE_SETTINGFACT(missionToolsUrl)
     DEFINE_SETTINGFACT(missionToolsToken)

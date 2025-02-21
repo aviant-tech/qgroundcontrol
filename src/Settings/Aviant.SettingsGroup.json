@@ -77,6 +77,22 @@
     "min":         0
 },
 {
+    "name":        "persistentConsumeWarnLimit",
+    "shortDesc":   "Battery failsafe warning limit",
+    "longDesc":    "A persistent consume offset above this limit will show a battery failsafe warning",
+    "type":        "double",
+    "default":     200,
+    "units":       "mAh",
+    "min":         0
+},
+{
+    "name":        "showTimeUntilLimit",
+    "shortDesc":   "Show time until next battery limit",
+    "longDesc":   "Show time until next battery limit, instead of mAh left until next limit",
+    "type":        "bool",
+    "default":     false
+},
+{
     "name":                "missionToolsInsecureHttps",
     "shortDesc":           "Insecure HTTPS connections",
     "longDesc":            "Do not validate server certificate for mission tools HTTPS connection",

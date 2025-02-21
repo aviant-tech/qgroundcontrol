@@ -834,6 +834,17 @@ Rectangle {
                                 Layout.fillWidth:  true
                             }
                             QGCLabel {
+                                text:              _aviantSettings.persistentConsumeWarnLimit.shortDescription
+                            }
+                            FactTextField {
+                                fact:              _aviantSettings.persistentConsumeWarnLimit
+                                Layout.fillWidth:  true
+                            }
+                            FactCheckBox {
+                                text:              _aviantSettings.showTimeUntilLimit.shortDescription
+                                fact:              _aviantSettings.showTimeUntilLimit
+                            }
+                            QGCLabel {
                                 text:              _aviantSettings.missionToolsUrl.shortDescription
                             }
                             FactTextField {

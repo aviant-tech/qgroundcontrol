@@ -29,21 +29,29 @@ public:
     Q_PROPERTY(Fact* voltage                READ voltage                CONSTANT)
     Q_PROPERTY(Fact* current                READ current                CONSTANT)
     Q_PROPERTY(Fact* mahConsumed            READ mahConsumed            CONSTANT)
+    Q_PROPERTY(Fact* rawMahConsumed         READ rawMahConsumed         CONSTANT)
+    Q_PROPERTY(Fact* consumedBasedRemaining READ consumedBasedRemaining CONSTANT)
     Q_PROPERTY(Fact* percentRemaining       READ percentRemaining       CONSTANT)
     Q_PROPERTY(Fact* timeRemaining          READ timeRemaining          CONSTANT)
     Q_PROPERTY(Fact* timeRemainingStr       READ timeRemainingStr       CONSTANT)
     Q_PROPERTY(Fact* chargeState            READ chargeState            CONSTANT)
     Q_PROPERTY(Fact* instantPower           READ instantPower           CONSTANT)
     Q_PROPERTY(Fact* timeUntilNextThreshold READ timeUntilNextThreshold CONSTANT)
+    Q_PROPERTY(Fact* mahUntilNextThreshold  READ mahUntilNextThreshold  CONSTANT)
     Q_PROPERTY(Fact* nextThresholdName      READ nextThresholdName      CONSTANT)
     Q_PROPERTY(Fact* maxCapacity            READ maxCapacity            CONSTANT)
+
+    Q_PROPERTY(bool   hasPersistedConsumed  READ hasPersistedConsumed   NOTIFY hasPersistedConsumedChanged)
+    Q_PROPERTY(double consumedOffset        READ consumedOffset         NOTIFY hasPersistedConsumedChanged)
 
     Fact* id                        () { return &_batteryIdFact; }
     Fact* function                  () { return &_batteryFunctionFact; }
     Fact* type                      () { return &_batteryTypeFact; }
     Fact* voltage                   () { return &_voltageFact; }
     Fact* percentRemaining          () { return &_percentRemainingFact; }
+    Fact* consumedBasedRemaining    () { return &_consumedBasedRemainingFact; }
     Fact* mahConsumed               () { return &_mahConsumedFact; }
+    Fact* rawMahConsumed            () { return &_rawMahConsumedFact; }
     Fact* current                   () { return &_currentFact; }
     Fact* temperature               () { return &_temperatureFact; }
     Fact* instantPower              () { return &_instantPowerFact; }
@@ -51,6 +59,7 @@ public:
     Fact* timeRemainingStr          () { return &_timeRemainingStrFact; }
     Fact* chargeState               () { return &_chargeStateFact; }
     Fact* timeUntilNextThreshold    () { return &_timeUntilNextThresholdFact; }
+    Fact* mahUntilNextThreshold     () { return &_mahUntilNextThresholdFact; }
     Fact* nextThresholdName         () { return &_nextThresholdNameFact; }
     Fact* maxCapacity               () { return &_maxCapacityFact; }
 
@@ -61,12 +70,15 @@ public:
     static const char* _voltageFactName;
     static const char* _currentFactName;
     static const char* _mahConsumedFactName;
+    static const char* _rawMahConsumedFactName;
+    static const char* _consumedBasedRemainingFactName;
     static const char* _percentRemainingFactName;
     static const char* _timeRemainingFactName;
     static const char* _timeRemainingStrFactName;
     static const char* _chargeStateFactName;
     static const char* _instantPowerFactName;
     static const char* _timeUntilNextThresholdFactName;
+    static const char* _mahUntilNextThresholdFactName;
     static const char* _nextThresholdNameFactName;
     static const char* _maxCapacityFactName;
 
@@ -81,11 +93,18 @@ public:
     // Overrides from FactGroup
     void handleMessage(Vehicle* vehicle, mavlink_message_t& message) override;
 
-    static void persistConsumedForVehicle(int vehicleId);
-    static void resetPersistedConsumedForVehicle(int vehicleId);
-    static void setCurrentConsumed(int vehicleId, uint8_t batteryId, double consumed);
-    static bool hasPersistedConsumedForVehicle(int vehicleId);
-    static double getPersistedConsumed(int vehicleId, uint8_t batteryId);
+    bool hasPersistedConsumed();
+    double consumedOffset();
+
+    static void persistConsumedForVehicle(Vehicle* vehicle);
+    static void resetPersistedConsumedForVehicle(Vehicle* vehicle);
+    static void setCurrentConsumed(Vehicle* vehicle, uint8_t batteryId, double consumed);
+    static bool hasPersistedConsumedForVehicle(Vehicle* vehicle);
+    static double getPersistedConsumed(Vehicle* vehicle, uint8_t batteryId);
+
+
+signals:
+    void hasPersistedConsumedChanged();
     
 
 private slots:
@@ -105,13 +124,16 @@ private:
     Fact            _voltageFact;
     Fact            _currentFact;
     Fact            _mahConsumedFact;
+    Fact            _rawMahConsumedFact;
     Fact            _temperatureFact;
     Fact            _percentRemainingFact;
+    Fact            _consumedBasedRemainingFact;
     Fact            _timeRemainingFact;
     Fact            _timeRemainingStrFact;
     Fact            _chargeStateFact;
     Fact            _instantPowerFact;
     Fact            _timeUntilNextThresholdFact;
+    Fact            _mahUntilNextThresholdFact;
     Fact            _nextThresholdNameFact;
     Fact            _maxCapacityFact;
     struct ThresholdInfo {

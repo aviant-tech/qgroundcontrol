@@ -24,6 +24,7 @@ Rectangle {
     implicitHeight: Math.min(batteryWidgetColumn.implicitHeight + ScreenTools.defaultFontPixelWidth, availableHeight)
 
     property var _activeVehicle:  QGroundControl.multiVehicleManager.activeVehicle
+    property var _aviantSettings: QGroundControl.settingsManager.aviantSettings
 
     ColumnLayout  {
         id:              batteryWidgetColumn
@@ -50,6 +51,23 @@ Rectangle {
             spacing:         ScreenTools.defaultFontPixelWidth
             anchors.margins: _toolsMargin
             width:           parent.width
+
+            Rectangle {
+                id:                           failsafeWarning
+                visible:                      battery && battery.consumedOffset > _aviantSettings.persistentConsumeWarnLimit.rawValue
+                height:                       failsafeWarningChild.height + 2 * _toolsMargin
+                Layout.fillWidth: true
+                radius:                       _toolsMargin
+                color:                        "red"
+                QGCLabel {
+                    id:                       failsafeWarningChild
+                    text:                     "BAD BATTERY FAILSAFES"
+                    color:                    "black"
+                    font.bold:                true
+                    anchors.verticalCenter:   parent.verticalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+            }
 
             RowLayout {
                 Layout.fillWidth: true
@@ -117,14 +135,14 @@ Rectangle {
                         id:               stateOfChargeContainer
                         Layout.fillWidth: true
                         spacing:          ScreenTools.defaultFontPixelWidth / 6
-                        visible:          battery && battery.percentRemaining.valueString != undefined && battery.percentRemaining.valueString != ""
+                        visible:          battery && battery.consumedBasedRemaining.valueString != undefined && battery.consumedBasedRemaining.valueString != ""
                         QGCLabel {
-                            text:  qsTr("SoC")
+                            text:  qsTr("Remaining")
                             color: qgcPal.colorGrey
                         }
                         QGCLabel {
                             font.pointSize: ScreenTools.mediumFontPointSize
-                            text:           battery ? battery.percentRemaining.valueString + " " + battery.percentRemaining.units : "N/A" 
+                            text:           battery ? battery.consumedBasedRemaining.valueString + " " + battery.consumedBasedRemaining.units : "N/A" 
                         }
                     }
                     ColumnLayout {
@@ -132,9 +150,13 @@ Rectangle {
                         spacing: ScreenTools.defaultFontPixelWidth / 6
 
                         property string nextThreshold: battery ? battery.nextThresholdName.value : ""
+                        property bool showTime: _aviantSettings.showTimeUntilLimit.rawValue
+                        property string unit: showTime ? "min" : "mAh"
+                        property real mahUntilNextThreshold: battery ? battery.mahUntilNextThreshold.value : -1
                         property real secondsUntilNextThreshold: battery ? battery.timeUntilNextThreshold.value : -1
+                        property real xUntilNextThreshold: showTime ? showTime : mahUntilNextThreshold
 
-                        visible: nextThreshold !== "" && secondsUntilNextThreshold >= 0
+                        visible: nextThreshold !== "" && xUntilNextThreshold >= 0
 
                         QGCLabel {
                             Layout.fillWidth: true
@@ -148,8 +170,7 @@ Rectangle {
                             Layout.fillWidth: true
                             font.pointSize:   ScreenTools.mediumFontPointSize
                             text: {
-                                const minutes = Math.floor(nextThresholdInfo.secondsUntilNextThreshold / 60)
-                                return qsTr("%1 min").arg(minutes)
+                                return qsTr("%1 %2").arg(nextThresholdInfo.xUntilNextThreshold).arg(nextThresholdInfo.unit)
                             }
                         }
                     }
