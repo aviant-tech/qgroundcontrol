@@ -201,7 +201,7 @@ Vehicle::Vehicle(LinkInterface*             link,
      QObject::connect(_vehicleLinkManager, &VehicleLinkManager::communicationLostChanged, this, [this](bool is_lost) {
         qDebug() << "Communication lost changed to " << is_lost << " for vehicle " << _id;
         if(is_lost) { // Persist consumed for batteries of relevant vehicle when communication is lost
-            VehicleBatteryFactGroup::persistConsumedForVehicle(_id);
+            VehicleBatteryFactGroup::persistConsumedForVehicle(this);
         }
     });
 
@@ -1115,11 +1115,11 @@ void Vehicle::_handleAttitudeQuaternion(mavlink_message_t& message)
 }
 
 void Vehicle::resetPersistedConsumedData() {
-    VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(_id);
+    VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(this);
 }
 
 bool Vehicle::hasPersistedConsumedData()  {
-    return VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(_id);
+    return VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(this);
 }
 
 
@@ -3357,7 +3357,7 @@ void Vehicle::_rebootCommandResultHandler(void* resultHandlerData, int /*compId*
         qDebug() << "Vehicle rebooted" << vehicle->id();
         // here we are quite sure that device is soft rebooting
         // closeVehicle itself is called in other scenarios, so we call persistConsumedForVehicle here
-        VehicleBatteryFactGroup::persistConsumedForVehicle(vehicle->id());
+        VehicleBatteryFactGroup::persistConsumedForVehicle(vehicle);
         vehicle->closeVehicle();
     }
 }

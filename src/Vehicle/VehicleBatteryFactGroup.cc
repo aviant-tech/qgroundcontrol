@@ -20,8 +20,10 @@ const char* VehicleBatteryFactGroup::_batteryIdFactName              = "id";
 const char* VehicleBatteryFactGroup::_batteryFunctionFactName        = "batteryFunction";
 const char* VehicleBatteryFactGroup::_batteryTypeFactName            = "batteryType";
 const char* VehicleBatteryFactGroup::_voltageFactName                = "voltage";
+const char* VehicleBatteryFactGroup::_consumedBasedRemainingFactName = "consumedBasedRemaining";
 const char* VehicleBatteryFactGroup::_percentRemainingFactName       = "percentRemaining";
 const char* VehicleBatteryFactGroup::_mahConsumedFactName            = "mahConsumed";
+const char* VehicleBatteryFactGroup::_rawMahConsumedFactName         = "rawMahConsumed";
 const char* VehicleBatteryFactGroup::_currentFactName                = "current";
 const char* VehicleBatteryFactGroup::_temperatureFactName            = "temperature";
 const char* VehicleBatteryFactGroup::_instantPowerFactName           = "instantPower";
@@ -29,6 +31,7 @@ const char* VehicleBatteryFactGroup::_timeRemainingFactName          = "timeRema
 const char* VehicleBatteryFactGroup::_timeRemainingStrFactName       = "timeRemainingStr";
 const char* VehicleBatteryFactGroup::_chargeStateFactName            = "chargeState";
 const char* VehicleBatteryFactGroup::_timeUntilNextThresholdFactName = "timeUntilNextThreshold";
+const char* VehicleBatteryFactGroup::_mahUntilNextThresholdFactName  = "mahUntilNextThreshold";
 const char* VehicleBatteryFactGroup::_nextThresholdNameFactName      = "nextThresholdName";
 const char* VehicleBatteryFactGroup::_maxCapacityFactName            = "maxCapacity";
 
@@ -45,13 +48,16 @@ VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* par
     , _voltageFact               (0, _voltageFactName,                   FactMetaData::valueTypeDouble)
     , _currentFact               (0, _currentFactName,                   FactMetaData::valueTypeDouble)
     , _mahConsumedFact           (0, _mahConsumedFactName,               FactMetaData::valueTypeDouble)
+    , _rawMahConsumedFact        (0, _rawMahConsumedFactName,            FactMetaData::valueTypeDouble)
     , _temperatureFact           (0, _temperatureFactName,               FactMetaData::valueTypeDouble)
     , _percentRemainingFact      (0, _percentRemainingFactName,          FactMetaData::valueTypeDouble)
+    , _consumedBasedRemainingFact(0, _consumedBasedRemainingFactName,    FactMetaData::valueTypeDouble)
     , _timeRemainingFact         (0, _timeRemainingFactName,             FactMetaData::valueTypeDouble)
     , _timeRemainingStrFact      (0, _timeRemainingStrFactName,          FactMetaData::valueTypeString)
     , _chargeStateFact           (0, _chargeStateFactName,               FactMetaData::valueTypeUint8)
     , _instantPowerFact          (0, _instantPowerFactName,              FactMetaData::valueTypeDouble)
     , _timeUntilNextThresholdFact(0, _timeUntilNextThresholdFactName,    FactMetaData::valueTypeDouble)
+    , _mahUntilNextThresholdFact (0, _mahUntilNextThresholdFactName,     FactMetaData::valueTypeDouble)
     , _nextThresholdNameFact     (0, _nextThresholdNameFactName,         FactMetaData::valueTypeString)
     , _maxCapacityFact           (0, _maxCapacityFactName,               FactMetaData::valueTypeDouble)
     , _vehicle                   (vehicle)
@@ -62,13 +68,16 @@ VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* par
     _addFact(&_voltageFact,                 _voltageFactName);
     _addFact(&_currentFact,                 _currentFactName);
     _addFact(&_mahConsumedFact,             _mahConsumedFactName);
+    _addFact(&_rawMahConsumedFact,          _rawMahConsumedFactName);
     _addFact(&_temperatureFact,             _temperatureFactName);
     _addFact(&_percentRemainingFact,        _percentRemainingFactName);
+    _addFact(&_consumedBasedRemainingFact,  _consumedBasedRemainingFactName);
     _addFact(&_timeRemainingFact,           _timeRemainingFactName);
     _addFact(&_timeRemainingStrFact,        _timeRemainingStrFactName);
     _addFact(&_chargeStateFact,             _chargeStateFactName);
     _addFact(&_instantPowerFact,            _instantPowerFactName);
     _addFact(&_timeUntilNextThresholdFact,  _timeUntilNextThresholdFactName);
+    _addFact(&_mahUntilNextThresholdFact,  _mahUntilNextThresholdFactName);
     _addFact(&_nextThresholdNameFact,       _nextThresholdNameFactName);
     _addFact(&_maxCapacityFact,             _maxCapacityFactName);
 
@@ -78,18 +87,22 @@ VehicleBatteryFactGroup::VehicleBatteryFactGroup(uint8_t batteryId, QObject* par
     _voltageFact.setRawValue               (qQNaN());
     _currentFact.setRawValue               (qQNaN());
     _mahConsumedFact.setRawValue           (qQNaN());
+    _rawMahConsumedFact.setRawValue        (qQNaN());
     _temperatureFact.setRawValue           (qQNaN());
     _percentRemainingFact.setRawValue      (qQNaN());
+    _consumedBasedRemainingFact.setRawValue(qQNaN());
     _timeRemainingFact.setRawValue         (qQNaN());
     _chargeStateFact.setRawValue           (MAV_BATTERY_CHARGE_STATE_UNDEFINED);
     _instantPowerFact.setRawValue          (qQNaN());
     _timeUntilNextThresholdFact.setRawValue(qQNaN());
+    _mahUntilNextThresholdFact.setRawValue (qQNaN());
     _nextThresholdNameFact.setRawValue     ("");
     _maxCapacityFact.setRawValue           (qQNaN());
 
     connect(&_timeRemainingFact, &Fact::rawValueChanged, this, &VehicleBatteryFactGroup::_timeRemainingChanged);
     if (_vehicle) {
         connect(_vehicle->parameterManager(), &ParameterManager::parametersReadyChanged, this, &VehicleBatteryFactGroup::_parametersReady);
+        _loadBatteryParameters();  // Parameters will sometimes load before we can connect signal, so we need to call this explicitly as well
     }
 }
 
@@ -104,6 +117,7 @@ void VehicleBatteryFactGroup::updateTimeUntilNextThreshold()
 
     if (qIsNaN(currentMahConsumed) || qIsNaN(maxCapacity) || qIsNaN(timeRemainingInHours) || timeRemainingInHours <= 0) {
         _timeUntilNextThresholdFact.setRawValue(qQNaN());
+        _mahUntilNextThresholdFact.setRawValue(qQNaN());
         _nextThresholdNameFact.setRawValue("N/A");
         return;
     }
@@ -116,14 +130,17 @@ void VehicleBatteryFactGroup::updateTimeUntilNextThreshold()
             double estimatedAverageCurrentInMa = mahRemaining / timeRemainingInHours;
             double timeUntilThresholdInHours = (threshold.mahThreshold - currentMahConsumed) / estimatedAverageCurrentInMa;
             double timeUntilThresholdInSeconds = timeUntilThresholdInHours * 3600;
+            double mhaUntilThreshold = threshold.mahThreshold - currentMahConsumed;
 
             _timeUntilNextThresholdFact.setRawValue(timeUntilThresholdInSeconds);
+            _mahUntilNextThresholdFact.setRawValue(mhaUntilThreshold);
             _nextThresholdNameFact.setRawValue(threshold.name);
             return;
         }
     }
     // If we're past all thresholds
     _timeUntilNextThresholdFact.setRawValue(0);
+    _mahUntilNextThresholdFact.setRawValue(0);
     _nextThresholdNameFact.setRawValue("All thresholds passed");
 }
 
@@ -163,7 +180,6 @@ void VehicleBatteryFactGroup::_parametersReady(bool parametersReady)
 {
     if (parametersReady) {
         _loadBatteryParameters();
-        disconnect(_vehicle->parameterManager(), &ParameterManager::parametersReadyChanged, this, &VehicleBatteryFactGroup::_parametersReady);
     }
 }
 
@@ -220,27 +236,56 @@ void VehicleBatteryFactGroup::_handleHighLatency2(Vehicle* vehicle, mavlink_mess
     group->_setTelemetryAvailable(true);
 }
 
-void VehicleBatteryFactGroup::persistConsumedForVehicle(int vehicleId)
+
+bool VehicleBatteryFactGroup::hasPersistedConsumed()
 {
-    if (_persistedConsumed.contains(vehicleId))
+    return hasPersistedConsumedForVehicle(_vehicle);
+}
+
+double VehicleBatteryFactGroup::consumedOffset()
+{
+    if (!_vehicle) return 0.0;
+
+    return getPersistedConsumed(_vehicle, _batteryIdFact.rawValue().toUInt());
+}
+
+void VehicleBatteryFactGroup::persistConsumedForVehicle(Vehicle* vehicle)
+{
+    if (vehicle && _persistedConsumed.contains(vehicle->id()))
     {
-        QMap<uint8_t, QPair<double, double>>& batteriesMap = _persistedConsumed[vehicleId];
+        QMap<uint8_t, QPair<double, double>>& batteriesMap = _persistedConsumed[vehicle->id()];
         
         for (auto it = batteriesMap.begin(); it != batteriesMap.end(); ++it)
         {
             it.value().first = it.value().second;
+            
+            VehicleBatteryFactGroup* group = _findOrAddBatteryGroupById(vehicle, it.key());
+            if (group) emit group->hasPersistedConsumedChanged();
         }
     }
 }
 
-void VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(int vehicleId)
+void VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(Vehicle* vehicle)
 {
-    _persistedConsumed.remove(vehicleId);
+    if (vehicle && _persistedConsumed.contains(vehicle->id()))
+    {
+        QMap<uint8_t, QPair<double, double>>& batteriesMap = _persistedConsumed[vehicle->id()];
+        
+        for (auto it = batteriesMap.begin(); it != batteriesMap.end(); ++it)
+        {
+            it.value().first = 0.0;  // Reset before sending signal, then delete all
+            
+            VehicleBatteryFactGroup* group = _findOrAddBatteryGroupById(vehicle, it.key());
+            if (group) emit group->hasPersistedConsumedChanged();
+        }
+        _persistedConsumed.remove(vehicle->id());
+    }
 }
 
-bool VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(int vehicleId) {
-    if (_persistedConsumed.contains(vehicleId)) {
-        const QMap<uint8_t, QPair<double, double>>& batteriesMap = _persistedConsumed[vehicleId];
+bool VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(Vehicle* vehicle)
+{
+    if (vehicle && _persistedConsumed.contains(vehicle->id())) {
+        const QMap<uint8_t, QPair<double, double>>& batteriesMap = _persistedConsumed[vehicle->id()];
         for (const auto& batteryPair : batteriesMap) {
             if (batteryPair.first > 0) {
                 return true;
@@ -250,10 +295,10 @@ bool VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(int vehicleId) {
     return false;
 }
 
-double VehicleBatteryFactGroup::getPersistedConsumed(int vehicleId, uint8_t batteryId)
+double VehicleBatteryFactGroup::getPersistedConsumed(Vehicle* vehicle, uint8_t batteryId)
 {
-    if (_persistedConsumed.contains(vehicleId)) {
-        const auto& batteriesMap = _persistedConsumed[vehicleId];
+    if (vehicle && _persistedConsumed.contains(vehicle->id())) {
+        const auto& batteriesMap = _persistedConsumed[vehicle->id()];
         if (batteriesMap.contains(batteryId)) {
             return batteriesMap[batteryId].first;
         }
@@ -261,13 +306,15 @@ double VehicleBatteryFactGroup::getPersistedConsumed(int vehicleId, uint8_t batt
     return 0.0;
 }
 
-void VehicleBatteryFactGroup::setCurrentConsumed(int vehicleId, uint8_t batteryId, double consumed)
+void VehicleBatteryFactGroup::setCurrentConsumed(Vehicle* vehicle, uint8_t batteryId, double consumed)
 {
-    if (!_persistedConsumed.contains(vehicleId)) {
-        _persistedConsumed[vehicleId] = QMap<uint8_t, QPair<double, double>>();
+    if (!vehicle) return;
+
+    if (!_persistedConsumed.contains(vehicle->id())) {
+        _persistedConsumed[vehicle->id()] = QMap<uint8_t, QPair<double, double>>();
     }
 
-    _persistedConsumed[vehicleId][batteryId].second = consumed;
+    _persistedConsumed[vehicle->id()][batteryId].second = consumed;
 }
 
 void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_message_t& message)
@@ -300,14 +347,23 @@ void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_mes
     double current = batteryStatus.current_battery == -1 ? qQNaN() : static_cast<double>(batteryStatus.current_battery) / 100.0;
     
 
-    double consumed;
+    double consumed, consumed_raw, consumedBasedRemaining;
 
     if (batteryStatus.current_consumed < 0) {
         consumed = qQNaN();
+        consumed_raw = qQNaN();
+        consumedBasedRemaining = qQNaN(); 
     } else {
-        consumed = batteryStatus.current_consumed;
-        consumed += getPersistedConsumed(vehicle->id(), batteryStatus.id);
-        setCurrentConsumed(vehicle->id(), batteryStatus.id, consumed);
+        consumed_raw = batteryStatus.current_consumed;
+        consumed = consumed_raw + getPersistedConsumed(vehicle, batteryStatus.id);
+        setCurrentConsumed(vehicle, batteryStatus.id, consumed);
+    
+        double maxCapacity = group->maxCapacity()->rawValue().toDouble();
+        if (!qIsNaN(maxCapacity) && maxCapacity != 0.0) {
+            consumedBasedRemaining = (maxCapacity - consumed) / maxCapacity * 100;
+        } else {
+            consumedBasedRemaining = qQNaN(); 
+        }
     }
 
 
@@ -317,6 +373,8 @@ void VehicleBatteryFactGroup::_handleBatteryStatus(Vehicle* vehicle, mavlink_mes
     group->voltage()->setRawValue           (totalVoltage);
     group->current()->setRawValue           (current);
     group->mahConsumed()->setRawValue       (consumed);
+    group->rawMahConsumed()->setRawValue    (consumed_raw);
+    group->consumedBasedRemaining()->setRawValue(consumedBasedRemaining);
     group->percentRemaining()->setRawValue  (batteryStatus.battery_remaining == -1 ?    qQNaN() : batteryStatus.battery_remaining);
     group->timeRemaining()->setRawValue     (batteryStatus.time_remaining == 0 ?        qQNaN() : batteryStatus.time_remaining);
     group->chargeState()->setRawValue       (batteryStatus.charge_state);

@@ -39,8 +39,36 @@
     "units":            "%"
 },
 {
+    "name":             "consumedBasedRemaining",
+    "shortDesc":        "Percent",
+    "type":             "double",
+    "decimalPlaces":    0,
+    "units":            "%"
+},
+{
     "name":             "mahConsumed",
     "shortDesc":        "Consumed",
+    "type":             "double",
+    "decimalPlaces":    0,
+    "units":            "mAh"
+},
+{
+    "name":             "rawMahConsumed",
+    "shortDesc":        "Raw Consumed",
+    "type":             "double",
+    "decimalPlaces":    0,
+    "units":            "mAh"
+},
+{
+    "name":             "timeUntilNextThreshold",
+    "shortDesc":        "Until Next Threshold",
+    "type":             "double",
+    "decimalPlaces":    0,
+    "units":            "s"
+},
+{
+    "name":             "mahUntilNextThreshold",
+    "shortDesc":        "Until Next Threshold",
     "type":             "double",
     "decimalPlaces":    0,
     "units":            "mAh"

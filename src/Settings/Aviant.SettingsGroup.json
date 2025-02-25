@@ -77,6 +77,24 @@
     "min":         0
 },
 {
+    "name":        "persistentConsumeWarnLimit",
+    "shortDesc":   "Battery failsafe warning limit",
+    "longDesc":    "A persistent consume offset above this limit will show a battery failsafe warning",
+    "type":        "double",
+    "default":     200,
+    "units":       "mAh",
+    "min":         0
+},
+{
+    "name":        "unitUntilThreshold",
+    "shortDesc":   "Unit until next threshold",
+    "longDesc":    "The unit to show for remaining until next threshold",
+    "type":        "int32",
+    "enumStrings": "None,mAh,min",
+    "enumValues":  "-1,0,1",
+    "default":     0
+},
+{
     "name":                "missionToolsInsecureHttps",
     "shortDesc":           "Insecure HTTPS connections",
     "longDesc":            "Do not validate server certificate for mission tools HTTPS connection",
