@@ -229,28 +229,44 @@ Item {
                                 spacing:                _margin
 
                                 QGCLabel {
-                                    Layout.preferredWidth: parent.width / 4
+                                    Layout.preferredWidth: parent.width / 5
                                     text:                  "Order ID"
                                     font.bold:             true
+                                    wrapMode:              Text.WordWrap
+                                    elide:                 Text.ElideRight
                                 }
 
                                 QGCLabel {
-                                    Layout.preferredWidth: parent.width / 4
+                                    Layout.preferredWidth: parent.width / 5
                                     text:                  "Requested at"
                                     font.bold:             true
+                                    wrapMode:              Text.WordWrap
+                                    elide:                 Text.ElideRight
                                 }
 
                                 QGCLabel {
-                                    Layout.preferredWidth: parent.width / 4
+                                    Layout.preferredWidth: parent.width / 5
                                     text:                  "Mission status"
                                     font.bold:             true
+                                    wrapMode:              Text.WordWrap
+                                    elide:                 Text.ElideRight
+                                }
+                                QGCLabel {
+                                    Layout.preferredWidth: parent.width / 5
+                                    text:                  "Intersection group"
+                                    font.bold:             true
+                                    horizontalAlignment:   Text.AlignHCenter
+                                    wrapMode:              Text.WordWrap
+                                    elide:                 Text.ElideRight
                                 }
 
                                 QGCLabel {
-                                    Layout.preferredWidth: parent.width / 4
+                                    Layout.preferredWidth: parent.width / 5
                                     text:                  "Mission file"
                                     font.bold:             true
                                     horizontalAlignment:   Text.AlignHCenter
+                                    wrapMode:              Text.WordWrap
+                                    elide:                 Text.ElideRight
                                 }
                             }
                         }
@@ -274,15 +290,17 @@ Item {
                                     spacing:         _margin
 
                                     QGCLabel {
-                                        Layout.preferredWidth: parent.width / 4
+                                        Layout.preferredWidth: parent.width / 5
                                         text:                  modelData && modelData.display_id !== undefined ? modelData.display_id : "Order ID not available"
                                         wrapMode:              Text.WordWrap
+                                        elide:                 Text.ElideRight
                                     }
 
                                     QGCLabel {
-                                        Layout.preferredWidth: parent.width / 4
+                                        Layout.preferredWidth: parent.width / 5
                                         text:                  modelData && modelData.requested_ts ? removeMilliseconds(modelData.requested_ts) : "Requested time not available"
                                         wrapMode:              Text.WordWrap
+                                        elide:                 Text.ElideRight
                                         
                                         function removeMilliseconds(dateString) {
                                             if (!dateString) return "Date not available"
@@ -292,9 +310,10 @@ Item {
                                     }
 
                                     QGCLabel {
-                                        Layout.preferredWidth: parent.width / 4
+                                        Layout.preferredWidth: parent.width / 5
                                         text:                  modelData && displayMissionStatus(modelData.mission_plan)
                                         wrapMode:              Text.WordWrap
+                                        elide:                 Text.ElideRight
 
                                         function displayMissionStatus(missionPlan) {
                                             if (!missionPlan) {
@@ -311,15 +330,65 @@ Item {
                                             return "Mission not QCed"
                                         }
                                     }
+
+                                    Item {
+                                        Layout.fillHeight:     true
+                                        Layout.fillWidth:      true
+                                        Layout.preferredWidth: parent.width / 5
+
+                                        property var intersectionGroups: {
+                                            // Create groups of intersecting orders
+                                            let groups = []
+                                            let orderGroups = {}
+                                            
+                                            // First pass: create initial groups
+                                            if (ordersPopup.kyteOrders) {
+                                                ordersPopup.kyteOrders.forEach((order, orderIndex) => {
+                                                    if (order.overlapping_flight_paths && order.overlapping_flight_paths.length > 0) {
+                                                        let found = false
+                                                        // Check existing groups
+                                                        for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+                                                            if (groups[groupIndex].some(groupOrderId => 
+                                                                order.overlapping_flight_paths.includes(groupOrderId))) {
+                                                                // Add to existing group
+                                                                groups[groupIndex].push(order.display_id)
+                                                                orderGroups[order.display_id] = groupIndex + 1
+                                                                found = true
+                                                                break
+                                                            }
+                                                        }
+                                                        if (!found) {
+                                                            // Create new group
+                                                            groups.push([order.display_id])
+                                                            orderGroups[order.display_id] = groups.length
+                                                        }
+                                                    }
+                                                })
+                                            }
+                                            return orderGroups
+                                        }
+
+                                        QGCLabel {
+                                            anchors.fill:         parent
+                                            anchors.margins:      ScreenTools.defaultFontPixelWidth
+                                            horizontalAlignment:  Text.AlignHCenter
+                                            verticalAlignment:    Text.AlignVCenter
+                                            text:                modelData && modelData.overlapping_flight_paths && 
+                                                                modelData.overlapping_flight_paths.length > 0 ? 
+                                                                parent.intersectionGroups[modelData.display_id] : ""
+                                            font.pointSize:      ScreenTools.defaultFontPointSize * 1.2
+                                            font.bold:           true
+                                        }
+                                    }
                                     
                                     Item {
                                         Layout.fillHeight:     true
-                                        Layout.preferredWidth: parent.width / 4
+                                        Layout.preferredWidth: parent.width / 5
 
                                         QGCButton {
                                             anchors.centerIn: parent
                                             id:               missionButton
-                                            text:             qsTr("Select mission")
+                                            text:             qsTr("Select")
                                             visible:          modelData && modelData.id && modelData.mission_plan
                                             onClicked: {
                                                 _aviantMissionTools.downloadMissionFileFromOrder(modelData.id)
@@ -1502,9 +1571,9 @@ Item {
                 }
 
                 QGCComboBox {
-                    Layout.fillWidth:  true
-                    model:             _aviantMissionTools.takeoffTypeList
-                    currentIndex:      _aviantMissionTools.takeoffType
+                    Layout.fillWidth:   true
+                    model:              _aviantMissionTools.takeoffTypeList
+                    currentIndex:       _aviantMissionTools.takeoffType
                     onActivated: {
                         _aviantMissionTools.takeoffType = index
                          if (typesSet()) {
