@@ -18,7 +18,8 @@ import QGroundControl.Templates     1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Palette       1.0
 
-ColumnLayout {
+Item {
+    id: root
     property var    instrumentValueData:            null
     property bool   settingsUnlocked:               false
     property alias  contentWidth:                   label.contentWidth
@@ -30,21 +31,35 @@ ColumnLayout {
     property var    _rgFontSizeTightHeights:        [ _tightDefaultFontHeight * _rgFontSizeRatios[0] + 2, _tightDefaultFontHeight * _rgFontSizeRatios[1] + 2, _tightDefaultFontHeight * _rgFontSizeRatios[2] + 2, _tightDefaultFontHeight * _rgFontSizeRatios[3] + 2 ]
     property real   _tightHeight:                   _rgFontSizeTightHeights[instrumentValueData.factValueGrid.fontSize]
     property real   _fontSize:                      _rgFontSizes[instrumentValueData.factValueGrid.fontSize]
-    property real   _horizontalLabelSpacing:        ScreenTools.defaultFontPixelWidth
-    property real   _width:                         0
-    property real   _height:                        0
+    property bool _iconVisible: instrumentValueData.rangeType === InstrumentValueData.IconSelectRange || instrumentValueData.icon
 
-    QGCLabel {
-        id:                 label
-        Layout.alignment:   Qt.AlignVCenter
-        font.pointSize:     _fontSize
-        text:               valueText()
+    Layout.fillHeight:      true
+    Layout.fillWidth:       true
+    Layout.alignment:       Qt.AlignVCenter
+    Layout.preferredWidth:  valueRepeater.maxWidth
+    Layout.preferredHeight: _tightHeight + ScreenTools.defaultFontPixelHeight
 
-        function valueText() {
-            if (instrumentValueData.fact) {
-                return instrumentValueData.fact.enumOrValueString + (instrumentValueData.showUnits ? " " + instrumentValueData.fact.units : "")
-            } else {
-                return qsTr("--.--")
+    Rectangle {
+        anchors.fill: parent
+        anchors.leftMargin: -ScreenTools.defaultFontPixelWidth
+        color: instrumentValueData.isValidColor(instrumentValueData.currentColor) ? instrumentValueData.currentColor : "transparent"
+        opacity: instrumentValueData.currentOpacity
+
+        QGCLabel {
+            id: label
+            anchors.fill: parent
+            // anchors.margins: ScreenTools.defaultFontPixelWidth / 2
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.pointSize: _fontSize
+            text: valueText()
+
+            function valueText() {
+                if (instrumentValueData.fact) {
+                    return instrumentValueData.fact.enumOrValueString + (instrumentValueData.showUnits ? " " + instrumentValueData.fact.units : "")
+                } else {
+                    return qsTr("--.--")
+                }
             }
         }
     }
