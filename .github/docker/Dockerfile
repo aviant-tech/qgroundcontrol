@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:jammy
 USER root
 ENV QT_VERSION=5.15.2
 ENV DEBIAN_FRONTEND noninteractive
