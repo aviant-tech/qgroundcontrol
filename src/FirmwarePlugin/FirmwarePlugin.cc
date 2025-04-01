@@ -324,6 +324,9 @@ const QVariantList& FirmwarePlugin::toolIndicators(const Vehicle*)
         if (!aviantSettings->showBatteryWidget()->rawValue().toBool()) {
             _toolIndicatorList.append(QVariant::fromValue(QUrl::fromUserInput("qrc:/toolbar/BatteryIndicator.qml")));
         }
+        if (!aviantSettings->showAltitudeWidget()->rawValue().toBool()) {
+            _toolIndicatorList.append(QVariant::fromValue(QUrl::fromUserInput("qrc:/toolbar/AltitudeIndicator.qml")));
+        }
     }
     return _toolIndicatorList;
 }

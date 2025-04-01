@@ -4,6 +4,7 @@ add_custom_target(FligthMapWidgetsQml
 		CenterMapDropPanel.qml
 		CompassRing.qml
 		BatteryWidget.qml
+		AltitudeWidget.qml
 		VehicleWarningSideBar.qml
 		WinchControl.qml
 		MapFitFunctions.qml

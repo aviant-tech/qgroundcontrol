@@ -18,6 +18,31 @@
     "default":     true
 },
 {
+    "name":        "showAltitudeWidget",
+    "shortDesc":   "Show altitude widget",
+    "longDesc":    "Show altitude widget",
+    "type":        "bool",
+    "default":     true
+},
+{
+    "name":      "minVisibleRangeInMeters",
+    "shortDesc": "Min. visible altitude range",
+    "longDesc":  "The minimum distance in meters for which the flight path should be visible in the fly view altitude widget.",
+    "type":      "uint32",
+    "min":       20,
+    "units":     "m",
+    "default":   60
+},
+{
+    "name":      "metersBetweenLines",
+    "shortDesc": "Meters between lines",
+    "longDesc":  "The distance in meters between the lines in the fly view altitude widget.",
+    "type":      "uint32",
+    "min":       1,
+    "units":     "m",
+    "default":   10
+},
+{
     "name":             "showWinchControlMenu",
     "shortDesc": "Show winch control menu",
     "longDesc":  "Shows the winch control menu buttons and slider",
