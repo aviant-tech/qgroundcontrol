@@ -29,8 +29,8 @@ RUN apt update && apt -y --quiet --no-install-recommends install \
 		curl \
 		espeak \
 		fuse \
-		g++-10 \
-		gcc-10 \
+		g++ \
+		gcc \
 		git \
 		gosu \
 		kmod \
@@ -58,12 +58,6 @@ RUN apt update && apt -y --quiet --no-install-recommends install \
 	&& apt-get -y autoremove \
 	&& apt-get clean autoclean \
 	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
-
-# Configure GCC 10 as the default compiler, as the default gcc version is 11
-# which causes build to fail
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10 \
-    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
-
 # Install Qt
 COPY deploy/docker/install-qt-linux.sh /tmp/qt/
 RUN /tmp/qt/install-qt-linux.sh
