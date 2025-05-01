@@ -50,6 +50,7 @@ Item {
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property var    _aviantSettings:        QGroundControl.settingsManager.aviantSettings
     property bool   _showBatteryWidget:     _activeVehicle != null && _aviantSettings.showBatteryWidget.rawValue
+    property bool   _showAltitudeWidget:    _activeVehicle != null && _aviantSettings.showAltitudeWidget.rawValue
     property bool   _showWinchControlMenu:  _aviantSettings.showWinchControlMenu.rawValue
 
     QGCToolInsets {
@@ -120,6 +121,40 @@ Item {
         availableHeight:            parent.height - y - _toolsMargin
 
         property real rightInset: visible ? parent.width - x : 0
+    }
+
+    AltitudeWidget {
+        id:                     altitudeWidget
+        anchors.margins:        _toolsMargin
+        anchors.right:          parent.right
+        anchors.top:            instrumentPanel.bottom
+        width:                  _rightPanelWidth / 2
+        visible:                _showAltitudeWidget
+        missionController:      _missionController
+        availableHeight:        parent.height - (winchControl.height + instrumentPanel.height + ScreenTools.defaultFontPixelHeight * 2)
+        minVisibleRangeInMeters: _aviantSettings.minVisibleRangeInMeters.rawValue
+        metersBetweenLines:     _aviantSettings.metersBetweenLines.rawValue
+
+        states: [
+            State {
+                name: "default"
+                when: altitudeWidget.availableHeight >= 300
+                AnchorChanges {
+                    target: altitudeWidget
+                    anchors.top: instrumentPanel.bottom
+                    anchors.left: undefined
+                }
+            },
+            State {
+                name: "rightOfInstrument"
+                when: altitudeWidget.availableHeight < 300
+                AnchorChanges {
+                    target: altitudeWidget
+                    anchors.top: instrumentPanel.top
+                    anchors.right: instrumentPanel.left
+                }
+            }
+        ]
     }
 
     PhotoVideoControl {

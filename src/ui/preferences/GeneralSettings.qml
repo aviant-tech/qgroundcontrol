@@ -801,6 +801,25 @@ Rectangle {
                                 fact:       _aviantSettings.showBatteryWidget
                             }
                             FactCheckBox {
+                                id:         promptShowAltitudeWidget
+                                text:       qsTr("Show altitude widget")
+                                fact:       _aviantSettings.showAltitudeWidget
+                            }
+                            QGCLabel {
+                                text:       _aviantSettings.minVisibleRangeInMeters.shortDescription
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _valueFieldWidth
+                                fact:                   _aviantSettings.minVisibleRangeInMeters
+                            }
+                            QGCLabel {
+                                text:       _aviantSettings.metersBetweenLines.shortDescription
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _valueFieldWidth
+                                fact:                   _aviantSettings.metersBetweenLines
+                            }
+                            FactCheckBox {
                                 id:         promptShowWinchControlMenu
                                 text:       qsTr("Show winch control menu")
                                 fact:       _aviantSettings.showWinchControlMenu
