@@ -72,6 +72,14 @@ QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base)
     }
 }
 
+QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base, int missionPlanId) {
+    if (operation == FetchLandingPointAdjustedMission) {
+        return QUrl(base + "/mission_plan/" + QString::number(missionPlanId) + "/download_for_aircraft/");
+    } else {
+        return _getMmsUrl(operation, base);
+    }
+}
+
 QUrl AviantMissionTools::_getKyteBackendUrl(Operation operation, QString base)
 {
     switch (operation) {
@@ -80,14 +88,6 @@ QUrl AviantMissionTools::_getKyteBackendUrl(Operation operation, QString base)
         case NoOperation:
         default:
             return QUrl();
-    }
-}
-
-QUrl AviantMissionTools::_getKyteBackendUrl(Operation operation, QString base, int orderId) {
-    if (operation == FetchKyteOrderMissionFile) {
-        return QUrl(base + "/orders/api/v2/orders/" + QString::number(orderId) + "/mission-file/");
-    } else {
-        return _getKyteBackendUrl(operation, base);
     }
 }
 
@@ -100,8 +100,8 @@ QString AviantMissionTools::_getOperationName(Operation operation)
             return QString("RallyPointHeight");
         case NoOperation:
             return QString("NoOperation");
-        case FetchKyteOrderMissionFile:
-            return QString("FetchKyteOrderMissionFile");
+        case FetchLandingPointAdjustedMission:
+            return QString("FetchLandingPointAdjustedMission");
         default:
             return QString("Unknown");
     }
@@ -334,7 +334,7 @@ void AviantMissionTools::_requestComplete(QNetworkReply *reply)
         case FetchKyteOrders:
             _parseKyteOrdersResponse(bytes);
             break;
-        case FetchKyteOrderMissionFile:
+        case FetchLandingPointAdjustedMission:
             _expectedHash = reply->rawHeader("X-File-Hash");
             if (_expectedHash.isEmpty()) {
                 qgcApp()->showAppMessage(tr("No hash received with mission file"), tr("Mission Tools"));
@@ -420,7 +420,7 @@ void AviantMissionTools::_parseAndLoadMissionResponse(const QByteArray &bytes)
         return;
     }
 
-    if (_currentOperation == FetchKyteOrderMissionFile) {
+    if (_currentOperation == FetchLandingPointAdjustedMission) {
         _masterController->clearCurrentPlanFile();
     }
 
@@ -466,11 +466,24 @@ void AviantMissionTools::fetchKyteOrderMissions()
     _initiateNetworkRequest(FetchKyteOrders, url);
 }
 
-void AviantMissionTools::downloadMissionFileFromOrder(int orderId)
+void AviantMissionTools::downloadMissionFileFromOrder(int missionPlanId, const QString& aircraftName)
 {
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
-    QUrl url = _getKyteBackendUrl(FetchKyteOrderMissionFile, aviantSettings->kyteBackendUrl()->rawValue().toString(), orderId);
-    _initiateNetworkRequest(FetchKyteOrderMissionFile, url);
+    QUrl url = _getMmsUrl(FetchLandingPointAdjustedMission, aviantSettings->missionToolsUrl()->rawValue().toString(), missionPlanId);
+
+    if (!url.isValid()) {
+        qgcApp()->showAppMessage(tr("Could not generate valid base URL for mission download."), tr("Mission Tools Error"));
+        return;
+    }
+
+    QUrlQuery query;
+    if (url.hasQuery()) {
+        query = QUrlQuery(url.query());
+    }
+    query.addQueryItem("aircraft_name", aircraftName);
+    url.setQuery(query);
+
+    _initiateNetworkRequest(FetchLandingPointAdjustedMission, url);
 }
 
 void AviantMissionTools::_parseKyteOrdersResponse(const QByteArray &bytes)

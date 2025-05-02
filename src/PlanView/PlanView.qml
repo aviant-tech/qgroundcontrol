@@ -242,13 +242,7 @@ Item {
 
                                 QGCLabel {
                                     Layout.preferredWidth: parent.width / 4
-                                    text:                  "Mission status"
-                                    font.bold:             true
-                                }
-
-                                QGCLabel {
-                                    Layout.preferredWidth: parent.width / 4
-                                    text:                  "Mission file"
+                                    text:                  "Mission"
                                     font.bold:             true
                                     horizontalAlignment:   Text.AlignHCenter
                                 }
@@ -290,27 +284,6 @@ Item {
                                             return formattedDate
                                         }
                                     }
-
-                                    QGCLabel {
-                                        Layout.preferredWidth: parent.width / 4
-                                        text:                  modelData && displayMissionStatus(modelData.mission_plan)
-                                        wrapMode:              Text.WordWrap
-
-                                        function displayMissionStatus(missionPlan) {
-                                            if (!missionPlan) {
-                                                return "Mission not available"
-                                            }
-                                            const qcStatus = missionPlan.qc_status
-                                            if (qcStatus) {
-                                                return qcStatus
-                                            }
-                                            const confluenceQcUrl = missionPlan.confluence_qc_url
-                                            if (confluenceQcUrl) {
-                                                return "QC in confluence"
-                                            }
-                                            return "Mission not QCed"
-                                        }
-                                    }
                                     
                                     Item {
                                         Layout.fillHeight:     true
@@ -320,9 +293,19 @@ Item {
                                             anchors.centerIn: parent
                                             id:               missionButton
                                             text:             qsTr("Select mission")
-                                            visible:          modelData && modelData.id && modelData.mission_plan
+                                            visible:          modelData && modelData.mms_mission_id
                                             onClicked: {
-                                                _aviantMissionTools.downloadMissionFileFromOrder(modelData.id)
+                                                var currentActiveVehicle = QGroundControl.multiVehicleManager ? QGroundControl.multiVehicleManager.activeVehicle : null;
+                                                var aircraftName = currentActiveVehicle ? currentActiveVehicle.name : "";
+
+                                                if (!aircraftName || aircraftName === "") {
+                                                    mainWindow.showMessageDialog(
+                                                        qsTr("Missing Aircraft Name"),
+                                                        qsTr("Cannot download mission. No active vehicle found or the active vehicle does not have a name configured.")
+                                                    )
+                                                    return; 
+                                                }
+                                                _aviantMissionTools.downloadMissionFileFromOrder(modelData.mms_mission_id, aircraftName)
                                                 hideDialog()
                                             }
                                         }
@@ -330,7 +313,7 @@ Item {
                                         QGCLabel {
                                             anchors.centerIn: parent
                                             id:               missionNotAvailableLabel
-                                            visible:          !modelData || !modelData.id || !modelData.mission_plan
+                                            visible:          !modelData || !modelData.mms_mission_id
                                             text:             "Mission not available"
                                         }
                                     }
@@ -836,7 +819,7 @@ Item {
                         showAlternateIcon:      _planMasterController.dirty
                         iconSource:             "/qmlimages/MapSync.svg"
                         alternateIconSource:    "/qmlimages/MapSyncChanged.svg"
-                        dropPanelComponent:     syncDropPanel
+                        dropPanelComponent:     syncDropPanelur
                     },
                     ToolStripAction {
                         text:       qsTr("Takeoff")
@@ -1225,7 +1208,7 @@ Item {
     }
 
     Component {
-        id: syncDropPanel
+        id: syncDropPanelur
 
         ColumnLayout {
             id:         columnHolder
