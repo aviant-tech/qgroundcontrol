@@ -316,7 +316,12 @@ void AviantMissionTools::_requestComplete(QNetworkReply *reply)
             // Set the validation result text instead of signaling error in a pop-up
             _validationResult = tr("Error validating mission:") + "\n" + reply->errorString();
         } else {
-            qgcApp()->showAppMessage(tr("Request failed:\n") + reply->errorString(), tr("Mission Tools"));
+            QByteArray responseBody = reply->readAll(); 
+            QString errorMessage = reply->errorString();
+            if (!responseBody.isEmpty()) {
+                errorMessage += tr("\n\n%1").arg(QString::fromUtf8(responseBody));
+            }
+            qgcApp()->showAppMessage(errorMessage, tr("An error occured"));
         }
         _currentOperation = NoOperation;
         emit stateChanged();
