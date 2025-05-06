@@ -447,7 +447,14 @@ void AviantMissionTools::_initiateNetworkRequest(Operation operationType, const 
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
 
     _networkRequest.setUrl(url);
-    _networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->kyteBackendToken()->rawValue().toString().toUtf8());
+
+    if (operationType == FetchLandingPointAdjustedMission) {
+        // Use X-API-KEY for MMS
+        _networkRequest.setRawHeader(QByteArray("X-API-KEY"), aviantSettings->missionToolsToken()->rawValue().toString().toUtf8());
+    } else {
+        // Use Authorization Token for Kyte Backend
+        _networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->kyteBackendToken()->rawValue().toString().toUtf8());
+    }
 
     QSslConfiguration sslConf = _networkRequest.sslConfiguration();
     sslConf.setPeerVerifyMode(aviantSettings->missionToolsInsecureHttps()->rawValue().toBool() ? QSslSocket::VerifyNone : QSslSocket::AutoVerifyPeer);
