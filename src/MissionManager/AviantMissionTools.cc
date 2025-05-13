@@ -13,6 +13,9 @@
 #include "SettingsManager.h"
 #include "AppSettings.h"
 #include "JsonHelper.h"
+#include <QDateTime>
+
+qint64 AviantMissionTools::_requestIdCounter = 0;
 
 AviantMissionTools::AviantMissionTools(QObject* parent)
     : QObject           (parent)
@@ -451,6 +454,9 @@ void AviantMissionTools::_initiateNetworkRequest(Operation operationType, const 
     if (operationType == FetchLandingPointAdjustedMission) {
         // Use X-API-KEY for MMS
         _networkRequest.setRawHeader(QByteArray("X-API-KEY"), aviantSettings->missionToolsToken()->rawValue().toString().toUtf8());
+        // Add Request-Id header
+        QString requestId = QString::number(QDateTime::currentMSecsSinceEpoch()) + "-" + QString::number(++_requestIdCounter);
+        _networkRequest.setRawHeader(QByteArray("Request-Id"), requestId.toUtf8());
     } else {
         // Use Authorization Token for Kyte Backend
         _networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->kyteBackendToken()->rawValue().toString().toUtf8());

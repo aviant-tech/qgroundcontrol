@@ -115,4 +115,5 @@ private:
     QJsonDocument           _lastValidatedJson;
     QList<QJsonObject>      _kyteOrders;
     QByteArray              _expectedHash;
+    static qint64           _requestIdCounter; // Static counter for Request-Id
 };
