@@ -34,7 +34,7 @@ public:
         MissionValidation,
         RallyPointHeight,
         FetchKyteOrders,
-        FetchKyteOrderMissionFile
+        FetchLandingPointAdjustedMission
     };
 
     enum TakeoffType {
@@ -68,7 +68,7 @@ public:
     Q_INVOKABLE void requestOperation(Operation operation);
     Q_INVOKABLE void cancelOperation(Operation operation);
     Q_INVOKABLE void fetchKyteOrderMissions();
-    Q_INVOKABLE void downloadMissionFileFromOrder(int orderId);
+    Q_INVOKABLE void downloadMissionFileFromOrder(int orderId, const QString& aircraftName);
 
     PlanMasterController* masterController       (void) const { return _masterController; }
     bool                  requestInProgress      (void) const { return _currentOperation != NoOperation; }
@@ -91,8 +91,8 @@ private slots:
 
 private:
     QUrl           _getMmsUrl                   (Operation operation, QString base);
+    QUrl           _getMmsUrl                   (Operation operation, QString base, int missionPlanId, QString aircraftName);
     QUrl           _getKyteBackendUrl           (Operation operation, QString base);
-    QUrl           _getKyteBackendUrl           (Operation operation, QString base, int orderId);
     void           _parseValidationResponse     (const QByteArray &bytes);
     void           _parseAndLoadMissionResponse (const QByteArray &bytes);
     static QString _getOperationName            (Operation operation);
@@ -115,4 +115,5 @@ private:
     QJsonDocument           _lastValidatedJson;
     QList<QJsonObject>      _kyteOrders;
     QByteArray              _expectedHash;
+    static qint64           _requestIdCounter; // Static counter for Request-Id
 };
