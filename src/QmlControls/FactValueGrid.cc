@@ -29,6 +29,19 @@ const char* FactValueGrid::_rangeValuesKey      = "rangeValues";
 const char* FactValueGrid::_rangeColorsKey      = "rangeColors";
 const char* FactValueGrid::_rangeIconsKey       = "rangeIcons";
 const char* FactValueGrid::_rangeOpacitiesKey   = "rangeOpacities";
+const char* FactValueGrid::_individualFwMrRangesKey = "individualFwMrRanges";
+
+// Definitions for FW specific range keys
+const char* FactValueGrid::_fwRangeValuesKey    = "fwRangeValues";
+const char* FactValueGrid::_fwRangeColorsKey    = "fwRangeColors";
+const char* FactValueGrid::_fwRangeIconsKey     = "fwRangeIcons";
+const char* FactValueGrid::_fwRangeOpacitiesKey = "fwRangeOpacities";
+
+// Definitions for MR specific range keys
+const char* FactValueGrid::_mrRangeValuesKey    = "mrRangeValues";
+const char* FactValueGrid::_mrRangeColorsKey    = "mrRangeColors";
+const char* FactValueGrid::_mrRangeIconsKey     = "mrRangeIcons";
+const char* FactValueGrid::_mrRangeOpacitiesKey = "mrRangeOpacities";
 
 const char* FactValueGrid::_deprecatedGroupKey =  "ValuesWidget";
 
@@ -138,6 +151,43 @@ void FactValueGrid::_saveValueData(QSettings& settings, InstrumentValueData* val
 
     settings.setValue(_factGroupNameKey,    value->factGroupName());
     settings.setValue(_factNameKey,         value->factName());
+    settings.setValue(_individualFwMrRangesKey, value->individualFwMrRanges());
+
+    if (value->individualFwMrRanges()) {
+        if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
+            settings.setValue(_fwRangeValuesKey, value->fwRangeValues());
+        }
+        switch (value->rangeType()) {
+            case InstrumentValueData::NoRangeInfo:
+                break;
+            case InstrumentValueData::ColorRange:
+                settings.setValue(_fwRangeColorsKey, value->fwRangeColors());
+                break;
+            case InstrumentValueData::OpacityRange:
+                settings.setValue(_fwRangeOpacitiesKey, value->fwRangeOpacities());
+                break;
+            case InstrumentValueData::IconSelectRange:
+                settings.setValue(_fwRangeIconsKey, value->fwRangeIcons());
+                break;
+        }
+
+        if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
+            settings.setValue(_mrRangeValuesKey, value->mrRangeValues());
+        }
+        switch (value->rangeType()) {
+            case InstrumentValueData::NoRangeInfo:
+                break;
+            case InstrumentValueData::ColorRange:
+                settings.setValue(_mrRangeColorsKey, value->mrRangeColors());
+                break;
+            case InstrumentValueData::OpacityRange:
+                settings.setValue(_mrRangeOpacitiesKey, value->mrRangeOpacities());
+                break;
+            case InstrumentValueData::IconSelectRange:
+                settings.setValue(_mrRangeIconsKey, value->mrRangeIcons());
+                break;
+        }
+    }
 }
 
 void FactValueGrid::_loadValueData(QSettings& settings, InstrumentValueData* value)
@@ -168,6 +218,49 @@ void FactValueGrid::_loadValueData(QSettings& settings, InstrumentValueData* val
         value->setRangeIcons(settings.value(_rangeIconsKey).value<QVariantList>());
         break;
     }
+
+    value->setIndividualFwMrRanges(settings.value(_individualFwMrRangesKey, false).toBool());
+
+    if (value->individualFwMrRanges()) {
+        // Load FW Ranges
+        // Note: The rangeType of value is already set from the global rangeType.
+        // InstrumentValueData::setIndividualFwMrRanges and InstrumentValueData::_resetRangeInfo
+        // ensure that _fwRange.type and _mrRange.type are synchronized with _range.type.
+        if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
+            value->setFwRangeValues(settings.value(_fwRangeValuesKey).value<QVariantList>());
+        }
+        switch (value->rangeType()) {
+            case InstrumentValueData::NoRangeInfo:
+                break;
+            case InstrumentValueData::ColorRange:
+                value->setFwRangeColors(settings.value(_fwRangeColorsKey).value<QVariantList>());
+                break;
+            case InstrumentValueData::OpacityRange:
+                value->setFwRangeOpacities(settings.value(_fwRangeOpacitiesKey).value<QVariantList>());
+                break;
+            case InstrumentValueData::IconSelectRange:
+                value->setFwRangeIcons(settings.value(_fwRangeIconsKey).value<QVariantList>());
+                break;
+        }
+
+        // Load MR Ranges
+        if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
+            value->setMrRangeValues(settings.value(_mrRangeValuesKey).value<QVariantList>());
+        }
+        switch (value->rangeType()) {
+            case InstrumentValueData::NoRangeInfo:
+                break;
+            case InstrumentValueData::ColorRange:
+                value->setMrRangeColors(settings.value(_mrRangeColorsKey).value<QVariantList>());
+                break;
+            case InstrumentValueData::OpacityRange:
+                value->setMrRangeOpacities(settings.value(_mrRangeOpacitiesKey).value<QVariantList>());
+                break;
+            case InstrumentValueData::IconSelectRange:
+                value->setMrRangeIcons(settings.value(_mrRangeIconsKey).value<QVariantList>());
+                break;
+        }
+    }
 }
 
 void FactValueGrid::_connectSaveSignals(InstrumentValueData* value)
@@ -182,6 +275,7 @@ void FactValueGrid::_connectSaveSignals(InstrumentValueData* value)
     connect(value, &InstrumentValueData::rangeColorsChanged,    this, &FactValueGrid::_saveSettings);
     connect(value, &InstrumentValueData::rangeOpacitiesChanged, this, &FactValueGrid::_saveSettings);
     connect(value, &InstrumentValueData::rangeIconsChanged,     this, &FactValueGrid::_saveSettings);
+    connect(value, &InstrumentValueData::individualFwMrRangesChanged, this, &FactValueGrid::_saveSettings);
 }
 
 void FactValueGrid::appendRow(void)

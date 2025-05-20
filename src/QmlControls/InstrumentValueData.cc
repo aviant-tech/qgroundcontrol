@@ -11,6 +11,7 @@
 #include "FactValueGrid.h"
 #include "QGCApplication.h"
 #include "QGCCorePlugin.h"
+#include "Vehicle.h"
 
 #include <QSettings>
 
@@ -38,12 +39,28 @@ InstrumentValueData::InstrumentValueData(FactValueGrid* factValueGrid, QObject* 
     connect(this, &InstrumentValueData::rangeColorsChanged,     this, &InstrumentValueData::_updateRanges);
     connect(this, &InstrumentValueData::rangeOpacitiesChanged,  this, &InstrumentValueData::_updateRanges);
     connect(this, &InstrumentValueData::rangeIconsChanged,      this, &InstrumentValueData::_updateRanges);
+
+    connect(this, &InstrumentValueData::individualFwMrRangesChanged, this, &InstrumentValueData::_updateRanges);
+
+    // Connect FW range signals
+    connect(this, &InstrumentValueData::fwRangeValuesChanged,    this, &InstrumentValueData::_updateRanges);
+    connect(this, &InstrumentValueData::fwRangeColorsChanged,    this, &InstrumentValueData::_updateRanges);
+    connect(this, &InstrumentValueData::fwRangeOpacitiesChanged, this, &InstrumentValueData::_updateRanges);
+    connect(this, &InstrumentValueData::fwRangeIconsChanged,     this, &InstrumentValueData::_updateRanges);
+
+    // Connect MR range signals
+    connect(this, &InstrumentValueData::mrRangeValuesChanged,    this, &InstrumentValueData::_updateRanges);
+    connect(this, &InstrumentValueData::mrRangeColorsChanged,    this, &InstrumentValueData::_updateRanges);
+    connect(this, &InstrumentValueData::mrRangeOpacitiesChanged, this, &InstrumentValueData::_updateRanges);
+    connect(this, &InstrumentValueData::mrRangeIconsChanged,     this, &InstrumentValueData::_updateRanges);
 }
 
 void InstrumentValueData::_activeVehicleChanged(Vehicle* activeVehicle)
 {
     if (_activeVehicle) {
         disconnect(_activeVehicle, &Vehicle::factGroupNamesChanged, this, &InstrumentValueData::_lookForMissingFact);
+        disconnect(_activeVehicle, &Vehicle::vehicleTypeChanged,    this, &InstrumentValueData::_updateRanges);
+        disconnect(_activeVehicle, &Vehicle::vtolInFwdFlightChanged,this, &InstrumentValueData::_updateRanges);
     }
 
     if (!activeVehicle) {
@@ -51,7 +68,9 @@ void InstrumentValueData::_activeVehicleChanged(Vehicle* activeVehicle)
     }
 
     _activeVehicle = activeVehicle;
-    connect(_activeVehicle, &Vehicle::factGroupNamesChanged, this, &InstrumentValueData::_lookForMissingFact);
+    connect(_activeVehicle, &Vehicle::factGroupNamesChanged,  this, &InstrumentValueData::_lookForMissingFact);
+    connect(_activeVehicle, &Vehicle::vehicleTypeChanged,     this, &InstrumentValueData::_updateRanges);
+    connect(_activeVehicle, &Vehicle::vtolInFwdFlightChanged, this, &InstrumentValueData::_updateRanges);
 
     emit factGroupNamesChanged();
 
@@ -164,110 +183,140 @@ void InstrumentValueData::setRangeType(RangeType rangeType)
 
 void InstrumentValueData::setRangeValues(const QVariantList& rangeValues)
 {
-    _rangeValues = rangeValues;
+    _range.values = rangeValues;
     emit rangeValuesChanged(rangeValues);
 }
 
 void InstrumentValueData::setRangeColors (const QVariantList& rangeColors)
 {
-    _rangeColors = rangeColors;
+    _range.colors = rangeColors;
     emit rangeColorsChanged(rangeColors);
 }
 
 void InstrumentValueData::setRangeIcons(const QVariantList& rangeIcons)
 {
-    _rangeIcons = rangeIcons;
+    _range.icons = rangeIcons;
     emit rangeIconsChanged(rangeIcons);
 }
 
 void InstrumentValueData::setRangeOpacities(const QVariantList& rangeOpacities)
 {
-    _rangeOpacities = rangeOpacities;
+    _range.opacities = rangeOpacities;
     emit rangeOpacitiesChanged(rangeOpacities);
 }
 
-void InstrumentValueData::_resetRangeInfo(void)
-{
-    _rangeValues.clear();
-    _rangeColors.clear();
-    _rangeOpacities.clear();
-    _rangeIcons.clear();
+void InstrumentValueData::setIndividualFwMrRanges(bool individualFwMrRanges) {
+    if (_individualFwMrRanges != individualFwMrRanges) {
+        _individualFwMrRanges = individualFwMrRanges;
+        emit individualFwMrRangesChanged(_individualFwMrRanges);
+    }
+}
+
+void InstrumentValueData::_resetRangeInfoCommon(RangeSet& rangeSet) {
+    rangeSet.values.clear();
+    rangeSet.colors.clear();
+    rangeSet.opacities.clear();
+    rangeSet.icons.clear();
 
     if (_rangeType != NoRangeInfo) {
-        _rangeValues = { 0.0, 100.0 };
+        rangeSet.values = { 0.0, 100.0 };
     }
-    for (int i=0; i<_rangeValues.count() + 1; i++) {
+
+    for (int i = 0; i < rangeSet.values.count() + 1; i++) {
         switch (_rangeType) {
         case NoRangeInfo:
             break;
         case ColorRange:
-            _rangeColors.append(QColor("green"));
+            rangeSet.colors.append(QColor("green"));
             break;
         case OpacityRange:
-            _rangeOpacities.append(1.0);
+            rangeSet.opacities.append(1.0);
             break;
         case IconSelectRange:
-            _rangeIcons.append(_factValueGrid->iconNames()[0]);
+            rangeSet.icons.append(_factValueGrid->iconNames()[0]);
             break;
         }
     }
+}
 
-    emit rangeValuesChanged     (_rangeValues);
-    emit rangeColorsChanged     (_rangeColors);
-    emit rangeOpacitiesChanged  (_rangeOpacities);
-    emit rangeIconsChanged      (_rangeIcons);
+void InstrumentValueData::_resetRangeInfo(void)
+{
+    _resetRangeInfoCommon(_range);
+    _emitRangeSignals(_range, NormalRange);
+
+    if (_individualFwMrRanges) {
+        _resetRangeInfoCommon(_fwRange);
+        _emitRangeSignals(_fwRange, FwRange);
+
+        _resetRangeInfoCommon(_mrRange);
+        _emitRangeSignals(_mrRange, MrRange);
+    }
+}
+
+void InstrumentValueData::_addRangeValueCommon(RangeSet& rangeSet) {
+    if (rangeSet.values.isEmpty()) { 
+        rangeSet.values.append(0.0); 
+    } else {
+        rangeSet.values.append(rangeSet.values.last().toDouble() + 1); 
+    }
+
+    switch (_rangeType) {
+    case NoRangeInfo:
+        break;
+    case ColorRange:
+        rangeSet.colors.append(QColor("green"));
+        break;
+    case OpacityRange:
+        rangeSet.opacities.append(1.0);
+        break;
+    case IconSelectRange:
+        if (_factValueGrid && !_factValueGrid->iconNames().isEmpty()) {
+            rangeSet.icons.append(_factValueGrid->iconNames()[0]);
+        } else {
+            rangeSet.icons.append(QString());
+        }
+        break;
+    }
 }
 
 void InstrumentValueData::addRangeValue(void)
 {
-    _rangeValues.append(_rangeValues.last().toDouble() + 1);
+    _addRangeValueCommon(_range);
+    _emitRangeSignals(_range, NormalRange);
+}
+
+void InstrumentValueData::_removeRangeValueCommon(int index, RangeSet& rangeSet) {
+    if (_range.values.count() < 2 || index < 0 || index >= rangeSet.values.count()) {
+        qDebug() << "_removeRangeValueCommon: Invalid index" << index << "for values count" << rangeSet.values.count();
+        return;
+    }
+
+    rangeSet.values.removeAt(index);
+
 
     switch (_rangeType) {
     case NoRangeInfo:
         break;
     case ColorRange:
-        _rangeColors.append(QColor("green"));
+        rangeSet.colors.removeAt(index + 1);
         break;
     case OpacityRange:
-        _rangeOpacities.append(1.0);
+        rangeSet.opacities.removeAt(index + 1);
         break;
     case IconSelectRange:
-        _rangeIcons.append(_factValueGrid->iconNames()[0]);
+        rangeSet.icons.removeAt(index + 1);
         break;
     }
-
-    emit rangeValuesChanged     (_rangeValues);
-    emit rangeColorsChanged     (_rangeColors);
-    emit rangeOpacitiesChanged  (_rangeOpacities);
-    emit rangeIconsChanged      (_rangeIcons);
 }
 
 void InstrumentValueData::removeRangeValue(int index)
 {
-    if (_rangeValues.count() < 2 || index <0 || index >= _rangeValues.count()) {
+    if (_range.values.count() < 2 || index < 0 || index >= _range.values.count()) { 
+        qDebug() << "removeRangeValue: Invalid index or not enough values.";
         return;
     }
-
-    _rangeValues.removeAt(index);
-
-    switch (_rangeType) {
-    case NoRangeInfo:
-        break;
-    case ColorRange:
-        _rangeColors.removeAt(index + 1);
-        break;
-    case OpacityRange:
-        _rangeOpacities.removeAt(index + 1);
-        break;
-    case IconSelectRange:
-        _rangeIcons.removeAt(index + 1);
-        break;
-    }
-
-    emit rangeValuesChanged     (_rangeValues);
-    emit rangeColorsChanged     (_rangeColors);
-    emit rangeOpacitiesChanged  (_rangeOpacities);
-    emit rangeIconsChanged      (_rangeIcons);
+    _removeRangeValueCommon(index, _range);
+    _emitRangeSignals(_range, NormalRange);
 }
 
 void InstrumentValueData::_updateRanges(void)
@@ -280,14 +329,29 @@ void InstrumentValueData::_updateRanges(void)
 void InstrumentValueData::_updateColor(void)
 {
     QColor newColor;
+    const double factValue = _fact ? _fact->rawValue().toDouble() : qQNaN();
+    const RangeSet* activeRangeSetToUse = &_range;
 
-    int rangeIndex = -1;
+    if (_rangeType == ColorRange) {
+        if (_individualFwMrRanges && _activeVehicle) {
+            const bool isVtol = _activeVehicle->vtol();
+            const bool isVtolInFwdFlight = isVtol && _activeVehicle->vtolInFwdFlight();
+            const bool isConsideredFixedWing = _activeVehicle->fixedWing() || (isVtol && isVtolInFwdFlight);
+            const bool isConsideredMultiRotor = _activeVehicle->multiRotor() || (isVtol && !isVtolInFwdFlight);
 
-    if (_rangeType == ColorRange && _fact) {
-        rangeIndex =_currentRangeIndex(_fact->rawValue().toDouble());
-    }
-    if (rangeIndex != -1) {
-        newColor = _rangeColors[rangeIndex].value<QColor>();
+            if (isConsideredFixedWing) {
+                activeRangeSetToUse = &_fwRange;
+            } else if (isConsideredMultiRotor) {
+                activeRangeSetToUse = &_mrRange;
+            }
+        }
+
+        if (_fact && !qIsNaN(factValue)) {
+            const int rangeIndex = _currentRangeIndex(factValue, activeRangeSetToUse->values);
+            if (rangeIndex != -1 && rangeIndex < activeRangeSetToUse->colors.count()) {
+                newColor = activeRangeSetToUse->colors[rangeIndex].value<QColor>();
+            }
+        }
     }
 
     if (newColor != _currentColor) {
@@ -299,14 +363,29 @@ void InstrumentValueData::_updateColor(void)
 void InstrumentValueData::_updateOpacity(void)
 {
     double newOpacity = 1.0;
+    double factValue = _fact ? _fact->rawValue().toDouble() : qQNaN();
+    const RangeSet* activeRangeSetToUse = &_range;
 
-    int rangeIndex = -1;
+    if (_rangeType == OpacityRange) {
+        if (_individualFwMrRanges && _activeVehicle) {
+            const bool isVtol = _activeVehicle->vtol();
+            const bool isVtolInFwdFlight = isVtol && _activeVehicle->vtolInFwdFlight();
+            const bool isConsideredFixedWing = _activeVehicle->fixedWing() || (isVtol && isVtolInFwdFlight);
+            const bool isConsideredMultiRotor = _activeVehicle->multiRotor() || (isVtol && !isVtolInFwdFlight);
 
-    if (_rangeType == OpacityRange && _fact) {
-        rangeIndex =_currentRangeIndex(_fact->rawValue().toDouble());
-    }
-    if (rangeIndex != -1) {
-        newOpacity = _rangeOpacities[rangeIndex].toDouble();
+            if (isConsideredFixedWing) {
+                activeRangeSetToUse = &_fwRange;
+            } else if (isConsideredMultiRotor) {
+                activeRangeSetToUse = &_mrRange;
+            }
+        }
+
+        if (_fact && !qIsNaN(factValue)) {
+            const int rangeIndex = _currentRangeIndex(factValue, activeRangeSetToUse->values);
+            if (rangeIndex != -1 && rangeIndex < activeRangeSetToUse->opacities.count()) {
+                newOpacity = activeRangeSetToUse->opacities[rangeIndex].toDouble();
+            }
+        }
     }
 
     if (!QGC::fuzzyCompare(newOpacity, _currentOpacity)) {
@@ -318,14 +397,29 @@ void InstrumentValueData::_updateOpacity(void)
 void InstrumentValueData::_updateIcon(void)
 {
     QString newIcon;
+    double factValue = _fact ? _fact->rawValue().toDouble() : qQNaN();
+    const RangeSet* activeRangeSetToUse = &_range;
 
-    int rangeIndex = -1;
+    if (_rangeType == IconSelectRange) {
+        if (_individualFwMrRanges && _activeVehicle) {
+            const bool isVtol = _activeVehicle->vtol();
+            const bool isVtolInFwdFlight = isVtol && _activeVehicle->vtolInFwdFlight();
+            const bool isConsideredFixedWing = _activeVehicle->fixedWing() || (isVtol && isVtolInFwdFlight);
+            const bool isConsideredMultiRotor = _activeVehicle->multiRotor() || (isVtol && !isVtolInFwdFlight);
 
-    if (_rangeType == IconSelectRange && _fact) {
-        rangeIndex =_currentRangeIndex(_fact->rawValue().toDouble());
-    }
-    if (rangeIndex != -1) {
-        newIcon = _rangeIcons[rangeIndex].toString();
+            if (isConsideredFixedWing) {
+                activeRangeSetToUse = &_fwRange;
+            } else if (isConsideredMultiRotor) {
+                activeRangeSetToUse = &_mrRange;
+            }
+        }
+
+        if (_fact && !qIsNaN(factValue)) {
+            const int rangeIndex = _currentRangeIndex(factValue, activeRangeSetToUse->values);
+            if (rangeIndex != -1 && rangeIndex < activeRangeSetToUse->icons.count()) {
+                newIcon = activeRangeSetToUse->icons[rangeIndex].toString();
+            }
+        }
     }
 
     if (newIcon != _currentIcon) {
@@ -334,17 +428,17 @@ void InstrumentValueData::_updateIcon(void)
     }
 }
 
-int InstrumentValueData::_currentRangeIndex(const QVariant& value)
+int InstrumentValueData::_currentRangeIndex(const QVariant& value, const QVariantList& rangeValuesToUse)
 {
-    if (qIsNaN(value.toDouble())) {
+    if (qIsNaN(value.toDouble()) || rangeValuesToUse.isEmpty()) {
         return 0;
     }
-    for (int i=0; i<_rangeValues.count(); i++) {
-        if (value.toDouble() <= _rangeValues[i].toDouble()) {
+    for (int i = 0; i < rangeValuesToUse.count(); i++) {
+        if (value.toDouble() <= rangeValuesToUse[i].toDouble()) {
             return i;
         }
     }
-    return _rangeValues.count();
+    return rangeValuesToUse.count();
 }
 
 QStringList InstrumentValueData::factGroupNames(void) const
@@ -378,4 +472,128 @@ QStringList InstrumentValueData::factValueNames(void) const
     }
 
     return valueNames;
+}
+
+// FW Add/Remove
+void InstrumentValueData::addFwRangeValue(void)
+{
+    _addRangeValueCommon(_fwRange);
+    _emitRangeSignals(_fwRange, FwRange);
+}
+
+void InstrumentValueData::removeFwRangeValue(int index)
+{
+    if (_fwRange.values.count() < 2 || index < 0 || index >= _fwRange.values.count()) { 
+        qDebug() << "removeFwRangeValue: Invalid index or not enough values.";
+        return;
+    }
+    _removeRangeValueCommon(index, _fwRange);
+    _emitRangeSignals(_fwRange, FwRange);
+}
+
+// MR Add/Remove
+void InstrumentValueData::addMrRangeValue(void)
+{
+    _addRangeValueCommon(_mrRange);
+    _emitRangeSignals(_mrRange, MrRange);
+}
+
+void InstrumentValueData::removeMrRangeValue(int index)
+{
+    if (_mrRange.values.count() < 2 || index < 0 || index >= _mrRange.values.count()) { 
+        qDebug() << "removeMrRangeValue: Invalid index or not enough values.";
+        return;
+    }
+    _removeRangeValueCommon(index, _mrRange);
+    _emitRangeSignals(_mrRange, MrRange);
+}
+
+// Setters for FW ranges
+void InstrumentValueData::setFwRangeValues(const QVariantList& fwRangeValues)
+{
+    if (_fwRange.values != fwRangeValues) {
+        _fwRange.values = fwRangeValues;
+        emit fwRangeValuesChanged(_fwRange.values);
+    }
+}
+
+void InstrumentValueData::setFwRangeColors(const QVariantList& fwRangeColors)
+{
+    if (_fwRange.colors != fwRangeColors) {
+        _fwRange.colors = fwRangeColors;
+        emit fwRangeColorsChanged(_fwRange.colors);
+    }
+}
+
+void InstrumentValueData::setFwRangeIcons(const QVariantList& fwRangeIcons)
+{
+    if (_fwRange.icons != fwRangeIcons) {
+        _fwRange.icons = fwRangeIcons;
+        emit fwRangeIconsChanged(_fwRange.icons);
+    }
+}
+
+void InstrumentValueData::setFwRangeOpacities(const QVariantList& fwRangeOpacities)
+{
+    if (_fwRange.opacities != fwRangeOpacities) {
+        _fwRange.opacities = fwRangeOpacities;
+        emit fwRangeOpacitiesChanged(_fwRange.opacities);
+    }
+}
+
+// Setters for MR ranges
+void InstrumentValueData::setMrRangeValues(const QVariantList& mrRangeValues)
+{
+    if (_mrRange.values != mrRangeValues) {
+        _mrRange.values = mrRangeValues;
+        emit mrRangeValuesChanged(_mrRange.values);
+    }
+}
+
+void InstrumentValueData::setMrRangeColors(const QVariantList& mrRangeColors)
+{
+    if (_mrRange.colors != mrRangeColors) {
+        _mrRange.colors = mrRangeColors;
+        emit mrRangeColorsChanged(_mrRange.colors);
+    }
+}
+
+void InstrumentValueData::setMrRangeIcons(const QVariantList& mrRangeIcons)
+{
+    if (_mrRange.icons != mrRangeIcons) {
+        _mrRange.icons = mrRangeIcons;
+        emit mrRangeIconsChanged(_mrRange.icons);
+    }
+}
+
+void InstrumentValueData::setMrRangeOpacities(const QVariantList& mrRangeOpacities)
+{
+    if (_mrRange.opacities != mrRangeOpacities) {
+        _mrRange.opacities = mrRangeOpacities;
+        emit mrRangeOpacitiesChanged(_mrRange.opacities);
+    }
+}
+
+void InstrumentValueData::_emitRangeSignals(const InstrumentValueData::RangeSet& rangeSet, InstrumentValueData::RangeSignalType signalType)
+{
+    switch (signalType) {
+    case NormalRange:
+        emit rangeValuesChanged(rangeSet.values);
+        emit rangeColorsChanged(rangeSet.colors);
+        emit rangeOpacitiesChanged(rangeSet.opacities);
+        emit rangeIconsChanged(rangeSet.icons);
+        break;
+    case FwRange:
+        emit fwRangeValuesChanged(rangeSet.values);
+        emit fwRangeColorsChanged(rangeSet.colors);
+        emit fwRangeOpacitiesChanged(rangeSet.opacities);
+        emit fwRangeIconsChanged(rangeSet.icons);
+        break;
+    case MrRange:
+        emit mrRangeValuesChanged(rangeSet.values);
+        emit mrRangeColorsChanged(rangeSet.colors);
+        emit mrRangeOpacitiesChanged(rangeSet.opacities);
+        emit mrRangeIconsChanged(rangeSet.icons);
+        break;
+    }
 }
