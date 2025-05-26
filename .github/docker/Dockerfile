@@ -9,8 +9,8 @@ ENV QT_DESKTOP=$QT_PATH/${QT_VERSION}/gcc_64
 ENV PATH=/usr/lib/ccache:$QT_DESKTOP/bin:$PATH
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Oslo
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y \
     curl \
     libsdl2-dev \
     gstreamer1.0-gl \
