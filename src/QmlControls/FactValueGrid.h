@@ -123,8 +123,19 @@ private:
     static const char* _rangeColorsKey;
     static const char* _rangeIconsKey;
     static const char* _rangeOpacitiesKey;
+    static const char* _individualFwMrRangesKey;
 
     static const char* _deprecatedGroupKey;
+
+    static const char* _fwRangeValuesKey;
+    static const char* _fwRangeColorsKey;
+    static const char* _fwRangeIconsKey;
+    static const char* _fwRangeOpacitiesKey;
+
+    static const char* _mrRangeValuesKey;
+    static const char* _mrRangeColorsKey;
+    static const char* _mrRangeIconsKey;
+    static const char* _mrRangeOpacitiesKey;
 };
 
 QML_DECLARE_TYPE(FactValueGrid)

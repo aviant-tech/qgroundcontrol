@@ -163,7 +163,9 @@ T.HorizontalFactValueGrid {
             }
         }
     }
-
+    /*
+    We dont want pilots to be able to edit the limit values, as this is configured by Multi-command.
+    Comment out the code instead of removing to make rebasing to QGCv5 easier.
     QGCMouseArea {
         x:          labelValueColumnLayout.x
         y:          labelValueColumnLayout.y
@@ -185,6 +187,7 @@ T.HorizontalFactValueGrid {
             }
         }
     }
+    */
 
     Component {
         id: valueEditDialog
