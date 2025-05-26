@@ -55,6 +55,7 @@ SetupPage {
             property Fact _collisionPrevention: controller.getParameterFact(-1, "CP_DIST")
             property Fact _objectAvoidance:     controller.getParameterFact(-1, "COM_OBS_AVOID")
             property Fact _landSpeedMC:         controller.getParameterFact(-1, "MPC_LAND_SPEED", false)
+            property Fact _parachuteRequired:   controller.getParameterFact(-1, "COM_PARACHUTE")
             property Fact _parachuteAltitude:   controller.getParameterFact(-1, "FD_MIN_DIST_TRM")
             property bool _hitlAvailable:       controller.parameterExists(-1, hitlParam)
             property Fact _hitlEnabled:         controller.getParameterFact(-1, hitlParam, false)
@@ -611,6 +612,18 @@ SetupPage {
                             }
                             FactTextField {
                                 fact:               _parachuteAltitude
+                                Layout.minimumWidth:_editFieldWidth
+                                Layout.fillWidth:   true
+                            }
+                            QGCLabel {
+                                id:                 parachuteRequiredLabel
+                                text:               qsTr("Parachute Required\nFor Arming:")
+                                Layout.minimumWidth:_labelWidth
+                                Layout.fillWidth:   true
+                            }
+                            FactComboBox {
+                                fact:               _parachuteRequired
+                                indexModel:         false
                                 Layout.minimumWidth:_editFieldWidth
                                 Layout.fillWidth:   true
                             }
