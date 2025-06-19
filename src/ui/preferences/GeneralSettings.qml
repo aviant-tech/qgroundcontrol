@@ -796,6 +796,19 @@ Rectangle {
                                 fact:                   _aviantSettings.verticalConflictDistance
                             }
                             FactCheckBox {
+                                id:         promptShowMultidroneConflictCircle
+                                text:       qsTr("Show multidrone conflict circle")
+                                fact:       _aviantSettings.showMultidroneConflictCircle
+                            }
+                            QGCLabel {
+                                text:       qsTr("Multidrone conflict distance")
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _valueFieldWidth
+                                enabled:                promptShowMultidroneConflictCircle.checked
+                                fact:                   _aviantSettings.multidroneConflictDistance
+                            }
+                            FactCheckBox {
                                 id:         promptShowBatteryWidget
                                 text:       qsTr("Show battery widget")
                                 fact:       _aviantSettings.showBatteryWidget

@@ -59,6 +59,7 @@ FlightMap {
     property bool   _showTrafficIndicators:     _aviantSettings.showTrafficIndicators.rawValue
     property var   _horizontalConflictDistance: _aviantSettings.horizontalConflictDistance.value
     property var   _verticalConflictDistance:  _aviantSettings.verticalConflictDistance.value
+    property var   _multidroneConflictDistance: _aviantSettings.multidroneConflictDistance.value
 
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
@@ -361,6 +362,23 @@ FlightMap {
         radius:         _horizontalConflictDistance
         center:         _activeVehicleCoordinate
         visible:        _showTrafficIndicators
+    }
+
+    // Multidrone conflict circle indicating the area that a drone should avoid if another drone is landing
+    MapCircle {
+        color:          "transparent"
+        opacity:        1
+        border.color:   "blue"
+        border.width:   3
+        radius:         _multidroneConflictDistance
+        center: {
+            var items = _missionController.visualItems
+            if (!items || items.count === 0) return QtPositioning.coordinate()
+            var lastItem = items.get(items.count - 1)
+            // wanted to use landingCoordinate but it was not working
+            return lastItem.coordinate
+        }
+        visible: _aviantSettings.showMultidroneConflictCircle.value && _aviantSettings.multidroneConflictDistance.value > 0
     }
 
     GeoFenceMapVisuals {

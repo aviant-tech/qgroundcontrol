@@ -68,6 +68,22 @@
     "default":          600
 },
 {
+    "name":             "multidroneConflictDistance",
+    "shortDesc":        "Multidrone conflict distance",
+    "longDesc":         "The radius in meters for the multidrone conflict circle drawn around the landing point.",
+    "type":             "uint32",
+    "min":              0,
+    "units":            "m",
+    "default":          1200
+},
+{
+    "name":             "showMultidroneConflictCircle",
+    "shortDesc":        "Show multidrone conflict circle",
+    "longDesc":         "Show a circle around the landing point with the multidrone conflict distance as radius.",
+    "type":             "bool",
+    "default":          true
+},
+{
     "name":         "rssiWarning",
     "shortDesc":    "Local (drone) RSSI below this value will trigger a warning",
     "type":         "double",
