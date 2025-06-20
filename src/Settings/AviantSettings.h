@@ -27,6 +27,8 @@ public:
     DEFINE_SETTINGFACT(showWinchControlMenu)
     DEFINE_SETTINGFACT(horizontalConflictDistance)
     DEFINE_SETTINGFACT(verticalConflictDistance)
+    DEFINE_SETTINGFACT(multidroneConflictDistance)
+    DEFINE_SETTINGFACT(showMultidroneConflictCircle)
     DEFINE_SETTINGFACT(minVisibleRangeInMeters)
     DEFINE_SETTINGFACT(metersBetweenLines)
     DEFINE_SETTINGFACT(rssiWarning)
