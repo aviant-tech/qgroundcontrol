@@ -62,6 +62,7 @@ Rectangle {
                     text:               modelData.title
                     autoExclusive:      true
                     Layout.fillWidth:   true
+                    visible:            true
 
                     onClicked: {
                         if (mainWindow.preventViewSwitch()) {

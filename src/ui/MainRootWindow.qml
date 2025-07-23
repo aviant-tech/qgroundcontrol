@@ -363,56 +363,62 @@ ApplicationWindow {
                     Layout.margins: _margins
                     spacing:        ScreenTools.defaultFontPixelWidth
 
-                    SubMenuButton {
-                        id:                 setupButton
-                        height:             _toolButtonHeight
-                        Layout.fillWidth:   true
-                        text:               qsTr("Vehicle Setup")
-                        imageColor:         qgcPal.text
-                        imageResource:      "/qmlimages/Gears.svg"
-                        onClicked: {
-                            if (!mainWindow.preventViewSwitch()) {
-                                toolSelectDialog.hideDialog()
-                                mainWindow.showSetupTool()
+                    // Tool selection (always visible)
+                    ColumnLayout {
+                        visible: true
+                        Layout.fillWidth: true
+                        spacing: ScreenTools.defaultFontPixelWidth
+
+                        SubMenuButton {
+                            id:                 setupButton
+                            height:             _toolButtonHeight
+                            Layout.fillWidth:   true
+                            text:               qsTr("Vehicle Setup")
+                            imageColor:         qgcPal.text
+                            imageResource:      "/qmlimages/Gears.svg"
+                            onClicked: {
+                                if (!mainWindow.preventViewSwitch()) {
+                                    toolSelectDialog.hideDialog()
+                                    mainWindow.showSetupTool()
+                                }
                             }
                         }
-                    }
 
-                    SubMenuButton {
-                        id:                 analyzeButton
-                        height:             _toolButtonHeight
-                        Layout.fillWidth:   true
-                        text:               qsTr("Analyze Tools")
-                        imageResource:      "/qmlimages/Analyze.svg"
-                        imageColor:         qgcPal.text
-                        visible:            QGroundControl.corePlugin.showAdvancedUI
-                        onClicked: {
-                            if (!mainWindow.preventViewSwitch()) {
-                                toolSelectDialog.hideDialog()
-                                mainWindow.showAnalyzeTool()
+                        SubMenuButton {
+                            id:                 analyzeButton
+                            height:             _toolButtonHeight
+                            Layout.fillWidth:   true
+                            text:               qsTr("Analyze Tools")
+                            imageResource:      "/qmlimages/Analyze.svg"
+                            imageColor:         qgcPal.text
+                            visible:            QGroundControl.corePlugin.showAdvancedUI
+                            onClicked: {
+                                if (!mainWindow.preventViewSwitch()) {
+                                    toolSelectDialog.hideDialog()
+                                    mainWindow.showAnalyzeTool()
+                                }
                             }
                         }
-                    }
 
-                    SubMenuButton {
-                        id:                 settingsButton
-                        height:             _toolButtonHeight
-                        Layout.fillWidth:   true
-                        text:               qsTr("Application Settings")
-                        imageResource:      "/res/QGCLogoFull"
-                        imageColor:         "transparent"
-                        visible:            !QGroundControl.corePlugin.options.combineSettingsAndSetup
-                        onClicked: {
-                            if (!mainWindow.preventViewSwitch()) {
-                                toolSelectDialog.hideDialog()
-                                mainWindow.showSettingsTool()
+                        SubMenuButton {
+                            id:                 settingsButton
+                            height:             _toolButtonHeight
+                            Layout.fillWidth:   true
+                            text:               qsTr("Application Settings")
+                            imageResource:      "/res/QGCLogoFull"
+                            imageColor:         "transparent"
+                            visible:            !QGroundControl.corePlugin.options.combineSettingsAndSetup
+                            onClicked: {
+                                if (!mainWindow.preventViewSwitch()) {
+                                    toolSelectDialog.hideDialog()
+                                    mainWindow.showSettingsTool()
+                                }
                             }
                         }
                     }
 
                     ColumnLayout {
-                        width:      innerLayout.width
-                        spacing:    0
+                        Layout.fillWidth: true
 
                         QGCLabel {
                             id:                     versionLabel
