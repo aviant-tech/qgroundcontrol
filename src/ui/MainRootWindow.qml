@@ -363,56 +363,85 @@ ApplicationWindow {
                     Layout.margins: _margins
                     spacing:        ScreenTools.defaultFontPixelWidth
 
-                    SubMenuButton {
-                        id:                 setupButton
-                        height:             _toolButtonHeight
-                        Layout.fillWidth:   true
-                        text:               qsTr("Vehicle Setup")
-                        imageColor:         qgcPal.text
-                        imageResource:      "/qmlimages/Gears.svg"
-                        onClicked: {
-                            if (!mainWindow.preventViewSwitch()) {
-                                toolSelectDialog.hideDialog()
-                                mainWindow.showSetupTool()
-                            }
+                    // Production mode message
+                    ColumnLayout {
+                        visible: QGroundControl.isProductionMode
+                        Layout.fillWidth: true
+                        spacing: ScreenTools.defaultFontPixelWidth
+
+                        QGCLabel {
+                            text: qsTr("Settings can not be changed in production mode")
+                            font.pointSize: ScreenTools.largeFontPointSize
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
+                        QGCLabel {
+                            text: qsTr("Start QGC in TEST mode to edit settings")
+                            font.pointSize: ScreenTools.defaultFontPointSize
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
                         }
                     }
 
-                    SubMenuButton {
-                        id:                 analyzeButton
-                        height:             _toolButtonHeight
-                        Layout.fillWidth:   true
-                        text:               qsTr("Analyze Tools")
-                        imageResource:      "/qmlimages/Analyze.svg"
-                        imageColor:         qgcPal.text
-                        visible:            QGroundControl.corePlugin.showAdvancedUI
-                        onClicked: {
-                            if (!mainWindow.preventViewSwitch()) {
-                                toolSelectDialog.hideDialog()
-                                mainWindow.showAnalyzeTool()
+                    // Normal tool selection (only visible in TEST mode)
+                    ColumnLayout {
+                        visible: !QGroundControl.isProductionMode
+                        Layout.fillWidth: true
+                        spacing: ScreenTools.defaultFontPixelWidth
+
+                        SubMenuButton {
+                            id:                 setupButton
+                            height:             _toolButtonHeight
+                            Layout.fillWidth:   true
+                            text:               qsTr("Vehicle Setup")
+                            imageColor:         qgcPal.text
+                            imageResource:      "/qmlimages/Gears.svg"
+                            onClicked: {
+                                if (!mainWindow.preventViewSwitch()) {
+                                    toolSelectDialog.hideDialog()
+                                    mainWindow.showSetupTool()
+                                }
                             }
                         }
-                    }
 
-                    SubMenuButton {
-                        id:                 settingsButton
-                        height:             _toolButtonHeight
-                        Layout.fillWidth:   true
-                        text:               qsTr("Application Settings")
-                        imageResource:      "/res/QGCLogoFull"
-                        imageColor:         "transparent"
-                        visible:            !QGroundControl.corePlugin.options.combineSettingsAndSetup
-                        onClicked: {
-                            if (!mainWindow.preventViewSwitch()) {
-                                toolSelectDialog.hideDialog()
-                                mainWindow.showSettingsTool()
+                        SubMenuButton {
+                            id:                 analyzeButton
+                            height:             _toolButtonHeight
+                            Layout.fillWidth:   true
+                            text:               qsTr("Analyze Tools")
+                            imageResource:      "/qmlimages/Analyze.svg"
+                            imageColor:         qgcPal.text
+                            visible:            QGroundControl.corePlugin.showAdvancedUI
+                            onClicked: {
+                                if (!mainWindow.preventViewSwitch()) {
+                                    toolSelectDialog.hideDialog()
+                                    mainWindow.showAnalyzeTool()
+                                }
+                            }
+                        }
+
+                        SubMenuButton {
+                            id:                 settingsButton
+                            height:             _toolButtonHeight
+                            Layout.fillWidth:   true
+                            text:               qsTr("Application Settings")
+                            imageResource:      "/res/QGCLogoFull"
+                            imageColor:         "transparent"
+                            visible:            !QGroundControl.corePlugin.options.combineSettingsAndSetup
+                            onClicked: {
+                                if (!mainWindow.preventViewSwitch()) {
+                                    toolSelectDialog.hideDialog()
+                                    mainWindow.showSettingsTool()
+                                }
                             }
                         }
                     }
 
                     ColumnLayout {
-                        width:      innerLayout.width
-                        spacing:    0
+                        Layout.fillWidth: true
 
                         QGCLabel {
                             id:                     versionLabel

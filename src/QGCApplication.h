@@ -79,6 +79,9 @@ public:
     /// @return true: Fake ui into showing mobile interface
     bool fakeMobile(void) const { return _fakeMobile; }
 
+    /// @return true: Application is running in production mode (some features disabled)
+    bool isProductionMode(void) const { return _productionMode; }
+
     // Still working on getting rid of this and using dependency injection instead for everything
     QGCToolbox* toolbox(void) { return _toolbox; }
 
@@ -198,6 +201,7 @@ private:
     QQmlApplicationEngine* _qmlAppEngine        = nullptr;
     bool                _logOutput              = false;    ///< true: Log Qt debug output to file
     bool				_fakeMobile             = false;    ///< true: Fake ui into displaying mobile interface
+    bool                _productionMode         = false;    ///< true: Application is running in production mode (some features disabled)
     bool                _settingsUpgraded       = false;    ///< true: Settings format has been upgrade to new version
     int                 _majorVersion           = 0;
     int                 _minorVersion           = 0;
