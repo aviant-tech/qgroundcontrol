@@ -81,11 +81,49 @@ Rectangle {
                     id:                         settingsColumn
                     anchors.horizontalCenter:   parent.horizontalCenter
 
-                    QGCLabel {
-                        id:         flyViewSectionLabel
-                        text:       qsTr("Fly View")
-                        visible:    QGroundControl.settingsManager.flyViewSettings.visible
+                    // Production mode message
+                    Rectangle {
+                        Layout.preferredHeight: prodModeCol.height + (_margins * 2)
+                        Layout.preferredWidth:  prodModeCol.width + (_margins * 2)
+                        color:                  qgcPal.colorOrange
+                        visible:                QGroundControl.isProductionMode
+                        Layout.fillWidth:       true
+
+                        ColumnLayout {
+                            id:                         prodModeCol
+                            anchors.margins:            _margins
+                            anchors.top:                parent.top
+                            anchors.horizontalCenter:   parent.horizontalCenter
+                            spacing:                    _margins
+
+                            QGCLabel {
+                                text:                   qsTr("General Settings Disabled in Production Mode")
+                                font.pointSize:         ScreenTools.largeFontPointSize
+                                Layout.alignment:       Qt.AlignHCenter
+                                Layout.fillWidth:      true
+                                horizontalAlignment:    Text.AlignHCenter
+                            }
+
+                            QGCLabel {
+                                text:                   qsTr("Start QGC in TEST mode to modify general settings")
+                                font.pointSize:         ScreenTools.defaultFontPointSize
+                                Layout.alignment:       Qt.AlignHCenter
+                                Layout.fillWidth:      true
+                                horizontalAlignment:    Text.AlignHCenter
+                            }
+                        }
                     }
+
+                    // All settings content - hidden in production mode
+                    ColumnLayout {
+                        visible: !QGroundControl.isProductionMode
+                        Layout.fillWidth: true
+
+                        QGCLabel {
+                            id:         flyViewSectionLabel
+                            text:       qsTr("Fly View")
+                            visible:    QGroundControl.settingsManager.flyViewSettings.visible
+                        }
                     Rectangle {
                         Layout.preferredHeight: flyViewCol.height + (_margins * 2)
                         Layout.preferredWidth:  flyViewCol.width + (_margins * 2)
@@ -1363,6 +1401,8 @@ Rectangle {
                         text:               QGroundControl.qgcVersion
                         Layout.alignment:   Qt.AlignHCenter
                     }
+                    } // end of settings content wrapper
+
                 } // settingsColumn
             }
     }
