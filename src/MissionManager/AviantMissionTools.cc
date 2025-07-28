@@ -259,6 +259,11 @@ void AviantMissionTools::requestOperation(Operation operation)
     sslConf.setPeerVerifyMode(aviantSettings->missionToolsInsecureHttps()->rawValue().toBool() ? QSslSocket::VerifyNone : QSslSocket::AutoVerifyPeer);
     _networkRequest.setSslConfiguration(sslConf);
 
+    QList<QByteArray> headerList = _networkRequest.rawHeaderList();
+    for (const QByteArray &header : headerList) {
+        qDebug() << "Header:" << header << "=" << _networkRequest.rawHeader(header);
+    }
+
     QNetworkReply *reply = nullptr;
     if (missionPayload) {
         // All currently supported operation used GET.
@@ -465,7 +470,10 @@ void AviantMissionTools::_initiateNetworkRequest(Operation operationType, const 
     QSslConfiguration sslConf = _networkRequest.sslConfiguration();
     sslConf.setPeerVerifyMode(aviantSettings->missionToolsInsecureHttps()->rawValue().toBool() ? QSslSocket::VerifyNone : QSslSocket::AutoVerifyPeer);
     _networkRequest.setSslConfiguration(sslConf);
-
+    QList<QByteArray> headerList = _networkRequest.rawHeaderList();
+    for (const QByteArray &header : headerList) {
+        qDebug() << "Header:" << header << "=" << _networkRequest.rawHeader(header);
+    }
     QNetworkReply *reply = _networkAccessManager->get(_networkRequest);
 
     if (reply) {
@@ -481,6 +489,7 @@ void AviantMissionTools::fetchKyteOrderMissions()
 {
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
     QUrl url = _getKyteBackendUrl(FetchKyteOrders, aviantSettings->kyteBackendUrl()->rawValue().toString());
+    qDebug() << "fetchKyteOrderMissions" << url;
     _initiateNetworkRequest(FetchKyteOrders, url);
 }
 
