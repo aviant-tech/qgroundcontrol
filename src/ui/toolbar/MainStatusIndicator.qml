@@ -77,19 +77,8 @@ RowLayout {
                         return mainStatusLabel._armedText
                     }
                 } else {
-                    if (_healthAndArmingChecksSupported) {
-                        if (_activeVehicle.healthAndArmingCheckReport.canArm) {
-                            if (_activeVehicle.healthAndArmingCheckReport.hasWarningsOrErrors) {
-                                _mainStatusBGColor = "yellow"
-                            } else {
-                                _mainStatusBGColor = "green"
-                            }
-                            return mainStatusLabel._readyToFlyText
-                        } else {
-                            _mainStatusBGColor = "red"
-                            return mainStatusLabel._notReadyToFlyText
-                        }
-                    } else if (_activeVehicle.readyToFlyAvailable) {
+                    // Do the Aviant specific checks first
+                    if (_activeVehicle.readyToFlyAvailable) {
                         if (_syncInProgress) {
                             _mainStatusBGColor = "yellow"
                             return "Syncing mission..."
@@ -118,7 +107,22 @@ RowLayout {
                             _mainStatusBGColor = "yellow"
                             return qsTr("Mission not uploaded to vehicle")
                         }
-                        else if (_activeVehicle.readyToFly) {
+                    }
+
+                    if (_healthAndArmingChecksSupported) {
+                        if (_activeVehicle.healthAndArmingCheckReport.canArm) {
+                            if (_activeVehicle.healthAndArmingCheckReport.hasWarningsOrErrors) {
+                                _mainStatusBGColor = "yellow"
+                            } else {
+                                _mainStatusBGColor = "green"
+                            }
+                            return mainStatusLabel._readyToFlyText
+                        } else {
+                            _mainStatusBGColor = "red"
+                            return mainStatusLabel._notReadyToFlyText
+                        }
+                    } else if (_activeVehicle.readyToFlyAvailable) {
+                        if (_activeVehicle.readyToFly) {
                             _mainStatusBGColor = "green"
                             return mainStatusLabel._readyToFlyText
                         } else {
