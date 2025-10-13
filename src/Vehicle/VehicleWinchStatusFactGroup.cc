@@ -88,20 +88,6 @@ VehicleWinchStatusFactGroup::VehicleWinchStatusFactGroup(QObject* parent)
     _addFact(&_staleFact,          _staleFactName);
 }
 
-enum MAV_WINCH_STATUS_FLAG_EXT
-{
-    MAV_WINCH_STATUS_LOCKED       = 16,
-    MAV_WINCH_STATUS_DROPPING     = 32,
-    MAV_WINCH_STATUS_ARRESTING    = 64,
-    MAV_WINCH_STATUS_GROUND_SENSE = 128,
-    MAV_WINCH_STATUS_RETRACTING   = 256,
-    MAV_WINCH_STATUS_REDELIVER    = 512,
-    MAV_WINCH_STATUS_ABANDON_LINE = 1024,
-    MAV_WINCH_STATUS_LOCKING      = 2048,
-    MAV_WINCH_STATUS_LOAD_LINE    = 4096,
-    MAV_WINCH_STATUS_LOAD_PAYLOAD = 8192
-};
-
 #define CUSTOM_AVIANT_STATUS_SHIFT         24
 #define CUSTOM_AVIANT_STATUS_MASK          0xFF  // After shift, max 8 bit
 #define CUSTOM_AVIANT_STATUS_DROP_ALLOWED  1     // After shift
