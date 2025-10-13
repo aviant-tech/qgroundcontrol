@@ -86,7 +86,7 @@ cd ${TMPDIR}
 wget -c --quiet "https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage"
 chmod a+x ./appimagetool-x86_64.AppImage
 
-./appimagetool-x86_64.AppImage ./$APP.AppDir/ ${TMPDIR}/$APP".AppImage"
+./appimagetool-x86_64.AppImage --appimage-extract-and-run ./$APP.AppDir/ ${TMPDIR}/$APP".AppImage"
 
 mkdir -p ${OUTPUT_DIR}
 cp ${TMPDIR}/$APP".AppImage" ${OUTPUT_DIR}/$APP".AppImage"
