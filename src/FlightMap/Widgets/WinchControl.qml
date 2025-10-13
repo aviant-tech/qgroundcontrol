@@ -276,8 +276,8 @@ Rectangle {
                     } else if (_currentWinchCommand === null) {
                         console.log("Cannot send winch command, no action selected.")
                     } else {
-                        //MAV_COMP_ID_USER18(42) is the chosen component for winches
-                        // since no winch defaults exist yet in the MAVLink standard.
+                        // MAV_COMP_ID_USER18(42) was the chosen component for winches in 1.13
+                        // since no winch defaults existed yet in the MAVLink standard.
                         // The QML MAVLink enum doesn't include MAV_CMD_DO_WINCH(42600).
                         // Setting it explicitly. See src/comm/QGCMAVLink.h for details.
                         // TODO Use 0 (broadcast) instead of 42 to not hardcode component id?
@@ -286,6 +286,8 @@ Rectangle {
                         // IMPORTANT that param3 is 1 since it is used by winch code to
                         // distinguish between manual and mission commands.
                         _vehicle.sendCommand(42, 42600, 1, 1, _currentWinchCommand, 1 /*MANUAL*/, 1)
+                        // In 1.15, MAV_COMP_ID_WINCH(169) exists. We send to both for compatibility.
+                        _vehicle.sendCommand(169, 42600, 1, 1, _currentWinchCommand, 1 /*MANUAL*/, 1)
                         disableWinchSlider()
                         uncheckInactiveButtons()
                     }
