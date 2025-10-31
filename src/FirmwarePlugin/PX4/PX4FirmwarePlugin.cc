@@ -46,6 +46,7 @@ PX4FirmwarePlugin::PX4FirmwarePlugin()
     , _holdFlightMode       (tr("Hold"))
     , _missionFlightMode    (tr("Mission"))
     , _rtlFlightMode        (tr("Return"))
+    , _missionRtlFlightMode (tr("MissionRTL"))
     , _landingFlightMode    (tr("Land"))
     , _preclandFlightMode   (tr("Precision Land"))
     , _rtgsFlightMode       (tr("Return to Groundstation"))
@@ -81,6 +82,7 @@ PX4FirmwarePlugin::PX4FirmwarePlugin()
         { PX4_CUSTOM_MAIN_MODE_AUTO,        PX4_CUSTOM_SUB_MODE_AUTO_LOITER,        true,   true,   true },
         { PX4_CUSTOM_MAIN_MODE_AUTO,        PX4_CUSTOM_SUB_MODE_AUTO_MISSION,       true,   true,   true },
         { PX4_CUSTOM_MAIN_MODE_AUTO,        PX4_CUSTOM_SUB_MODE_AUTO_RTL,           true,   true,   true },
+        { PX4_CUSTOM_MAIN_MODE_AUTO,        PX4_CUSTOM_SUB_MODE_AUTO_MISSION_RTL,   true,   true,   true },
         { PX4_CUSTOM_MAIN_MODE_AUTO,        PX4_CUSTOM_SUB_MODE_AUTO_FOLLOW_TARGET, true,   false,  true },
         { PX4_CUSTOM_MAIN_MODE_AUTO,        PX4_CUSTOM_SUB_MODE_AUTO_LAND,          false,  true,   true },
         { PX4_CUSTOM_MAIN_MODE_AUTO,        PX4_CUSTOM_SUB_MODE_AUTO_PRECLAND,      true,  false,  true },
@@ -103,6 +105,7 @@ PX4FirmwarePlugin::PX4FirmwarePlugin()
         &_holdFlightMode,
         &_missionFlightMode,
         &_rtlFlightMode,
+        &_missionRtlFlightMode,
         &_followMeFlightMode,
         &_landingFlightMode,
         &_preclandFlightMode,
@@ -360,6 +363,11 @@ void PX4FirmwarePlugin::guidedModeRTL(Vehicle* vehicle, bool smartRTL)
 {
     Q_UNUSED(smartRTL);
     _setFlightModeAndValidate(vehicle, _rtlFlightMode);
+}
+
+void PX4FirmwarePlugin::guidedModeMissionRTL(Vehicle* vehicle)
+{
+    _setFlightModeAndValidate(vehicle, _missionRtlFlightMode);
 }
 
 void PX4FirmwarePlugin::guidedModeLand(Vehicle* vehicle)

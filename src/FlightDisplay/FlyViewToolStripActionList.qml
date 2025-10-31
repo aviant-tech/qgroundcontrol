@@ -27,6 +27,7 @@ ToolStripActionList {
         GuidedActionTakeoff { },
         GuidedActionLand { },
         GuidedActionRTL { },
+        GuidedActionMissionRTL { },
         GuidedActionPause { },
         GuidedActionActionList { }
     ]
