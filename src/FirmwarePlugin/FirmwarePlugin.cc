@@ -245,6 +245,13 @@ void FirmwarePlugin::guidedModeRTL(Vehicle* vehicle, bool smartRTL)
     qgcApp()->showAppMessage(guided_mode_not_supported_by_vehicle);
 }
 
+void FirmwarePlugin::guidedModeMissionRTL(Vehicle* vehicle)
+{
+    // Not supported by generic vehicle
+    Q_UNUSED(vehicle);
+    qgcApp()->showAppMessage(guided_mode_not_supported_by_vehicle);
+}
+
 void FirmwarePlugin::guidedModeLand(Vehicle* vehicle)
 {
     // Not supported by generic vehicle

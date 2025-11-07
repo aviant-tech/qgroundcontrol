@@ -2705,6 +2705,15 @@ void Vehicle::guidedModeRTL(bool smartRTL)
     _firmwarePlugin->guidedModeRTL(this, smartRTL);
 }
 
+void Vehicle::guidedModeMissionRTL()
+{
+    if (!guidedModeSupported()) {
+        qgcApp()->showAppMessage(guided_mode_not_supported_by_vehicle);
+        return;
+    }
+    _firmwarePlugin->guidedModeMissionRTL(this);
+}
+
 void Vehicle::guidedModeLand()
 {
     if (!guidedModeSupported()) {

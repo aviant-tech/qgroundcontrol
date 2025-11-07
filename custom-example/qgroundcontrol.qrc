@@ -218,6 +218,7 @@
 		<file alias="QGroundControl/FlightDisplay/GuidedActionTakeoff.qml">../src/FlightDisplay/GuidedActionTakeoff.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionPause.qml">../src/FlightDisplay/GuidedActionPause.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionRTL.qml">../src/FlightDisplay/GuidedActionRTL.qml</file>
+		<file alias="QGroundControl/FlightDisplay/GuidedActionMissionRTL.qml">../src/FlightDisplay/GuidedActionMissionRTL.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedAltitudeSlider.qml">../src/FlightDisplay/GuidedAltitudeSlider.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedToolStripAction.qml">../src/FlightDisplay/GuidedToolStripAction.qml</file>
 		<file alias="QGroundControl/FlightDisplay/MultiVehicleList.qml">../src/FlightDisplay/MultiVehicleList.qml</file>

@@ -38,12 +38,14 @@ public:
     QString             pauseFlightMode                 (void) const override { return _holdFlightMode; }
     QString             missionFlightMode               (void) const override { return _missionFlightMode; }
     QString             rtlFlightMode                   (void) const override { return _rtlFlightMode; }
+    QString             missionRtlFlightMode            (void) const override { return _missionRtlFlightMode; }
     QString             landFlightMode                  (void) const override { return _landingFlightMode; }
     QString             takeControlFlightMode           (void) const override { return _manualFlightMode; }
     QString             gotoFlightMode                  (void) const override { return _holdFlightMode; }
     QString             followFlightMode                (void) const override { return _followMeFlightMode; };
     void                pauseVehicle                    (Vehicle* vehicle) override;
     void                guidedModeRTL                   (Vehicle* vehicle, bool smartRTL) override;
+    void                guidedModeMissionRTL            (Vehicle* vehicle) override;
     void                guidedModeLand                  (Vehicle* vehicle) override;
     void                guidedModeTakeoff               (Vehicle* vehicle, double takeoffAltRel) override;
     void                guidedModeGotoLocation          (Vehicle* vehicle, const QGeoCoordinate& gotoCoord) override;
@@ -94,6 +96,7 @@ protected:
     QString _holdFlightMode;
     QString _missionFlightMode;
     QString _rtlFlightMode;
+    QString _missionRtlFlightMode;
     QString _landingFlightMode;
     QString _preclandFlightMode;
     QString _rtgsFlightMode;
