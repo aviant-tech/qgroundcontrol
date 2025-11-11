@@ -56,7 +56,12 @@ SetupPage {
             property Fact _objectAvoidance:     controller.getParameterFact(-1, "COM_OBS_AVOID")
             property Fact _landSpeedMC:         controller.getParameterFact(-1, "MPC_LAND_SPEED", false)
             property Fact _parachuteRequired:   controller.getParameterFact(-1, "COM_PARACHUTE")
-            property Fact _parachuteAltitude:   controller.getParameterFact(-1, "FD_MIN_DIST_TRM")
+            // Parachute altitude parameter changed name in PX4 1.15
+            property Fact _parachuteAltitude: (
+                controller.parameterExists(-1, "COM_FDTRM_MINAGL")
+                    ? controller.getParameterFact(-1, "COM_FDTRM_MINAGL")
+                    : controller.getParameterFact(-1, "FD_MIN_DIST_TRM")
+            )
             property bool _hitlAvailable:       controller.parameterExists(-1, hitlParam)
             property Fact _hitlEnabled:         controller.getParameterFact(-1, hitlParam, false)
 
@@ -728,3 +733,4 @@ SetupPage {
         }
     }
 }
+

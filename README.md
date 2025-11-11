@@ -35,6 +35,14 @@ You need to have an AWS account with the necessary permissions for ECRPublic and
 4. Push the "latest" tag: `docker push public.ecr.aws/m7l5v7s4/qgroundcontrol:latest`
 5. Log out of AWS ecr public: `docker logout public.ecr.aws`
 
+### Building AppImage using Docker
+To creat an AppImage locally, run:
+```docker buildx build -o . .``
+
+The output directory chan be changed using the argument to the `-o` flag.
+
+Object files are cached between runs, so only the linking has to be re-done on each build. (This gives sub-minute builds)
+
 
 ### Running QGroundControl locally with Docker
 

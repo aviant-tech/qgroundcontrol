@@ -111,6 +111,9 @@ public:
     /// Returns the flight mode for RTL
     virtual QString rtlFlightMode(void) const { return QString(); }
 
+    /// Returns the flight mode for Mission RTL
+    virtual QString missionRtlFlightMode(void) const { return QString(); }
+
     /// Returns the flight mode for Smart RTL
     virtual QString smartRTLFlightMode(void) const { return QString(); }
 
@@ -140,6 +143,9 @@ public:
 
     /// Command vehicle to return to launch
     virtual void guidedModeRTL(Vehicle* vehicle, bool smartRTL);
+    ///
+    /// Command vehicle to return to launch following mission path
+    virtual void guidedModeMissionRTL(Vehicle* vehicle);
 
     /// Command vehicle to land at current location
     virtual void guidedModeLand(Vehicle* vehicle);
