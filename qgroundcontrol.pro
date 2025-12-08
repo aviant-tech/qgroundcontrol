@@ -720,6 +720,7 @@ HEADERS += \
     src/Vehicle/TerrainProtocolHandler.h \
     src/Vehicle/TrajectoryPoints.h \
     src/Vehicle/Vehicle.h \
+    src/Vehicle/VehicleAviantFactGroup.h \
     src/Vehicle/VehicleObjectAvoidance.h \
     src/Vehicle/VehicleBatteryFactGroup.h \
     src/Vehicle/VehicleClockFactGroup.h \
@@ -952,6 +953,7 @@ SOURCES += \
     src/Vehicle/Actuators/GeometryImage.cc \
     src/Vehicle/Actuators/Mixer.cc \
     src/Vehicle/Actuators/MotorAssignment.cc \
+    src/Vehicle/VehicleAviantFactGroup.cc \
     src/Vehicle/CompInfo.cc \
     src/Vehicle/CompInfoActuators.cc \
     src/Vehicle/CompInfoEvents.cc \

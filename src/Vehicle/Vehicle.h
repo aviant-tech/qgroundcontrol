@@ -27,6 +27,7 @@
 #include "QGCMapCircle.h"
 #include "TerrainFactGroup.h"
 #include "SysStatusSensorInfo.h"
+#include "VehicleAviantFactGroup.h"
 #include "VehicleClockFactGroup.h"
 #include "VehicleDistanceSensorFactGroup.h"
 #include "VehicleLocalPositionFactGroup.h"
@@ -325,6 +326,7 @@ public:
     Q_PROPERTY(FactGroup*           localPosition   READ localPositionFactGroup     CONSTANT)
     Q_PROPERTY(FactGroup*           localPositionSetpoint READ localPositionSetpointFactGroup CONSTANT)
     Q_PROPERTY(FactGroup*           hygrometer      READ hygrometerFactGroup        CONSTANT)
+    Q_PROPERTY(FactGroup*           aviant READ aviantFactGroup CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  batteries       READ batteries                  CONSTANT)
     Q_PROPERTY(Actuators*           actuators       READ actuators                  CONSTANT)
     Q_PROPERTY(HealthAndArmingCheckReport* healthAndArmingCheckReport READ healthAndArmingCheckReport CONSTANT)
@@ -691,6 +693,7 @@ public:
     FactGroup* estimatorStatusFactGroup     () { return &_estimatorStatusFactGroup; }
     FactGroup* terrainFactGroup             () { return &_terrainFactGroup; }
     FactGroup* hygrometerFactGroup          () { return &_hygrometerFactGroup; }
+    FactGroup* aviantFactGroup() { return &_aviantFactGroup; }
     QmlObjectListModel* batteries           () { return &_batteryFactGroupListModel; }
 
     MissionManager*                 missionManager      () { return _missionManager; }
@@ -1362,6 +1365,7 @@ private:
     VehicleEstimatorStatusFactGroup _estimatorStatusFactGroup;
     VehicleHygrometerFactGroup      _hygrometerFactGroup;
     TerrainFactGroup                _terrainFactGroup;
+    VehicleAviantFactGroup _aviantFactGroup;
     QmlObjectListModel              _batteryFactGroupListModel;
 
     TerrainProtocolHandler* _terrainProtocolHandler = nullptr;
@@ -1400,6 +1404,7 @@ private:
     static const char* _hobbsFactName;
     static const char* _throttlePctFactName;
 
+    static const char* _aviantFactGroupName;
     static const char* _gpsFactGroupName;
     static const char* _gps2FactGroupName;
     static const char* _windFactGroupName;

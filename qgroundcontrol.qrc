@@ -334,6 +334,7 @@
         <file alias="TransectStyle.SettingsGroup.json">src/MissionManager/TransectStyle.SettingsGroup.json</file>
         <file alias="Units.SettingsGroup.json">src/Settings/Units.SettingsGroup.json</file>
         <file alias="USBBoardInfo.json">src/comm/USBBoardInfo.json</file>
+        <file alias="Vehicle/AviantFactGroup.json">src/Vehicle/AviantFactGroup.json</file>
         <file alias="Vehicle/BatteryFact.json">src/Vehicle/BatteryFact.json</file>
         <file alias="Vehicle/ClockFact.json">src/Vehicle/ClockFact.json</file>
         <file alias="Vehicle/DistanceSensorFact.json">src/Vehicle/DistanceSensorFact.json</file>

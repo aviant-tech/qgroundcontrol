@@ -15,6 +15,7 @@
 #include <QString>
 #include <QVariant>
 #include <QDebug>
+#include <QColor>
 #include <QAbstractListModel>
 
 class FactValueSliderListModel;
@@ -73,6 +74,8 @@ public:
     Q_PROPERTY(bool         readOnly                READ readOnly                                           CONSTANT)
     Q_PROPERTY(bool         writeOnly               READ writeOnly                                          CONSTANT)
     Q_PROPERTY(bool         volatileValue           READ volatileValue                                      CONSTANT)
+    Q_PROPERTY(QColor       overrideColor           READ overrideColor                                      CONSTANT)
+    Q_PROPERTY(bool         overrideColorEnabled    READ overrideColorEnabled                               CONSTANT)
 
     /// @brief Convert and validate value
     /// @param cookedValue: Value to convert and validate
@@ -126,6 +129,8 @@ public:
     bool            readOnly                (void) const;
     bool            writeOnly               (void) const;
     bool            volatileValue           (void) const;
+    QColor          overrideColor           (void) const { return _overrideColor; }
+    bool            overrideColorEnabled    (void) const { return _overrideColorEnabled; }
 
     // Internal hack to allow changes to fact which do not signal reboot. Currently used by font point size
     // code in ScreenTools.qml to set initial sizing at first boot.
@@ -140,6 +145,8 @@ public:
     void setCookedValue     (const QVariant& value);
     void setEnumIndex       (int index);
     void setEnumStringValue (const QString& value);
+    void setOverrideColor   (const QColor& color);
+    void unsetOverrideColor (void);
     int  valueIndex         (const QString& value);
 
     // The following methods allow you to defer sending of the valueChanged signals in order to implement
@@ -211,4 +218,6 @@ protected:
     bool                        _deferredValueChangeSignal;
     FactValueSliderListModel*   _valueSliderModel;
     bool                        _ignoreQGCRebootRequired;
+    bool                        _overrideColorEnabled;
+    QColor                      _overrideColor;
 };

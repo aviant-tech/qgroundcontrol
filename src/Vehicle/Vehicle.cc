@@ -95,6 +95,7 @@ const char* Vehicle::_distanceToGCSFactName =       "distanceToGCS";
 const char* Vehicle::_hobbsFactName =               "hobbs";
 const char* Vehicle::_throttlePctFactName =         "throttlePct";
 
+const char* Vehicle::_aviantFactGroupName =             "aviant";
 const char* Vehicle::_gpsFactGroupName =                "gps";
 const char* Vehicle::_gps2FactGroupName =               "gps2";
 const char* Vehicle::_windFactGroupName =               "wind";
@@ -171,6 +172,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _estimatorStatusFactGroup     (this)
     , _hygrometerFactGroup          (this)
     , _terrainFactGroup             (this)
+    , _aviantFactGroup(this)
     , _terrainProtocolHandler       (new TerrainProtocolHandler(this, &_terrainFactGroup, this))
 {
     _linkManager = _toolbox->linkManager();
@@ -328,6 +330,7 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _distanceSensorFactGroup          (this)
     , _localPositionFactGroup           (this)
     , _localPositionSetpointFactGroup   (this)
+    , _aviantFactGroup(this)
 {
     _linkManager = _toolbox->linkManager();
 
@@ -462,6 +465,7 @@ void Vehicle::_commonInit()
     _addFactGroup(&_estimatorStatusFactGroup,   _estimatorStatusFactGroupName);
     _addFactGroup(&_hygrometerFactGroup,        _hygrometerFactGroupName);
     _addFactGroup(&_terrainFactGroup,           _terrainFactGroupName);
+    _addFactGroup(&_aviantFactGroup, _aviantFactGroupName);
 
     // Add firmware-specific fact groups, if provided
     QMap<QString, FactGroup*>* fwFactGroups = _firmwarePlugin->factGroups();

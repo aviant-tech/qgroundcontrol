@@ -62,6 +62,8 @@ add_library(Vehicle
 	TerrainProtocolHandler.h
 	TrajectoryPoints.cc
 	TrajectoryPoints.h
+	VehicleAviantFactGroup.cc
+	VehicleAviantFactGroup.h
 	VehicleBatteryFactGroup.cc
 	VehicleBatteryFactGroup.h
 	Vehicle.cc
