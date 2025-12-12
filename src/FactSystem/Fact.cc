@@ -28,6 +28,7 @@ Fact::Fact(QObject* parent)
     , _deferredValueChangeSignal(false)
     , _valueSliderModel         (nullptr)
     , _ignoreQGCRebootRequired  (false)
+    , _overrideColorEnabled(false)
 {    
     FactMetaData* metaData = new FactMetaData(_type, this);
     setMetaData(metaData);
@@ -46,6 +47,7 @@ Fact::Fact(int componentId, QString name, FactMetaData::ValueType_t type, QObjec
     , _deferredValueChangeSignal(false)
     , _valueSliderModel         (nullptr)
     , _ignoreQGCRebootRequired  (false)
+    , _overrideColorEnabled(false)
 {
     FactMetaData* metaData = new FactMetaData(_type, this);
     setMetaData(metaData);
@@ -64,6 +66,7 @@ Fact::Fact(const QString& settingsGroup, FactMetaData* metaData, QObject* parent
     , _deferredValueChangeSignal(false)
     , _valueSliderModel         (nullptr)
     , _ignoreQGCRebootRequired  (false)
+    , _overrideColorEnabled(false)
 {
     qgcApp()->toolbox()->corePlugin()->adjustSettingMetaData(settingsGroup, *metaData);
     setMetaData(metaData, true /* setDefaultFromMetaData */);
@@ -175,6 +178,17 @@ void Fact::setEnumIndex(int index)
     } else {
         qWarning() << kMissingMetadata << name();
     }
+}
+
+void Fact::setOverrideColor(const QColor& color)
+{
+    _overrideColor = color;
+    _overrideColorEnabled = true;
+}
+
+void Fact::unsetOverrideColor(void)
+{
+    _overrideColorEnabled = false;
 }
 
 void Fact::_containerSetRawValue(const QVariant& value)

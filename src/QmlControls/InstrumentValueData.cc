@@ -309,27 +309,33 @@ void InstrumentValueData::_updateRanges(void)
 void InstrumentValueData::_updateColor(void)
 {
     QColor newColor;
-    const double factValue = _fact ? _fact->rawValue().toDouble() : qQNaN();
-    const RangeSet* activeRangeSetToUse = &_range;
+    
+    if (_fact->overrideColorEnabled()) {
+        newColor = _fact->overrideColor();
 
-    if (_rangeType == ColorRange) {
-        if (_individualFwMrRanges && _activeVehicle) {
-            const bool isVtol = _activeVehicle->vtol();
-            const bool isVtolInFwdFlight = isVtol && _activeVehicle->vtolInFwdFlight();
-            const bool isConsideredFixedWing = _activeVehicle->fixedWing() || (isVtol && isVtolInFwdFlight);
-            const bool isConsideredMultiRotor = _activeVehicle->multiRotor() || (isVtol && !isVtolInFwdFlight);
+    } else{
+        const double factValue = _fact ? _fact->rawValue().toDouble() : qQNaN();
+        const RangeSet* activeRangeSetToUse = &_range;
 
-            if (isConsideredFixedWing) {
-                activeRangeSetToUse = &_fwRange;
-            } else if (isConsideredMultiRotor) {
-                activeRangeSetToUse = &_mrRange;
+        if (_rangeType == ColorRange) {
+            if (_individualFwMrRanges && _activeVehicle) {
+                const bool isVtol = _activeVehicle->vtol();
+                const bool isVtolInFwdFlight = isVtol && _activeVehicle->vtolInFwdFlight();
+                const bool isConsideredFixedWing = _activeVehicle->fixedWing() || (isVtol && isVtolInFwdFlight);
+                const bool isConsideredMultiRotor = _activeVehicle->multiRotor() || (isVtol && !isVtolInFwdFlight);
+
+                if (isConsideredFixedWing) {
+                    activeRangeSetToUse = &_fwRange;
+                } else if (isConsideredMultiRotor) {
+                    activeRangeSetToUse = &_mrRange;
+                }
             }
-        }
 
-        if (_fact && !qIsNaN(factValue)) {
-            const int rangeIndex = _currentRangeIndex(factValue, activeRangeSetToUse->values);
-            if (rangeIndex != -1 && rangeIndex < activeRangeSetToUse->colors.count()) {
-                newColor = activeRangeSetToUse->colors[rangeIndex].value<QColor>();
+            if (_fact && !qIsNaN(factValue)) {
+                const int rangeIndex = _currentRangeIndex(factValue, activeRangeSetToUse->values);
+                if (rangeIndex != -1 && rangeIndex < activeRangeSetToUse->colors.count()) {
+                    newColor = activeRangeSetToUse->colors[rangeIndex].value<QColor>();
+                }
             }
         }
     }

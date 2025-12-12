@@ -1,0 +1,21 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name":             "navigationAccuracy",
+    "shortDesc":        "NavAcc",
+    "type":             "uint8",
+    "enumStrings":      "--,ACC,APX,FAIL",
+    "enumValues":       "0,1,2,3"
+},
+{
+    "name":             "navigationRedundancy",
+    "shortDesc":        "NavRedun",
+    "type":             "uint8",
+    "enumStrings":      "--,REDUN,SINGLE,FAIL",
+    "enumValues":       "0,1,2,3"
+}
+]
+}
