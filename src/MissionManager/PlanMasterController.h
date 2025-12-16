@@ -154,7 +154,7 @@ private:
     AviantMissionTools      _aviantMissionTools;
     bool                    _loadGeoFence =             false;
     bool                    _loadRallyPoints =          false;
-    bool                    _sendMission =              false;
+    bool                    _sendGeoFence =             false;
     bool                    _sendRallyPoints =          false;
     QString                 _currentPlanFile;
     bool                    _deleteWhenSendCompleted =  false;

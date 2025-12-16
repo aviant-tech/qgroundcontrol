@@ -34,7 +34,6 @@ public:
     Q_PROPERTY(QmlObjectListModel*  circles                 READ circles                                            CONSTANT)
     Q_PROPERTY(QGeoCoordinate       breachReturnPoint       READ breachReturnPoint      WRITE setBreachReturnPoint  NOTIFY breachReturnPointChanged)
     Q_PROPERTY(Fact*                breachReturnAltitude    READ breachReturnAltitude                               CONSTANT)
-    Q_PROPERTY(QStringList          fenceActions            READ fenceActions                                       CONSTANT)
     Q_PROPERTY(double               progressPct             READ progressPct                                        NOTIFY progressPctChanged)
 
     // Hack to expose PX4 circular fence controlled by GF_MAX_HOR_DIST
@@ -61,9 +60,8 @@ public:
     /// Clears the interactive bit from all fence items
     Q_INVOKABLE void clearAllInteractive(void);
 
-    double      paramCircularFence  (void);
-    Fact*       breachReturnAltitude(void) { return &_breachReturnAltitudeFact; }
-    QStringList fenceActions(void) const;
+    double  paramCircularFence  (void);
+    Fact*   breachReturnAltitude(void) { return &_breachReturnAltitudeFact; }
 
     // Overrides from PlanElementController
     bool supported                  (void) const final;
