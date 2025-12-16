@@ -4,7 +4,7 @@
 #include <QtMath>
 
 const QColor VehicleAviantFactGroup::COLOR_UNKNOWN { QColor::fromRgb(128, 128, 128) }; // Gray
-const QColor VehicleAviantFactGroup::COLOR_NOMINAL { QColor::fromRgb(0, 255, 0) }; // Green
+const QColor VehicleAviantFactGroup::COLOR_NOMINAL { QColor::fromRgb(0, 128, 0) }; // Green
 const QColor VehicleAviantFactGroup::COLOR_WARNING { QColor::fromRgb(255, 170, 0) }; // Orange
 const QColor VehicleAviantFactGroup::COLOR_CRITICAL { QColor::fromRgb(255, 0, 0) }; // Red
 
