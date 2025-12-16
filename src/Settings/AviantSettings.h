@@ -42,5 +42,4 @@ public:
     DEFINE_SETTINGFACT(missionToolsToken)
     DEFINE_SETTINGFACT(kyteBackendUrl)
     DEFINE_SETTINGFACT(kyteBackendToken)
-    DEFINE_SETTINGFACT(hideBreachReturnPoint)
 };

@@ -102,33 +102,20 @@ bool RallyPointController::load(const QJsonObject& json, QString& errorString)
     QString errorStr;
     QString errorMessage = tr("Rally: %1");
 
-    bool loadType = false;
-    if (json[JsonHelper::jsonVersionKey].toInt() == _jsonCurrentVersionWithRPType) {
-        loadType = true;
-    } else if (json[JsonHelper::jsonVersionKey].toInt() == _jsonCurrentVersion) {
-        // Will load and convert "old version" (without RP type)
-    } else {
-        errorString = tr("Rally Points supports version %1 and %2")
-            .arg(_jsonCurrentVersion).arg(_jsonCurrentVersionWithRPType);
+    if (json[JsonHelper::jsonVersionKey].toInt() != _jsonCurrentVersion) {
+        errorString = tr("Rally Points supports version %1").arg(_jsonCurrentVersion);
         return false;
     }
 
     QList<QGeoCoordinate> rgPoints;
-    QList<int> types;
-    if (!JsonHelper::loadGeoCoordinateArray(json[_jsonPointsKey], true /* altitudeRequired */, rgPoints,
-                (loadType ? &types : NULL), errorStr)) {
+    if (!JsonHelper::loadGeoCoordinateArray(json[_jsonPointsKey], true /* altitudeRequired */, rgPoints, errorStr)) {
         errorString = errorMessage.arg(errorStr);
         return false;
     }
 
-    if (loadType && rgPoints.count() != types.count()) {
-        errorString = errorMessage.arg("Point/type count mismatch");
-    }
-
     QObjectList pointList;
     for (int i=0; i<rgPoints.count(); i++) {
-        int type = loadType ? types[i] : 0;  // default type is 0
-        pointList.append(new RallyPoint(rgPoints[i], type, this));
+        pointList.append(new RallyPoint(rgPoints[i], this));
     }
     _points.swapObjectList(pointList);
 
@@ -140,27 +127,12 @@ bool RallyPointController::load(const QJsonObject& json, QString& errorString)
 
 void RallyPointController::save(QJsonObject& json)
 {
-    // Check if other rally point type than "always" / 0 exist
-    // Save in "old format" if not
-    bool useTypeVersion = false;
-    for (int i=0; i<_points.count(); i++) {
-        if (qobject_cast<RallyPoint*>(_points[i])->type() != 0) {
-            useTypeVersion = true;
-            break;
-        }
-    }
-
-    json[JsonHelper::jsonVersionKey] = useTypeVersion ? _jsonCurrentVersionWithRPType : _jsonCurrentVersion;
+    json[JsonHelper::jsonVersionKey] = _jsonCurrentVersion;
 
     QJsonArray rgPoints;
     QJsonValue jsonPoint;
     for (int i=0; i<_points.count(); i++) {
-        RallyPoint* point = qobject_cast<RallyPoint*>(_points[i]);
-        if (useTypeVersion) {
-            JsonHelper::saveGeoCoordinate(point->coordinate(), true /* writeAltitude */, point->type(), jsonPoint);
-        } else {
-            JsonHelper::saveGeoCoordinate(point->coordinate(), true /* writeAltitude */, jsonPoint);
-        }
+        JsonHelper::saveGeoCoordinate(qobject_cast<RallyPoint*>(_points[i])->coordinate(), true /* writeAltitude */, jsonPoint);
         rgPoints.append(jsonPoint);
     }
     json[_jsonPointsKey] = QJsonValue(rgPoints);
@@ -205,9 +177,9 @@ void RallyPointController::sendToVehicle(void)
     } else {
         qCDebug(RallyPointControllerLog) << "RallyPointController::sendToVehicle";
         setDirty(false);
-        QList<const RallyPoint*> rgPoints;
+        QList<QGeoCoordinate> rgPoints;
         for (int i=0; i<_points.count(); i++) {
-            rgPoints.append(qobject_cast<const RallyPoint*>(_points[i]));
+            rgPoints.append(qobject_cast<RallyPoint*>(_points[i])->coordinate());
         }
         _rallyPointManager->sendToVehicle(rgPoints);
     }

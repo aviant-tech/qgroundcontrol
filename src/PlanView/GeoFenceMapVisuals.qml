@@ -29,7 +29,6 @@ Item {
     property bool   planView:               false   ///< true: visuals showing in plan view
     property var    homePosition
 
-    property var    _aviantSettings:            QGroundControl.settingsManager.aviantSettings
     property var    _breachReturnPointComponent
     property var    _breachReturnDragComponent
     property var    _paramCircleFenceComponent
@@ -149,7 +148,7 @@ Item {
         MissionItemIndicatorDrag {
             mapControl:     map
             itemCoordinate: myGeoFenceController.breachReturnPoint
-            visible:        _root.interactive && !_aviantSettings.hideBreachReturnPoint.rawValue
+            visible:        _root.interactive
 
             onItemCoordinateChanged: myGeoFenceController.breachReturnPoint = itemCoordinate
         }
@@ -161,7 +160,6 @@ Item {
         id: breachReturnPointComponent
 
         MapQuickItem {
-            visible:        !_aviantSettings.hideBreachReturnPoint.rawValue
             anchorPoint.x:  sourceItem.anchorPointX
             anchorPoint.y:  sourceItem.anchorPointY
             z:              QGroundControl.zOrderMapItems
