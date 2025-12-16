@@ -54,7 +54,6 @@ signals:
 
 private slots:
     void _sendCoordinateChanged(void);
-    void _sendTypeChanged(void);
 
 private:
     void _factSetup(void);
