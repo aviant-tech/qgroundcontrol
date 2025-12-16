@@ -36,27 +36,26 @@ void RallyPointManager::_sendError(ErrorCode_t errorCode, const QString& errorMs
     emit error(errorCode, errorMsg);
 }
 
-void RallyPointManager::sendToVehicle(const QList<const RallyPoint*>& rgPoints)
+void RallyPointManager::sendToVehicle(const QList<QGeoCoordinate>& rgPoints)
 {
     _rgSendPoints.clear();
-    for (const RallyPoint* rallyPoint: rgPoints) {
-        _rgSendPoints.append(*rallyPoint);
+    for (const QGeoCoordinate& rallyPoint: rgPoints) {
+        _rgSendPoints.append(rallyPoint);
     }
 
     QList<MissionItem*> rallyItems;
     for (int i=0; i<rgPoints.count(); i++) {
-        const RallyPoint* point = rgPoints[i];
+
         MissionItem* item = new MissionItem(0,
                                             MAV_CMD_NAV_RALLY_POINT,
                                             MAV_FRAME_GLOBAL,
-                                            point->type(),                   // type: always, MR, FW
-                                            0, 0, 0,                         // param 2-4 unused
-                                            point->coordinate().latitude(),
-                                            point->coordinate().longitude(),
-                                            point->coordinate().altitude(),
-                                            false,                           // autocontinue
-                                            false,                           // isCurrentItem
-                                            this);                           // parent
+                                            0, 0, 0, 0,                 // param 1-4 unused
+                                            rgPoints[i].latitude(),
+                                            rgPoints[i].longitude(),
+                                            rgPoints[i].altitude(),
+                                            false,                      // autocontinue
+                                            false,                      // isCurrentItem
+                                            this);                      // parent
         rallyItems.append(item);
     }
 
@@ -89,7 +88,7 @@ void RallyPointManager::_planManagerLoadComplete(bool removeAllRequested)
         MAV_CMD command = item->command();
 
         if (command == MAV_CMD_NAV_RALLY_POINT) {
-            _rgPoints.append(RallyPoint(QGeoCoordinate(item->param5(), item->param6(), item->param7()), item->param1()));
+            _rgPoints.append(QGeoCoordinate(item->param5(), item->param6(), item->param7()));
         } else {
             qCDebug(RallyPointManagerLog) << "RallyPointManager load: Unsupported command %1" << item->command();
             break;
@@ -105,7 +104,7 @@ void RallyPointManager::_sendComplete(bool error)
     if (error) {
         _rgPoints.clear();
     } else {
-        _rgPoints.swap(_rgSendPoints);
+        _rgPoints = _rgSendPoints;
     }
     _rgSendPoints.clear();
     emit sendComplete(error);

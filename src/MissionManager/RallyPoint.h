@@ -22,9 +22,7 @@ class RallyPoint : public QObject
     Q_OBJECT
     
 public:
-    RallyPoint(const QGeoCoordinate& coordinate, int type, QObject* parent = nullptr);
-    RallyPoint(const QGeoCoordinate& coordinate, QObject* parent = nullptr)
-        : RallyPoint(coordinate, 0, parent) {}
+    RallyPoint(const QGeoCoordinate& coordinate, QObject* parent = nullptr);
     RallyPoint(const RallyPoint& other, QObject* parent = nullptr);
 
     ~RallyPoint();
@@ -32,15 +30,11 @@ public:
     const RallyPoint& operator=(const RallyPoint& other);
     
     Q_PROPERTY(QGeoCoordinate   coordinate      READ coordinate     WRITE setCoordinate     NOTIFY coordinateChanged)
-    Q_PROPERTY(int              type            READ type           WRITE setType           NOTIFY typeChanged)
     Q_PROPERTY(bool             dirty           READ dirty          WRITE setDirty          NOTIFY dirtyChanged)
     Q_PROPERTY(QVariantList     textFieldFacts  MEMBER _textFieldFacts                      CONSTANT)
 
     QGeoCoordinate coordinate(void) const;
     void setCoordinate(const QGeoCoordinate& coordinate);
-
-    int type(void) const;
-    void setType(int type);
 
     bool dirty(void) const { return _dirty; }
     void setDirty(bool dirty);
@@ -49,7 +43,6 @@ public:
 
 signals:
     void coordinateChanged      (const QGeoCoordinate& coordinate);
-    void typeChanged            (int type);
     void dirtyChanged           (bool dirty);
 
 private slots:
@@ -63,7 +56,6 @@ private:
     Fact _longitudeFact;
     Fact _latitudeFact;
     Fact _altitudeFact;
-    Fact _typeFact;
 
     QVariantList _textFieldFacts;
 
@@ -72,7 +64,6 @@ private:
     static const char* _longitudeFactName;
     static const char* _latitudeFactName;
     static const char* _altitudeFactName;
-    static const char* _typeFactName;
 };
 
 #endif
