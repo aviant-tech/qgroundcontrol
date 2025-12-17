@@ -22,6 +22,8 @@ env:
 
 jobs:
   build:
+    # Workflow disabled: Windows release not used
+    if: ${{ false }}
     runs-on:  windows-2022
 
     steps:

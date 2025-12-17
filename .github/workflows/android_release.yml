@@ -22,6 +22,8 @@ env:
 
 jobs:
   build:
+    # Workflow disabled: Android release not used
+    if: ${{ false }}
     runs-on:  ubuntu-22.04
 
     strategy:
