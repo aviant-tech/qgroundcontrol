@@ -2904,10 +2904,9 @@ void Vehicle::emergencyStop()
 {
     sendMavCommand(
                 _defaultComponentId,
-                MAV_CMD_COMPONENT_ARM_DISARM,
+                MAV_CMD_DO_FLIGHTTERMINATION,
                 true,        // show error if fails
-                0.0f,
-                21196.0f);  // Magic number for emergency stop
+                1.0f);       // Do the termination
 }
 
 void Vehicle::setCurrentMissionSequence(int seq)
