@@ -16,6 +16,13 @@
     "type":             "uint8",
     "enumStrings":      "--,REDUN,SINGLE,FAIL",
     "enumValues":       "0,1,2,3"
+},
+{
+    "name":             "atsStatus",
+    "shortDesc":        "ATS",
+    "type":             "uint32",
+    "enumStrings":      "--,OK,WARN,FAIL",
+    "enumValues":       "0,1,2,3"
 }
 ]
 }
