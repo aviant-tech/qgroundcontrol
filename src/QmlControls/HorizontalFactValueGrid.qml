@@ -163,31 +163,25 @@ T.HorizontalFactValueGrid {
             }
         }
     }
-    /*
-    We dont want pilots to be able to edit the limit values, as this is configured by Multi-command.
-    Comment out the code instead of removing to make rebasing to QGCv5 easier.
     QGCMouseArea {
         x:          labelValueColumnLayout.x
         y:          labelValueColumnLayout.y
         width:      labelValueColumnLayout.width
         height:     labelValueColumnLayout.height
-        visible:    settingsUnlocked
+        visible:    settingsUnlocked && QGroundControl.settingsManager.aviantSettings.editableTelemetryBar.rawValue
         cursorShape:Qt.PointingHandCursor
 
         property var mappedLabelValueColumnLayoutPosition: _root.mapFromItem(labelValueColumnLayout, labelValueColumnLayout.x, labelValueColumnLayout.y)
 
         onClicked: {
             var columnGridLayoutItem = labelValueColumnLayout.childAt(mouse.x, mouse.y)
-            //console.log(mouse.x, mouse.y, columnGridLayoutItem)
             var mappedMouse = labelValueColumnLayout.mapToItem(columnGridLayoutItem, mouse.x, mouse.y)
             var labelOrDataItem = columnGridLayoutItem.childAt(mappedMouse.x, mappedMouse.y)
-            //console.log(mappedMouse.x, mappedMouse.y, labelOrDataItem, labelOrDataItem ? labelOrDataItem.instrumentValueData : "null", labelOrDataItem && labelOrDataItem.parent ? labelOrDataItem.parent.instrumentValueData : "null")
             if (labelOrDataItem && labelOrDataItem.instrumentValueData !== undefined) {
                 mainWindow.showPopupDialogFromComponent(valueEditDialog, { instrumentValueData: labelOrDataItem.instrumentValueData })
             }
         }
     }
-    */
 
     Component {
         id: valueEditDialog

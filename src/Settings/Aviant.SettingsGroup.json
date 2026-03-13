@@ -173,6 +173,13 @@
     "longDesc":            "Hide breach return point that is not used by PX4 (use rally points)",
     "type":                "bool",
     "default":             true
+},
+{
+    "name":                "editableTelemetryBar",
+    "shortDesc":           "Editable telemetry bar",
+    "longDesc":            "Allow editing individual telemetry bar values when settings are unlocked",
+    "type":                "bool",
+    "default":             false
 }
 ]
 }
