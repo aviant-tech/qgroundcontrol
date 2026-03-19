@@ -909,6 +909,10 @@ Rectangle {
                                 Layout.fillWidth:  true
                             }
                             FactCheckBox {
+                                text:       qsTr("Editable telemetry bar")
+                                fact:       _aviantSettings.editableTelemetryBar
+                            }
+                            FactCheckBox {
                                 text:       _aviantSettings.missionToolsInsecureHttps.shortDescription
                                 fact:       _aviantSettings.missionToolsInsecureHttps
                             }
