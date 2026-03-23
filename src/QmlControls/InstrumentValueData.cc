@@ -90,6 +90,7 @@ void InstrumentValueData::_setFactWorker(void)
 {
     if (_fact) {
         disconnect(_fact, &Fact::rawValueChanged, this, &InstrumentValueData::_updateRanges);
+        disconnect(_fact, &Fact::timedOutChanged, this, &InstrumentValueData::_updateRanges);
         _fact = nullptr;
     }
 
@@ -113,6 +114,7 @@ void InstrumentValueData::_setFactWorker(void)
     if (_fact) {
         _factName = nonEmptyFactName;
         connect(_fact, &Fact::rawValueChanged, this, &InstrumentValueData::_updateRanges);
+        connect(_fact, &Fact::timedOutChanged, this, &InstrumentValueData::_updateRanges);
     }
 
     emit factValueNamesChanged  ();
@@ -309,11 +311,12 @@ void InstrumentValueData::_updateRanges(void)
 void InstrumentValueData::_updateColor(void)
 {
     QColor newColor;
-    
-    if (_fact->overrideColorEnabled()) {
-        newColor = _fact->overrideColor();
 
-    } else{
+    if (_fact && _fact->timedOut()) {
+        newColor = QColor::fromRgb(255, 170, 0); // Orange
+    } else if (_fact && _fact->overrideColorEnabled()) {
+        newColor = _fact->overrideColor();
+    } else {
         const double factValue = _fact ? _fact->rawValue().toDouble() : qQNaN();
         const RangeSet* activeRangeSetToUse = &_range;
 

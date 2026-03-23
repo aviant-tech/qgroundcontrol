@@ -98,6 +98,8 @@ const Fact& Fact::operator=(const Fact& other)
     _deferredValueChangeSignal  = other._deferredValueChangeSignal;
     _valueSliderModel           = nullptr;
     _ignoreQGCRebootRequired    = other._ignoreQGCRebootRequired;
+    _timeSinceLastUpdate        = other._timeSinceLastUpdate;
+    _timedOut                   = other._timedOut;
     if (_metaData && other._metaData) {
         *_metaData = *other._metaData;
     } else {
@@ -114,6 +116,7 @@ void Fact::forceSetRawValue(const QVariant& value)
         QString     errorString;
         
         if (_metaData->convertAndValidateRaw(value, true /* convertOnly */, typedValue, errorString)) {
+            _timeSinceLastUpdate.restart();
             _rawValue.setValue(typedValue);
             _sendValueChangedSignal(cookedValue());
             //-- Must be in this order
@@ -132,6 +135,7 @@ void Fact::setRawValue(const QVariant& value)
         QString     errorString;
         
         if (_metaData->convertAndValidateRaw(value, true /* convertOnly */, typedValue, errorString)) {
+            _timeSinceLastUpdate.restart();
             if (typedValue != _rawValue) {
                 _rawValue.setValue(typedValue);
                 _sendValueChangedSignal(cookedValue());
@@ -193,6 +197,8 @@ void Fact::unsetOverrideColor(void)
 
 void Fact::_containerSetRawValue(const QVariant& value)
 {
+    _timeSinceLastUpdate.restart();
+
     if(_rawValue != value) {
         _rawValue = value;
         _sendValueChangedSignal(cookedValue());
@@ -201,6 +207,18 @@ void Fact::_containerSetRawValue(const QVariant& value)
 
     // This always need to be signalled in order to support forceSetRawValue usage and waiting for vehicleUpdated signal
     emit vehicleUpdated(_rawValue);
+}
+
+void Fact::checkTimeout(double timeoutSecs)
+{
+    const bool shouldBeTimedOut = !_timeSinceLastUpdate.isValid() ||
+                            _timeSinceLastUpdate.elapsed() >= timeoutSecs * 1000;
+
+    if (shouldBeTimedOut != _timedOut) {
+        _timedOut = shouldBeTimedOut;
+        emit timedOutChanged(_timedOut);
+        _sendValueChangedSignal(cookedValue());
+    }
 }
 
 QString Fact::name(void) const
@@ -406,11 +424,17 @@ QString Fact::rawValueStringFullPrecision(void) const
 
 QString Fact::rawValueString(void) const
 {
+    if (_timedOut) {
+        return QStringLiteral("TOUT");
+    }
     return _variantToString(rawValue(), decimalPlaces());
 }
 
 QString Fact::cookedValueString(void) const
 {
+    if (_timedOut) {
+        return QStringLiteral("TOUT");
+    }
     return _variantToString(cookedValue(), decimalPlaces());
 }
 
@@ -704,6 +728,9 @@ void Fact::sendDeferredValueChangedSignal(void)
 
 QString Fact::enumOrValueString(void)
 {
+    if (_timedOut) {
+        return QStringLiteral("TOUT");
+    }
     if (_metaData) {
         if (_metaData->enumStrings().count()) {
             return enumStringValue();
