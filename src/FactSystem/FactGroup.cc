@@ -10,6 +10,9 @@
 
 #include "FactGroup.h"
 #include "JsonHelper.h"
+#include "QGCApplication.h"
+#include "SettingsManager.h"
+#include "AviantSettings.h"
 
 #include <QJsonDocument>
 #include <QJsonParseError>
@@ -153,8 +156,16 @@ void FactGroup::_addFactGroup(FactGroup* factGroup, const QString& name)
 
 void FactGroup::_updateAllValues(void)
 {
-    for(Fact* fact: _nameToFactMap) {
+    double timeoutSecs = 0;
+    if (qgcApp() && qgcApp()->toolbox() && qgcApp()->toolbox()->settingsManager()) {
+        timeoutSecs = qgcApp()->toolbox()->settingsManager()->aviantSettings()->factTimeoutSecs()->rawValue().toDouble();
+    }
+
+    for (Fact* fact : _nameToFactMap) {
         fact->sendDeferredValueChangedSignal();
+        if (timeoutSecs > 0) {
+            fact->checkTimeout(timeoutSecs);
+        }
     }
 }
 
@@ -192,3 +203,4 @@ void FactGroup::_setTelemetryAvailable (bool telemetryAvailable)
         emit telemetryAvailableChanged(_telemetryAvailable);
     }
 }
+

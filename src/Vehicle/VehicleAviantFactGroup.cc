@@ -19,9 +19,6 @@ VehicleAviantFactGroup::VehicleAviantFactGroup(QObject* parent)
     _addFact(&_navigationAccuracyFact, navigationAccuracyFactName);
     _addFact(&_navigationRedundancyFact, navigationRedundancyFactName);
     _addFact(&_atsStatusFact, atsStatusFactName);
-    _navigationAccuracyFact.setRawValue(qQNaN());
-    _navigationRedundancyFact.setRawValue(qQNaN());
-    _atsStatusFact.setRawValue(0);
 }
 
 void VehicleAviantFactGroup::handleMessage(Vehicle* vehicle, mavlink_message_t& message)

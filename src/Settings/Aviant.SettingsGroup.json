@@ -180,6 +180,15 @@
     "longDesc":            "Allow editing individual telemetry bar values when settings are unlocked",
     "type":                "bool",
     "default":             false
+},
+{
+    "name":        "factTimeoutSecs",
+    "shortDesc":   "Fact value timeout",
+    "longDesc":    "Telemetry values not updated within this many seconds are shown as N/A. Set to 0 to disable.",
+    "type":        "double",
+    "min":         0,
+    "units":       "s",
+    "default":     3
 }
 ]
 }

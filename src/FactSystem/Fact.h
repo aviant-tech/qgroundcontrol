@@ -17,6 +17,7 @@
 #include <QDebug>
 #include <QColor>
 #include <QAbstractListModel>
+#include <QElapsedTimer>
 
 class FactValueSliderListModel;
 
@@ -76,6 +77,7 @@ public:
     Q_PROPERTY(bool         volatileValue           READ volatileValue                                      CONSTANT)
     Q_PROPERTY(QColor       overrideColor           READ overrideColor                                      CONSTANT)
     Q_PROPERTY(bool         overrideColorEnabled    READ overrideColorEnabled                               CONSTANT)
+    Q_PROPERTY(bool         timedOut                READ timedOut                                           NOTIFY timedOutChanged)
 
     /// @brief Convert and validate value
     /// @param cookedValue: Value to convert and validate
@@ -131,6 +133,8 @@ public:
     bool            volatileValue           (void) const;
     QColor          overrideColor           (void) const { return _overrideColor; }
     bool            overrideColorEnabled    (void) const { return _overrideColorEnabled; }
+    bool            timedOut                (void) const { return _timedOut; }
+    void            checkTimeout            (double timeoutSecs);
 
     // Internal hack to allow changes to fact which do not signal reboot. Currently used by font point size
     // code in ScreenTools.qml to set initial sizing at first boot.
@@ -194,6 +198,8 @@ signals:
     /// Signalled when the param write ack comes back from the vehicle
     void vehicleUpdated(QVariant value);
     
+    void timedOutChanged(bool timedOut);
+
     /// Signalled when property has been changed by a call to the property write accessor
     ///
     /// This signal is meant for use by Fact container implementations. Used to send changed values to vehicle.
@@ -220,4 +226,6 @@ protected:
     bool                        _ignoreQGCRebootRequired;
     bool                        _overrideColorEnabled;
     QColor                      _overrideColor;
+    QElapsedTimer               _timeSinceLastUpdate;
+    bool                        _timedOut = false;
 };
