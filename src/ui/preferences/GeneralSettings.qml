@@ -809,6 +809,10 @@ Rectangle {
                                 fact:                   _aviantSettings.multidroneConflictDistance
                             }
                             FactCheckBox {
+                                text:       qsTr("Show acceptance radius circle")
+                                fact:       _aviantSettings.showAcceptanceRadiusCircle
+                            }
+                            FactCheckBox {
                                 id:         promptShowBatteryWidget
                                 text:       qsTr("Show battery widget")
                                 fact:       _aviantSettings.showBatteryWidget

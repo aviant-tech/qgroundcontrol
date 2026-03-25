@@ -21,6 +21,7 @@ MapQuickItem {
 
     property var missionItem
     property int sequenceNumber
+    property bool showHighlight: true
 
     signal clicked
 
@@ -36,7 +37,7 @@ MapQuickItem {
             gimbalYaw:          missionItem.missionGimbalYaw
             vehicleYaw:         missionItem.missionVehicleYaw
             showGimbalYaw:      !isNaN(missionItem.missionGimbalYaw)
-            highlightSelected:  true
+            highlightSelected:  _item.showHighlight
             onClicked:          _item.clicked()
             opacity:            _item.opacity
 

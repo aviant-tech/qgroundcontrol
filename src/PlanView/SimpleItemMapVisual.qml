@@ -130,8 +130,14 @@ Item {
             z:              QGroundControl.zOrderMapItems
             missionItem:    _missionItem
             sequenceNumber: _missionItem.sequenceNumber
+            showHighlight:  !_acceptanceRadiusVisible
             onClicked:      if(_root.interactive)  _root.clicked(_missionItem.sequenceNumber)
             opacity:        _root.opacity
+
+            property bool _acceptanceRadiusVisible: !map.planView
+                                                    && vehicle
+                                                    && vehicle.acceptanceRadius > 0
+                                                    && QGroundControl.settingsManager.aviantSettings.showAcceptanceRadiusCircle.value
         }
     }
 

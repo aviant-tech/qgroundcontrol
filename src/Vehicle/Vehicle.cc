@@ -1034,6 +1034,11 @@ void Vehicle::_handleNavControllerOutput(mavlink_message_t& message)
     _altitudeTuningSetpointFact.setRawValue(_altitudeTuningFact.rawValue().toDouble() - navControllerOutput.alt_error);
     _xTrackErrorFact.setRawValue(navControllerOutput.xtrack_error);
     _airSpeedSetpointFact.setRawValue(_airSpeedFact.rawValue().toDouble() - navControllerOutput.aspd_error);
+
+    if (navControllerOutput.acceptance_radius != _acceptanceRadius) {
+        _acceptanceRadius = navControllerOutput.acceptance_radius;
+        emit acceptanceRadiusChanged(_acceptanceRadius);
+    }
 }
 
 // Ignore warnings from mavlink headers for both GCC/Clang and MSVC
@@ -3851,6 +3856,13 @@ void Vehicle::_updateMissionItemIndex()
     unsigned offset = 0;
     if (!_firmwarePlugin->sendHomePositionToVehicle()) {
         offset = 1;
+    }
+
+    // Reset acceptance radius when waypoint changes to avoid showing stale radius
+    // at new waypoint position. NAV_CONTROLLER_OUTPUT will set the correct value.
+    if (_acceptanceRadius != 0) {
+        _acceptanceRadius = 0;
+        emit acceptanceRadiusChanged(_acceptanceRadius);
     }
 
     _missionItemIndexFact.setRawValue(currentIndex + offset);
