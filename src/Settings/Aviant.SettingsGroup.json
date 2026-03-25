@@ -84,6 +84,13 @@
     "default":          true
 },
 {
+    "name":             "showAcceptanceRadiusCircle",
+    "shortDesc":        "Show acceptance radius circle",
+    "longDesc":         "Show a circle around the aircraft with the acceptance radius reported by the flight controller.",
+    "type":             "bool",
+    "default":          true
+},
+{
     "name":         "rssiWarning",
     "shortDesc":    "Local (drone) RSSI below this value will trigger a warning",
     "type":         "double",
