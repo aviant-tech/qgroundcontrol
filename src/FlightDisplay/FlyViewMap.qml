@@ -364,6 +364,18 @@ FlightMap {
         visible:        _showTrafficIndicators
     }
 
+    // Acceptance radius circle around the aircraft
+    MapCircle {
+        id:             acceptanceRadiusCircle
+        color:          "transparent"
+        opacity:        1
+        border.color:   "white"
+        border.width:   2
+        radius:         _activeVehicle ? _activeVehicle.acceptanceRadius : 0
+        center:         _activeVehicle ? _activeVehicle.coordinate : QtPositioning.coordinate()
+        visible:        _aviantSettings.showAcceptanceRadiusCircle.value && _activeVehicle && _activeVehicle.acceptanceRadius > 0
+    }
+
     // Multidrone conflict circle indicating the area that a drone should avoid if another drone is landing
     MapCircle {
         color:          "transparent"
