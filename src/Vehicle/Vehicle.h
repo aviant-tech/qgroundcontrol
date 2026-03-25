@@ -1033,7 +1033,7 @@ private:
     void _handleCommandAck              (mavlink_message_t& message);
     void _handleGpsRawInt               (mavlink_message_t& message);
     void _handleGlobalPositionInt       (mavlink_message_t& message);
-    void _handleUtmGlobalPosition       (mavlink_message_t& message);
+    void _handlePositionTargetGlobalInt  (mavlink_message_t& message);
     void _handleAltitude                (mavlink_message_t& message);
     void _handleVfrHud                  (mavlink_message_t& message);
     void _handleNavControllerOutput     (mavlink_message_t& message);
@@ -1125,7 +1125,6 @@ private:
     bool            _gpsRawIntMessageAvailable              = false;
     bool            _gps2RawMessageAvailable                = false;
     bool            _globalPositionIntMessageAvailable      = false;
-    bool            _utmGlobalPositionMessageAvailable      = false;
     bool            _altitudeMessageAvailable               = false;
     double          _defaultCruiseSpeed = qQNaN();
     double          _defaultHoverSpeed = qQNaN();
