@@ -26,7 +26,7 @@ Rectangle {
     property var  activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property real vehicleAltitude:   activeVehicle ? activeVehicle.altitudeAMSL.rawValue : 0
     property var  missionController: missionController
-    property real distanceToNext:    _calculateDistanceToNextWP(activeVehicle, missionController)
+    property real climbRate:         activeVehicle ? activeVehicle.climbRate.rawValue : 0
     property real centerAltitude:    _calculateCenterAltitude(missionController, vehicleAltitude)
     property real margins:           ScreenTools.defaultFontPixelWidth / 2
     property real scaleHeight:       height - (margins * 2) - ScreenTools.defaultFontPixelHeight
@@ -44,18 +44,6 @@ Rectangle {
     
     function mapRelativeToCenterY(relativeAltitude) {
         return centerY - (relativeAltitude * pixelsPerMeter)
-    }
-
-    function _calculateDistanceToNextWP(vehicle, controller) {
-        // Calculates the straight line distance to the next waypoint in meters
-        if (!vehicle || !controller || !controller.visualItems || controller.currentMissionIndex < 0) {
-            return 0
-        }
-        var currentItem = controller.visualItems.get(controller.currentMissionIndex)
-        if (!currentItem || !currentItem.coordinate || !vehicle.coordinate) {
-            return 0
-        }
-        return vehicle.coordinate.distanceTo(currentItem.coordinate)
     }
 
     function _calculateCenterAltitude(controller, vehicleAlt) {
@@ -86,33 +74,21 @@ Rectangle {
     }
 
     Connections {
-        target: activeVehicle
-        onCoordinateChanged: {
-            if (activeVehicle.flying) {
-                distanceToNext = _calculateDistanceToNextWP(activeVehicle, missionController)
-            }
-        }
-    }
-
-    Connections {
         target: missionController
         onCurrentMissionIndexChanged: centerAltitude = _calculateCenterAltitude(missionController, vehicleAltitude)
     }
 
     QGCLabel {
-        id:          nextWPLabel
+        id:          climbRateLabel
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        text: vehicleFlying && distanceToNext ? 
-              qsTr("Next WP: ") + (distanceToNext < 1000 ? 
-              distanceToNext.toFixed(0) + "m" : 
-              (distanceToNext/1000).toFixed(1) + "km") : ""
+        text: (climbRate >= 0 ? "+" : "-") + Math.abs(climbRate).toFixed(1) + " m/s"
         visible: vehicleFlying
         color: "white"
     }
 
     RowLayout {
-        anchors.top: vehicleFlying ? nextWPLabel.bottom : parent.top
+        anchors.top: vehicleFlying ? climbRateLabel.bottom : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
