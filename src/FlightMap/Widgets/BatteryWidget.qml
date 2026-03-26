@@ -132,17 +132,17 @@ Rectangle {
                     }
 
                     ColumnLayout {
-                        id:               stateOfChargeContainer
+                        id:               consumedContainer
                         Layout.fillWidth: true
                         spacing:          ScreenTools.defaultFontPixelWidth / 6
-                        visible:          battery && battery.consumedBasedRemaining.valueString != undefined && battery.consumedBasedRemaining.valueString != ""
+                        visible:          battery && !isNaN(battery.mahConsumed.rawValue)
                         QGCLabel {
-                            text:  qsTr("Remaining")
+                            text:  battery && battery.hasPersistedConsumed ? qsTr("Persistent consumed") : qsTr("Consumed")
                             color: qgcPal.colorGrey
                         }
                         QGCLabel {
                             font.pointSize: ScreenTools.mediumFontPointSize
-                            text:           battery ? battery.consumedBasedRemaining.valueString + " " + battery.consumedBasedRemaining.units : "N/A" 
+                            text:           battery ? battery.mahConsumed.valueString + " " + battery.mahConsumed.units : "N/A"
                         }
                     }
                     ColumnLayout {
