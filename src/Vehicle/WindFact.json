@@ -23,6 +23,13 @@
     "type":             "double",
     "decimalPlaces":    1,
     "units":            "m/s"
+},
+{
+    "name":             "variance",
+    "shortDesc": "Wind variance",
+    "type":             "double",
+    "decimalPlaces":    1,
+    "units":            "m/s"
 }
 ]
 }
