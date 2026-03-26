@@ -15,21 +15,25 @@
 const char* VehicleWindFactGroup::_directionFactName =      "direction";
 const char* VehicleWindFactGroup::_speedFactName =          "speed";
 const char* VehicleWindFactGroup::_verticalSpeedFactName =  "verticalSpeed";
+const char* VehicleWindFactGroup::_varianceFactName =       "variance";
 
 VehicleWindFactGroup::VehicleWindFactGroup(QObject* parent)
     : FactGroup(1000, ":/json/Vehicle/WindFact.json", parent)
     , _directionFact    (0, _directionFactName,     FactMetaData::valueTypeDouble)
     , _speedFact        (0, _speedFactName,         FactMetaData::valueTypeDouble)
     , _verticalSpeedFact(0, _verticalSpeedFactName, FactMetaData::valueTypeDouble)
+    , _varianceFact     (0, _varianceFactName,      FactMetaData::valueTypeDouble)
 {
     _addFact(&_directionFact,       _directionFactName);
     _addFact(&_speedFact,           _speedFactName);
     _addFact(&_verticalSpeedFact,   _verticalSpeedFactName);
+    _addFact(&_varianceFact,        _varianceFactName);
 
     // Start out as not available "--.--"
     _directionFact.setRawValue      (qQNaN());
     _speedFact.setRawValue          (qQNaN());
     _verticalSpeedFact.setRawValue  (qQNaN());
+    _varianceFact.setRawValue       (qQNaN());
 }
 
 void VehicleWindFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
@@ -85,7 +89,8 @@ void VehicleWindFactGroup::_handleWindCov(mavlink_message_t& message)
 
     this->direction()->setRawValue(direction);
     this->speed()->setRawValue(speed);
-    verticalSpeed()->setRawValue(0);
+    verticalSpeed()->setRawValue(wind.wind_z);
+    variance()->setRawValue(wind.var_horiz);
     _setTelemetryAvailable(true);
 }
 

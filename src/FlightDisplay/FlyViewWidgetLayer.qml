@@ -47,7 +47,9 @@ Item {
     property real   _margins:               ScreenTools.defaultFontPixelWidth / 2
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
     property rect   _centerViewport:        Qt.rect(0, 0, width, height)
+    property bool   _showWind:              _activeVehicle && _activeVehicle.wind && !isNaN(_activeVehicle.wind.speed.rawValue)
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
+    property real   _instrumentPanelWidth:  ScreenTools.defaultFontPixelWidth * (_showWind ? 45 : 30)
     property var    _aviantSettings:        QGroundControl.settingsManager.aviantSettings
     property bool   _showBatteryWidget:     _activeVehicle != null && _aviantSettings.showBatteryWidget.rawValue
     property bool   _showAltitudeWidget:    _activeVehicle != null && _aviantSettings.showAltitudeWidget.rawValue
@@ -115,7 +117,7 @@ Item {
         anchors.margins:            _toolsMargin
         anchors.top:                multiVehiclePanelSelector.visible ? multiVehiclePanelSelector.bottom : parent.top
         anchors.right:              parent.right
-        width:                      _rightPanelWidth
+        width:                      _instrumentPanelWidth
         spacing:                    _toolsMargin
         visible:                    QGroundControl.corePlugin.options.flyView.showInstrumentPanel && multiVehiclePanelSelector.showSingleVehiclePanel
         availableHeight:            parent.height - y - _toolsMargin
