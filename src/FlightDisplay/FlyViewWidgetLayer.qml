@@ -54,6 +54,7 @@ Item {
     property bool   _showBatteryWidget:     _activeVehicle != null && _aviantSettings.showBatteryWidget.rawValue
     property bool   _showAltitudeWidget:    _activeVehicle != null && _aviantSettings.showAltitudeWidget.rawValue
     property bool   _showWinchControlMenu:  _aviantSettings.showWinchControlMenu.rawValue
+    property bool   _anchorToTelemetryBar:  _aviantSettings.anchorWidgetsToTelemetryBar.rawValue
 
     QGCToolInsets {
         id:                     _totalToolInsets
@@ -115,12 +116,34 @@ Item {
     FlyViewInstrumentPanel {
         id:                         instrumentPanel
         anchors.margins:            _toolsMargin
-        anchors.top:                multiVehiclePanelSelector.visible ? multiVehiclePanelSelector.bottom : parent.top
-        anchors.right:              parent.right
         width:                      _instrumentPanelWidth
         spacing:                    _toolsMargin
         visible:                    QGroundControl.corePlugin.options.flyView.showInstrumentPanel && multiVehiclePanelSelector.showSingleVehiclePanel
-        availableHeight:            parent.height - y - _toolsMargin
+        availableHeight:            _anchorToTelemetryBar ? (parent.height - _toolsMargin) : (parent.height - y - _toolsMargin)
+        state:                      _anchorToTelemetryBar ? "telemetryBar" : "topRight"
+
+        states: [
+            State {
+                name: "topRight"
+                AnchorChanges {
+                    target:              instrumentPanel
+                    anchors.top:         multiVehiclePanelSelector.visible ? multiVehiclePanelSelector.bottom : _root.top
+                    anchors.bottom:      undefined
+                    anchors.right:       _root.right
+                    anchors.left:        undefined
+                }
+            },
+            State {
+                name: "telemetryBar"
+                AnchorChanges {
+                    target:              instrumentPanel
+                    anchors.top:         undefined
+                    anchors.bottom:      telemetryPanel.bottom
+                    anchors.right:       telemetryPanel.left
+                    anchors.left:        undefined
+                }
+            }
+        ]
 
         property real rightInset: visible ? parent.width - x : 0
     }
@@ -128,32 +151,45 @@ Item {
     AltitudeWidget {
         id:                     altitudeWidget
         anchors.margins:        _toolsMargin
-        anchors.right:          parent.right
-        anchors.top:            instrumentPanel.bottom
         width:                  _rightPanelWidth / 2
         visible:                _showAltitudeWidget
         missionController:      _missionController
-        availableHeight:        parent.height - (winchControl.height + instrumentPanel.height + ScreenTools.defaultFontPixelHeight * 2)
+        availableHeight:        _anchorToTelemetryBar
+                                    ? parent.height - (winchControl.height + ScreenTools.defaultFontPixelHeight * 2)
+                                    : parent.height - (winchControl.height + instrumentPanel.height + ScreenTools.defaultFontPixelHeight * 2)
         minVisibleRangeInMeters: _aviantSettings.minVisibleRangeInMeters.rawValue
         metersBetweenLines:     _aviantSettings.metersBetweenLines.rawValue
+        state:                  _anchorToTelemetryBar ? "telemetryBar" : (availableHeight >= 300 ? "default" : "rightOfInstrument")
 
         states: [
             State {
                 name: "default"
-                when: altitudeWidget.availableHeight >= 300
                 AnchorChanges {
-                    target: altitudeWidget
-                    anchors.top: instrumentPanel.bottom
-                    anchors.left: undefined
+                    target:              altitudeWidget
+                    anchors.top:         instrumentPanel.bottom
+                    anchors.bottom:      undefined
+                    anchors.right:       _root.right
+                    anchors.left:        undefined
                 }
             },
             State {
                 name: "rightOfInstrument"
-                when: altitudeWidget.availableHeight < 300
                 AnchorChanges {
-                    target: altitudeWidget
-                    anchors.top: instrumentPanel.top
-                    anchors.right: instrumentPanel.left
+                    target:              altitudeWidget
+                    anchors.top:         instrumentPanel.top
+                    anchors.bottom:      undefined
+                    anchors.right:       instrumentPanel.left
+                    anchors.left:        undefined
+                }
+            },
+            State {
+                name: "telemetryBar"
+                AnchorChanges {
+                    target:              altitudeWidget
+                    anchors.top:         undefined
+                    anchors.bottom:      telemetryPanel.bottom
+                    anchors.right:       undefined
+                    anchors.left:        telemetryPanel.right
                 }
             }
         ]
@@ -179,7 +215,7 @@ Item {
                 AnchorChanges {
                     target:                 photoVideoControl
                     anchors.verticalCenter: undefined
-                    anchors.top:            instrumentPanel.bottom
+                    anchors.top:            _anchorToTelemetryBar ? _root.top : instrumentPanel.bottom
                 }
             }
         ]

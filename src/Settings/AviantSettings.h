@@ -44,5 +44,6 @@ public:
     DEFINE_SETTINGFACT(kyteBackendUrl)
     DEFINE_SETTINGFACT(kyteBackendToken)
     DEFINE_SETTINGFACT(editableTelemetryBar)
+    DEFINE_SETTINGFACT(anchorWidgetsToTelemetryBar)
     DEFINE_SETTINGFACT(factTimeoutSecs)
 };

@@ -189,6 +189,13 @@
     "default":             false
 },
 {
+    "name":        "anchorWidgetsToTelemetryBar",
+    "shortDesc":   "Anchor widgets to telemetry bar",
+    "longDesc":    "Anchor altitude and instrument widgets to the telemetry bar instead of the top-right corner",
+    "type":        "bool",
+    "default":     false
+},
+{
     "name":        "factTimeoutSecs",
     "shortDesc":   "Fact value timeout",
     "longDesc":    "Telemetry values not updated within this many seconds are shown as N/A. Set to 0 to disable.",

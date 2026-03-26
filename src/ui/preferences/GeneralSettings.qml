@@ -822,6 +822,10 @@ Rectangle {
                                 text:       qsTr("Show altitude widget")
                                 fact:       _aviantSettings.showAltitudeWidget
                             }
+                            FactCheckBox {
+                                text:       qsTr("Anchor widgets to telemetry bar")
+                                fact:       _aviantSettings.anchorWidgetsToTelemetryBar
+                            }
                             QGCLabel {
                                 text:       _aviantSettings.minVisibleRangeInMeters.shortDescription
                             }
