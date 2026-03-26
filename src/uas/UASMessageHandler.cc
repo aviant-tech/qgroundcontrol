@@ -33,6 +33,7 @@ bool UASMessage::severityIsError() const
         case MAV_SEVERITY_ALERT:
         case MAV_SEVERITY_CRITICAL:
         case MAV_SEVERITY_ERROR:
+        case MAV_SEVERITY_WARNING:
             return true;
         default:
             return false;
