@@ -18,6 +18,11 @@
     "enumValues":       "0,1,2,3"
 },
 {
+    "name":             "navigationStatus",
+    "shortDesc":        "Nav",
+    "type":             "string"
+},
+{
     "name":             "atsStatus",
     "shortDesc":        "ATS",
     "type":             "uint32",
