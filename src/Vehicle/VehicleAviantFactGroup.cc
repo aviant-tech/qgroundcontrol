@@ -15,6 +15,7 @@ VehicleAviantFactGroup::VehicleAviantFactGroup(QObject* parent)
     : FactGroup     (100, ":/json/Vehicle/AviantFactGroup.json", parent),
     _navigationAccuracyFact   (0, navigationAccuracyFactName,   FactMetaData::valueTypeUint8),
     _navigationRedundancyFact (0, navigationRedundancyFactName, FactMetaData::valueTypeUint8),
+    _navigationStatusFact     (0, navigationStatusFactName,     FactMetaData::valueTypeString),
     _atsStatusFact            (0, atsStatusFactName,            FactMetaData::valueTypeUint32),
     _fwIcingFact              (0, fwIcingFactName,              FactMetaData::valueTypeUint8),
     _tempPiInternalFact       (0, tempPiInternalFactName,       FactMetaData::valueTypeInt8),
@@ -43,6 +44,7 @@ VehicleAviantFactGroup::VehicleAviantFactGroup(QObject* parent)
 {
     _addFact(&_navigationAccuracyFact, navigationAccuracyFactName);
     _addFact(&_navigationRedundancyFact, navigationRedundancyFactName);
+    _addFact(&_navigationStatusFact, navigationStatusFactName);
     _addFact(&_atsStatusFact, atsStatusFactName);
     _addFact(&_fwIcingFact, fwIcingFactName);
     _addFact(&_tempPiInternalFact, tempPiInternalFactName);
@@ -153,6 +155,30 @@ void VehicleAviantFactGroup::handleNavMsg(Vehicle* vehicle, mavlink_message_t& m
             break;
     }
     _navigationRedundancyFact.setRawValue(nav.redundancy);
+
+    // Combined navigationStatus: text from non-nominal sub-indicators, color from worst
+    // Nav enums: UNKNOWN=0, nominal=1, degraded=2, FAILED=3 — maps directly to indicator state severity
+    QString accText;
+    if (nav.accuracy == AVIANT_NAV_ACCURACY_APPROXIMATE) accText = QStringLiteral("APX");
+    else if (nav.accuracy == AVIANT_NAV_ACCURACY_FAILED) accText = QStringLiteral("FAIL");
+
+    QString redText;
+    if (nav.redundancy == AVIANT_NAV_REDUNDANCY_SINGLE) redText = QStringLiteral("SING");
+    else if (nav.redundancy == AVIANT_NAV_REDUNDANCY_FAILED) redText = QStringLiteral("FAIL");
+
+    QString statusText;
+    if (!accText.isEmpty() && !redText.isEmpty()) {
+        statusText = accText + QStringLiteral(" ") + redText;
+    } else if (!accText.isEmpty()) {
+        statusText = accText;
+    } else if (!redText.isEmpty()) {
+        statusText = redText;
+    } else {
+        statusText = QStringLiteral("--");
+    }
+
+    setIndicatorColorOverride(_navigationStatusFact, std::max((int)nav.accuracy, (int)nav.redundancy));
+    _navigationStatusFact.setRawValue(statusText);
 }
 
 void VehicleAviantFactGroup::handleAtsStatusMsg(Vehicle* vehicle, mavlink_message_t& message)
