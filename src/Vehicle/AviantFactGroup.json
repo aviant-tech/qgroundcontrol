@@ -93,6 +93,13 @@
     "decimalPlaces":    2
 },
 {
+    "name":             "topMotorLoad",
+    "shortDesc":        "TopMot",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
     "name":             "motVoltage0",
     "shortDesc":        "Mot0V",
     "type":             "double",
