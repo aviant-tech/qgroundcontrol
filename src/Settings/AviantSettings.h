@@ -23,6 +23,7 @@ public:
     DEFINE_SETTING_NAME_GROUP()
     DEFINE_SETTINGFACT(showTrafficIndicators)
     DEFINE_SETTINGFACT(showBatteryWidget)
+    DEFINE_SETTINGFACT(allowManualFlightModeChange)
     DEFINE_SETTINGFACT(showAltitudeWidget)
     DEFINE_SETTINGFACT(showWinchControlMenu)
     DEFINE_SETTINGFACT(horizontalConflictDistance)

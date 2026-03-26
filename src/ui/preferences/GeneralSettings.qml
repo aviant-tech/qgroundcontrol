@@ -168,6 +168,13 @@ Rectangle {
                             }
 
                             FactCheckBox {
+                                text:       qsTr("Allow manual flight mode change")
+                                fact:       _allowManualFlightModeChange
+
+                                property Fact _allowManualFlightModeChange: QGroundControl.settingsManager.aviantSettings.allowManualFlightModeChange
+                            }
+
+                            FactCheckBox {
                                 text:       qsTr("Use Vertical Instrument Panel")
                                 visible:    _alternateInstrumentPanel.visible
                                 fact:       _alternateInstrumentPanel
