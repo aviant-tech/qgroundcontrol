@@ -24,10 +24,19 @@ Item {
     id:             _root
     anchors.top:    parent.top
     anchors.bottom: parent.bottom
-    width:          adsbIcon.width * 1.1
+    width:          (adsbValuesColumn.x + adsbValuesColumn.width) * 1.1
 
-    property var  adsbManager:   QGroundControl.adsbVehicleManager
-    property bool showIndicator: adsbManager && adsbManager.adsbVehicles.count > 0
+    property var  adsbManager:    QGroundControl.adsbVehicleManager
+    property int  vehicleCount:   adsbManager ? adsbManager.adsbVehicles.count : 0
+    property bool showIndicator:  true
+
+    // We can see up to 3 of our own indicators (HemsWX drop, self SafeSky, self base stations),
+    // so 1-3 is orange (may be only our own) and 4+ is green (at least one external aircraft).
+    function statusColor() {
+        if (vehicleCount >= 4) return qgcPal.colorGreen
+        if (vehicleCount >= 1) return qgcPal.colorOrange
+        return qgcPal.colorRed
+    }
 
     Image {
         id:                 adsbIcon
@@ -39,8 +48,26 @@ Item {
         fillMode:           Image.PreserveAspectFit
     }
 
+    Column {
+        id:                     adsbValuesColumn
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin:     ScreenTools.defaultFontPixelWidth / 2
+        anchors.left:           adsbIcon.right
+
+        QGCLabel {
+            color:                  statusColor()
+            text:                   vehicleCount.toString()
+            font.family:            ScreenTools.demiboldFontFamily
+        }
+        QGCLabel {
+            color:                  statusColor()
+            text:                   qsTr("acft")
+            font.pointSize:         ScreenTools.smallFontPointSize
+        }
+    }
+
     MouseArea {
-        anchors.fill: adsbIcon
+        anchors.fill: parent
         onClicked: {
             mainWindow.showIndicatorPopup(_root, hiddenVehiclesPopup)
         }
@@ -64,7 +91,7 @@ Item {
 
                 QGCLabel {
                     id:               adsbLabel
-                    text:             qsTr("Unhidde hidden ADSB Vehicles")
+                    text:             qsTr("ADSB Vehicles (%1)").arg(vehicleCount)
                     font.family:      ScreenTools.demiboldFontFamily
                     Layout.alignment: Qt.AlignHCenter
                 }
@@ -79,27 +106,30 @@ Item {
                     Layout.maximumHeight:   300
 
                     model: adsbManager.adsbVehicles
-                    
+
                     delegate: Item {
-                        height:          object.hidden ? adsbVehicleLabel.implicitHeight : 0
+                        height:          adsbVehicleLabel.implicitHeight
                         width:           hiddenVehiclesList.width
-                        visible:         object.hidden
                         anchors.margins: ScreenTools.defaultFontPixelHeight
 
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
-                                 if (object.icaoAddress) {
-                                    adsbManager.setHiddenForADSBVehicle(Number(object.icaoAddress), false)
+                                if (object.hidden) {
+                                    if (object.icaoAddress) {
+                                        adsbManager.setHiddenForADSBVehicle(Number(object.icaoAddress), false)
+                                    }
                                 } else {
-                                    console.log("ADSB vehicle icao address not found")
+                                    if (object.icaoAddress) {
+                                        adsbManager.setHiddenForADSBVehicle(Number(object.icaoAddress), true)
+                                    }
                                 }
                             }
                         }
 
                         QGCLabel {
                             id:    adsbVehicleLabel
-                            color: qgcPal.text
+                            color: object.hidden ? qgcPal.colorGrey : qgcPal.text
                             text: {
                                 if (!object || !object.callsign) {
                                     return qsTr("Unknown Vehicle")
@@ -109,7 +139,6 @@ Item {
                                 }
                                 return object.callsign
                             }
-
                         }
                     }
                 }
