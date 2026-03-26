@@ -18,6 +18,13 @@
     "default":     true
 },
 {
+    "name":        "allowManualFlightModeChange",
+    "shortDesc":   "Allow manual flight mode change",
+    "longDesc":    "Allow changing the flight mode from the fly view toolbar",
+    "type":        "bool",
+    "default":     false
+},
+{
     "name":        "showAltitudeWidget",
     "shortDesc":   "Show altitude widget",
     "longDesc":    "Show altitude widget",

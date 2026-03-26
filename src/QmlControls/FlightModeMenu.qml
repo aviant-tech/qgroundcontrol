@@ -21,6 +21,7 @@ QGCLabel {
 
     property var    currentVehicle:         QGroundControl.multiVehicleManager.activeVehicle
     property real   mouseAreaLeftMargin:    0
+    property bool   enableFlightModeChange: true
 
     Menu {
         id: flightModesMenu
@@ -63,7 +64,7 @@ QGCLabel {
 
     MouseArea {
         id:                 mouseArea
-        visible:            currentVehicle && currentVehicle.flightModeSetAvailable
+        visible:            currentVehicle && currentVehicle.flightModeSetAvailable && enableFlightModeChange
         anchors.leftMargin: mouseAreaLeftMargin
         anchors.fill:       parent
         onClicked:          flightModesMenu.popup((_root.width - flightModesMenu.width) / 2, _root.height)
