@@ -23,6 +23,158 @@
     "type":             "uint32",
     "enumStrings":      "--,OK,WARN,FAIL",
     "enumValues":       "0,1,2,3"
+},
+{
+    "name":             "fwIcing",
+    "shortDesc":        "Icing",
+    "type":             "uint8",
+    "enumStrings":      "--,OK,WARN,CRIT",
+    "enumValues":       "0,1,2,3"
+},
+{
+    "name":             "tempPiInternal",
+    "shortDesc":        "TmpPi",
+    "type":             "int8",
+    "units":            "degC"
+},
+{
+    "name":             "tempAvionicsAmbient",
+    "shortDesc":        "TmpAvncs",
+    "type":             "int8",
+    "units":            "degC"
+},
+{
+    "name":             "tempFuselageAmbient",
+    "shortDesc":        "TmpFuslg",
+    "type":             "int8",
+    "units":            "degC"
+},
+{
+    "name":             "tempOutsideAmbient",
+    "shortDesc":        "TmpOut",
+    "type":             "int8",
+    "units":            "degC"
+},
+{
+    "name":             "tempModemInternal",
+    "shortDesc":        "TmpModem",
+    "type":             "int8",
+    "units":            "degC"
+},
+{
+    "name":             "tempBatteryInternal",
+    "shortDesc":        "TmpBatt",
+    "type":             "int8",
+    "units":            "degC"
+},
+{
+    "name":             "tempAirspeedInternal",
+    "shortDesc":        "TmpAspd",
+    "type":             "int8",
+    "units":            "degC"
+},
+{
+    "name":             "tempImuInternal",
+    "shortDesc":        "TmpIMU",
+    "type":             "int8",
+    "units":            "degC"
+},
+{
+    "name":             "tempBaroInternal",
+    "shortDesc":        "TmpBaro",
+    "type":             "int8",
+    "units":            "degC"
+},
+{
+    "name":             "anomalousCurrent",
+    "shortDesc":        "AnomalI",
+    "type":             "double",
+    "units":            "A",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage0",
+    "shortDesc":        "Mot0V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage1",
+    "shortDesc":        "Mot1V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage2",
+    "shortDesc":        "Mot2V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage3",
+    "shortDesc":        "Mot3V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage4",
+    "shortDesc":        "Mot4V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage5",
+    "shortDesc":        "Mot5V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage6",
+    "shortDesc":        "Mot6V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage7",
+    "shortDesc":        "Mot7V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage8",
+    "shortDesc":        "Mot8V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage9",
+    "shortDesc":        "Mot9V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage10",
+    "shortDesc":        "Mot10V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
+    "name":             "motVoltage11",
+    "shortDesc":        "Mot11V",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
 }
 ]
 }
