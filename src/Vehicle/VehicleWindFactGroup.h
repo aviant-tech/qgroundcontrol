@@ -22,10 +22,12 @@ public:
     Q_PROPERTY(Fact* direction      READ direction      CONSTANT)
     Q_PROPERTY(Fact* speed          READ speed          CONSTANT)
     Q_PROPERTY(Fact* verticalSpeed  READ verticalSpeed  CONSTANT)
+    Q_PROPERTY(Fact* variance       READ variance       CONSTANT)
 
     Fact* direction     () { return &_directionFact; }
     Fact* speed         () { return &_speedFact; }
     Fact* verticalSpeed () { return &_verticalSpeedFact; }
+    Fact* variance      () { return &_varianceFact; }
 
     // Overrides from FactGroup
     void handleMessage(Vehicle* vehicle, mavlink_message_t& message) override;
@@ -33,6 +35,7 @@ public:
     static const char* _directionFactName;
     static const char* _speedFactName;
     static const char* _verticalSpeedFactName;
+    static const char* _varianceFactName;
 
 private:
     void _handleHighLatency (mavlink_message_t& message);
@@ -45,4 +48,5 @@ private:
     Fact        _directionFact;
     Fact        _speedFact;
     Fact        _verticalSpeedFact;
+    Fact        _varianceFact;
 };
