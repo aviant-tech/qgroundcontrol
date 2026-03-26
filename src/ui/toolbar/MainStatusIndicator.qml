@@ -16,12 +16,14 @@ import QGroundControl.MultiVehicleManager   1.0
 import QGroundControl.ScreenTools           1.0
 import QGroundControl.Palette               1.0
 import QGroundControl.FactSystem            1.0
+import QGroundControl.SettingsManager       1.0
 
 RowLayout {
     id:         _root
     spacing:    0
 
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
+    property bool   _showFlightModeControls: QGroundControl.settingsManager.aviantSettings.showFlightModeControls.rawValue
     property var    _vehicleInAir:      _activeVehicle ? _activeVehicle.flying || _activeVehicle.landing : false
     property bool   _vtolInFWDFlight:   _activeVehicle ? _activeVehicle.vtolInFwdFlight : false
     property bool   _armed:             _activeVehicle ? _activeVehicle.armed : false
@@ -190,6 +192,7 @@ RowLayout {
         font.pointSize:         _vehicleInAir ?  ScreenTools.largeFontPointSize : ScreenTools.defaultFontPointSize
         mouseAreaLeftMargin:    -(flightModeMenu.x - flightModeIcon.x)
         visible:                _activeVehicle
+        enableFlightModeChange: _showFlightModeControls
     }
 
     Item {

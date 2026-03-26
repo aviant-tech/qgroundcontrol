@@ -18,6 +18,13 @@
     "default":     true
 },
 {
+    "name":        "showFlightModeControls",
+    "shortDesc":   "Show flight mode controls",
+    "longDesc":    "Show flight mode selection controls in the fly view toolbar",
+    "type":        "bool",
+    "default":     true
+},
+{
     "name":        "showAltitudeWidget",
     "shortDesc":   "Show altitude widget",
     "longDesc":    "Show altitude widget",
