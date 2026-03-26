@@ -14,6 +14,7 @@ public:
     VehicleAviantFactGroup(QObject* parent = nullptr);
     Q_PROPERTY(Fact* navigationAccuracy    READ navigationAccuracy    CONSTANT)
     Q_PROPERTY(Fact* navigationRedundancy  READ navigationRedundancy  CONSTANT)
+    Q_PROPERTY(Fact* navigationStatus      READ navigationStatus      CONSTANT)
     Q_PROPERTY(Fact* atsStatus             READ atsStatus             CONSTANT)
     Q_PROPERTY(Fact* fwIcing               READ fwIcing               CONSTANT)
     Q_PROPERTY(Fact* tempPiInternal        READ tempPiInternal        CONSTANT)
@@ -42,6 +43,7 @@ public:
 
     Fact* navigationAccuracy() { return &_navigationAccuracyFact; }
     Fact* navigationRedundancy() { return &_navigationRedundancyFact; }
+    Fact* navigationStatus() { return &_navigationStatusFact; }
     Fact* atsStatus() { return &_atsStatusFact; }
     Fact* fwIcing() { return &_fwIcingFact; }
     Fact* tempPiInternal() { return &_tempPiInternalFact; }
@@ -84,6 +86,7 @@ private:
 
     Fact _navigationAccuracyFact;
     Fact _navigationRedundancyFact;
+    Fact _navigationStatusFact;
     Fact _atsStatusFact;
     Fact _fwIcingFact;
     Fact _tempPiInternalFact;
@@ -118,6 +121,7 @@ private:
 
     static constexpr const char* navigationAccuracyFactName = "navigationAccuracy";
     static constexpr const char* navigationRedundancyFactName = "navigationRedundancy";
+    static constexpr const char* navigationStatusFactName = "navigationStatus";
     static constexpr const char* atsStatusFactName = "atsStatus";
     static constexpr const char* fwIcingFactName = "fwIcing";
     static constexpr const char* tempPiInternalFactName = "tempPiInternal";
