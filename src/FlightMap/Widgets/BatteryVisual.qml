@@ -114,5 +114,13 @@ Item {
             color:                qgcPal.colorRed
             visible:              batteryContainer.batEmergencyThreshold !== null
         }
+
+        QGCLabel {
+            anchors.centerIn:   parent
+            font.pointSize:     ScreenTools.smallFontPointSize
+            text:               batteryContainer.percentageRemaining > 0
+                                    ? Math.round(batteryContainer.percentageRemaining) + "%"
+                                    : ""
+        }
     }
 }
