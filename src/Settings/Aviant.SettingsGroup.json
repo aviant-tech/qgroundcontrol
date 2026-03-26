@@ -189,6 +189,14 @@
     "min":         0,
     "units":       "s",
     "default":     3
+},
+{
+    "name":        "minSeenTraffic",
+    "shortDesc":   "Min seen traffic for green",
+    "longDesc":    "Minimum number of ADSB vehicles that must be seen for the traffic indicator to show green. Below this (but above 0) the indicator shows orange.",
+    "type":        "uint32",
+    "min":         1,
+    "default":     3
 }
 ]
 }
