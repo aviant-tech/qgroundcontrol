@@ -44,4 +44,5 @@ public:
     DEFINE_SETTINGFACT(kyteBackendToken)
     DEFINE_SETTINGFACT(editableTelemetryBar)
     DEFINE_SETTINGFACT(factTimeoutSecs)
+    DEFINE_SETTINGFACT(minSeenTraffic)
 };
