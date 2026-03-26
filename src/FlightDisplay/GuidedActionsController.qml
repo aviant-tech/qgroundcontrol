@@ -55,6 +55,8 @@ Item {
     readonly property string vtolTransitionTitle:           qsTr("VTOL Transition")
     readonly property string roiTitle:                      qsTr("ROI")
     readonly property string actionListTitle:               qsTr("Action")
+    readonly property string activateNextWaypointTitle:    qsTr("Next Waypoint")
+    readonly property string activateNextWaypointMessage:  qsTr("Activate the next waypoint in the mission.")
 
     readonly property string armMessage:                        qsTr("Arm the vehicle.")
     readonly property string forceArmMessage:                   qsTr("WARNING: This will force arming of the vehicle bypassing any safety checks.")
@@ -106,6 +108,7 @@ Item {
     readonly property int actionForceArm:                   24
     readonly property int actionStepAlt:                    25
     readonly property int actionMissionRTL:                 26
+    readonly property int actionActivateNextWaypoint:      27
 
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property var    _planMasterController:      globals.planMasterControllerPlanView
@@ -134,7 +137,8 @@ Item {
     property bool showROI:              _guidedActionsEnabled && _vehicleFlying && __roiSupported && !_missionActive
     property bool showLandAbort:        _guidedActionsEnabled && _vehicleFlying && _fixedWingOnApproach
     property bool showGotoLocation:     _guidedActionsEnabled && _vehicleFlying
-    property bool showActionList:       _guidedActionsEnabled && (showStartMission || showResumeMission || showChangeAlt || showLandAbort)
+    property bool showActivateNextWaypoint: _guidedActionsEnabled && _vehicleArmed && _vehicleFlying && _vehicleInMissionMode && _currentMissionItemIsLoiter && _hasNextMissionItem
+    property bool showActionList:       _guidedActionsEnabled && (showStartMission || showResumeMission || showChangeAlt || showLandAbort || showActivateNextWaypoint)
 
     // Note: The '_missionItemCount - 2' is a hack to not trigger resume mission when a mission ends with an RTL item
     property bool showResumeMission:    _activeVehicle && !_vehicleArmed && _vehicleWasFlying && _missionAvailable && _resumeMissionIndex > 0 && (_resumeMissionIndex < _missionItemCount - 2)
@@ -163,6 +167,9 @@ Item {
     property bool   _vehicleWasFlying:      false
     property bool   _rcRSSIAvailable:       _activeVehicle ? _activeVehicle.rcRSSI > 0 && _activeVehicle.rcRSSI <= 100 : false
     property bool   _fixedWingOnApproach:   _activeVehicle ? _activeVehicle.fixedWing && _vehicleLanding : false
+    property var    _currentVisualItem:     _currentMissionIndex >= 0 && missionController.visualItems ? missionController.visualItems.get(_currentMissionIndex) : null
+    property bool   _currentMissionItemIsLoiter: _currentVisualItem ? !!_currentVisualItem.isLoiterItem : false
+    property bool   _hasNextMissionItem:    _currentMissionIndex >= 0 && _currentMissionIndex < _missionItemCount - 1
 
     // You can turn on log output for GuidedActionsController by turning on GuidedActionsControllerLog category
     property bool __guidedModeSupported:    _activeVehicle ? _activeVehicle.guidedModeSupported : false
@@ -257,6 +264,18 @@ Item {
             console.log("showGotoLocation", showGotoLocation)
         }
         _outputState()
+    }
+    onShowActivateNextWaypointChanged: {
+        if (_corePlugin.guidedActionsControllerLogging()) {
+            console.log("showActivateNextWaypoint", showActivateNextWaypoint)
+        }
+        _outputState()
+        if (showActivateNextWaypoint) {
+            var nextItem = missionController.visualItems.get(_currentMissionIndex + 1)
+            if (nextItem) {
+                confirmAction(actionActivateNextWaypoint, nextItem.sequenceNumber)
+            }
+        }
     }
     onShowLandAbortChanged: {
         if (showLandAbort) {
@@ -482,6 +501,11 @@ Item {
             confirmDialog.title = setWaypointTitle
             confirmDialog.message = setWaypointMessage
             break;
+        case actionActivateNextWaypoint:
+            confirmDialog.title = activateNextWaypointTitle
+            confirmDialog.message = activateNextWaypointMessage
+            confirmDialog.hideTrigger = Qt.binding(function() { return !showActivateNextWaypoint })
+            break;
         case actionOrbit:
             confirmDialog.title = orbitTitle
             confirmDialog.message = orbitMessage
@@ -584,6 +608,9 @@ Item {
             _activeVehicle.guidedModeGotoLocation(actionData)
             break
         case actionSetWaypoint:
+            _activeVehicle.setCurrentMissionSequence(actionData)
+            break
+        case actionActivateNextWaypoint:
             _activeVehicle.setCurrentMissionSequence(actionData)
             break
         case actionOrbit:

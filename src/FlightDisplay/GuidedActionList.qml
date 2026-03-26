@@ -63,6 +63,12 @@ Rectangle {
             text:       guidedController.landAbortMessage,
             action:     guidedController.actionLandAbort,
             visible:    guidedController.showLandAbort
+        },
+        {
+            title:      guidedController.activateNextWaypointTitle,
+            text:       guidedController.activateNextWaypointMessage,
+            action:     guidedController.actionActivateNextWaypoint,
+            visible:    guidedController.showActivateNextWaypoint
         }
     ]
 
