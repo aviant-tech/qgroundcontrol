@@ -177,6 +177,40 @@ Rectangle {
                 }
             }
         }
+
+        ColumnLayout {
+            spacing:            ScreenTools.defaultFontPixelHeight / 2
+            visible:            guidedController.showBranchingActions
+            Layout.alignment:   Qt.AlignHCenter
+
+            QGCLabel {
+                text:               qsTr("Waypoint Selection")
+                Layout.alignment:   Qt.AlignHCenter
+            }
+
+            Repeater {
+                model: guidedController._branchingCandidates
+
+                QGCButton {
+                    text: {
+                        var label
+                        if (modelData.sequenceNumber <= guidedController.missionController.currentMissionIndex)
+                            label = qsTr("Repeat")
+                        else if (modelData.sequenceNumber === guidedController.missionController.nextPositionSequenceNumber)
+                            label = qsTr("Activate Next")
+                        else
+                            label = qsTr("Skip to")
+                        return label + " " + modelData.commandName + " (#" + modelData.sequenceNumber + ")"
+                    }
+                    Layout.fillWidth:   true
+
+                    onClicked: {
+                        _root.visible = false
+                        guidedController.confirmAction(guidedController.actionSetWaypoint, modelData.sequenceNumber)
+                    }
+                }
+            }
+        }
     }
 
     QGCColoredImage {

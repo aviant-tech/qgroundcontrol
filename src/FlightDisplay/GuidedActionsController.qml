@@ -55,6 +55,7 @@ Item {
     readonly property string vtolTransitionTitle:           qsTr("VTOL Transition")
     readonly property string roiTitle:                      qsTr("ROI")
     readonly property string actionListTitle:               qsTr("Action")
+    property var _branchingCandidates: missionController.branchingCandidates
 
     readonly property string armMessage:                        qsTr("Arm the vehicle.")
     readonly property string forceArmMessage:                   qsTr("WARNING: This will force arming of the vehicle bypassing any safety checks.")
@@ -107,6 +108,7 @@ Item {
     readonly property int actionStepAlt:                    25
     readonly property int actionMissionRTL:                 26
 
+
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property var    _planMasterController:      globals.planMasterControllerPlanView
     property bool   _syncInProgress:            _planMasterController.syncInProgress
@@ -134,7 +136,8 @@ Item {
     property bool showROI:              _guidedActionsEnabled && _vehicleFlying && __roiSupported && !_missionActive
     property bool showLandAbort:        _guidedActionsEnabled && _vehicleFlying && _fixedWingOnApproach
     property bool showGotoLocation:     _guidedActionsEnabled && _vehicleFlying
-    property bool showActionList:       _guidedActionsEnabled && (showStartMission || showResumeMission || showChangeAlt || showLandAbort)
+    property bool showBranchingActions:    _guidedActionsEnabled && _vehicleFlying && _vehicleInMissionMode && (_currentVisualItem ? _currentVisualItem.isLoiterItem : false) && _branchingCandidates.length > 0
+    property bool showActionList:       _guidedActionsEnabled && (showStartMission || showResumeMission || showChangeAlt || showLandAbort || showBranchingActions)
 
     // Note: The '_missionItemCount - 2' is a hack to not trigger resume mission when a mission ends with an RTL item
     property bool showResumeMission:    _activeVehicle && !_vehicleArmed && _vehicleWasFlying && _missionAvailable && _resumeMissionIndex > 0 && (_resumeMissionIndex < _missionItemCount - 2)
@@ -163,6 +166,8 @@ Item {
     property bool   _vehicleWasFlying:      false
     property bool   _rcRSSIAvailable:       _activeVehicle ? _activeVehicle.rcRSSI > 0 && _activeVehicle.rcRSSI <= 100 : false
     property bool   _fixedWingOnApproach:   _activeVehicle ? _activeVehicle.fixedWing && _vehicleLanding : false
+    property var    _currentVisualItem:     missionController.currentVisualItem
+
 
     // You can turn on log output for GuidedActionsController by turning on GuidedActionsControllerLog category
     property bool __guidedModeSupported:    _activeVehicle ? _activeVehicle.guidedModeSupported : false
@@ -257,6 +262,15 @@ Item {
             console.log("showGotoLocation", showGotoLocation)
         }
         _outputState()
+    }
+    onShowBranchingActionsChanged: {
+        if (_corePlugin.guidedActionsControllerLogging()) {
+            console.log("showBranchingActions", showBranchingActions)
+        }
+        _outputState()
+        if (showBranchingActions) {
+            confirmAction(actionActionList)
+        }
     }
     onShowLandAbortChanged: {
         if (showLandAbort) {

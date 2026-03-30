@@ -82,6 +82,9 @@ public:
     Q_PROPERTY(double               progressPct                     READ progressPct                    NOTIFY progressPctChanged)
     Q_PROPERTY(int                  missionItemCount                READ missionItemCount               NOTIFY missionItemCountChanged)         ///< True mission item command count (only valid in Fly View)
     Q_PROPERTY(int                  currentMissionIndex             READ currentMissionIndex            NOTIFY currentMissionIndexChanged)
+    Q_PROPERTY(VisualMissionItem*   currentVisualItem               READ currentVisualItem              NOTIFY currentMissionIndexChanged)
+    Q_PROPERTY(int                  nextPositionSequenceNumber       READ nextPositionSequenceNumber      NOTIFY currentMissionIndexChanged)
+    Q_PROPERTY(QVariantList         branchingCandidates             READ branchingCandidates            NOTIFY currentMissionIndexChanged)
     Q_PROPERTY(int                  resumeMissionIndex              READ resumeMissionIndex             NOTIFY resumeMissionIndexChanged)       ///< Returns the item index two which a mission should be resumed. -1 indicates resume mission not available.
     Q_PROPERTY(int                  currentPlanViewSeqNum           READ currentPlanViewSeqNum          NOTIFY currentPlanViewSeqNumChanged)
     Q_PROPERTY(int                  currentPlanViewVIIndex          READ currentPlanViewVIIndex         NOTIFY currentPlanViewVIIndexChanged)
@@ -237,6 +240,9 @@ public:
 
     int missionItemCount            (void) const { return _missionItemCount; }
     int currentMissionIndex         (void) const;
+    VisualMissionItem* currentVisualItem(void) const;
+    int nextPositionSequenceNumber   (void) const;
+    QVariantList branchingCandidates (void) const;
     int resumeMissionIndex          (void) const;
     int currentPlanViewSeqNum       (void) const { return _currentPlanViewSeqNum; }
     int currentPlanViewVIIndex      (void) const { return _currentPlanViewVIIndex; }
@@ -341,6 +347,8 @@ private:
     void                    _setPlannedHomePositionFromFirstCoordinate(const QGeoCoordinate& clickCoordinate);
     void                    _resetMissionFlightStatus           (void);
     void                    _addHoverTime                       (double hoverTime, double hoverDistance, int waypointIndex);
+    VisualMissionItem*      _visualItemForSequenceNumber              (int sequenceNumber) const;
+    bool                    _isWaypointSafeToActivate           (VisualMissionItem* current, VisualMissionItem* candidate) const;
     void                    _addCruiseTime                      (double cruiseTime, double cruiseDistance, int wayPointIndex);
     void                    _updateBatteryInfo                  (int waypointIndex);
     bool                    _loadItemsFromJson                  (const QJsonObject& json, QmlObjectListModel* visualItems, QString& errorString);

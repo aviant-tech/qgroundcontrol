@@ -2180,6 +2180,124 @@ void MissionController::_currentMissionIndexChanged(int sequenceNumber)
     }
 }
 
+
+/// Returns the sequence number of the next mission item with a coordinate after the current item, or -1 if none exists.
+int MissionController::nextPositionSequenceNumber(void) const
+{
+    if (!_flyView || !_visualItems) {
+        return -1;
+    }
+
+    int currentSeqNum = currentMissionIndex();
+    for (int i = 0; i < _visualItems->count(); i++) {
+        VisualMissionItem* item = qobject_cast<VisualMissionItem*>(_visualItems->get(i));
+        if (item && item->sequenceNumber() > currentSeqNum && item->specifiesCoordinate()) {
+            return item->sequenceNumber();
+        }
+    }
+    return -1;
+}
+
+/// Looks up the VisualMissionItem that owns the given sequence number.
+/// A simple lookup by exact sequence number is not enough because complex items
+/// (e.g. Survey, Corridor Scan) expand into multiple MAVLink mission items and
+/// therefore span a range of sequence numbers. This function checks whether
+/// sequenceNumber falls within [item->sequenceNumber(), item->lastSequenceNumber()]
+/// so callers can map any sub-item sequence number back to its parent visual item.
+VisualMissionItem* MissionController::_visualItemForSequenceNumber(int sequenceNumber) const
+{
+    if (!_visualItems) {
+        return nullptr;
+    }
+    for (int i = 0; i < _visualItems->count(); i++) {
+        VisualMissionItem* item = qobject_cast<VisualMissionItem*>(_visualItems->get(i));
+        if (item && item->sequenceNumber() <= sequenceNumber && sequenceNumber <= item->lastSequenceNumber()) {
+            return item;
+        }
+    }
+    return nullptr;
+}
+
+/// Guards against pilot accidentally jumping to a distant or altitude-mismatched
+/// waypoint during loiter branching. Only allows simple NAV_WAYPOINT items.
+bool MissionController::_isWaypointSafeToActivate(VisualMissionItem* current, VisualMissionItem* candidate) const
+{
+    static const int maxBranchDistanceM = 500;
+    static const int maxBranchAltDeltaM = 1;
+
+    if (!candidate->specifiesCoordinate()) {
+        return false;
+    }
+    SimpleMissionItem* simpleCandidate = qobject_cast<SimpleMissionItem*>(candidate);
+    if (!simpleCandidate || simpleCandidate->command() != MAV_CMD_NAV_WAYPOINT) {
+        return false;
+    }
+    if (current->coordinate().distanceTo(candidate->coordinate()) > maxBranchDistanceM) {
+        return false;
+    }
+    if (qAbs(candidate->amslEntryAlt() - current->amslEntryAlt()) > maxBranchAltDeltaM) {
+        return false;
+    }
+    return true;
+}
+
+/// Waypoints reachable from the current loiter position, either as the
+/// natural next position item or via DO_JUMP commands before it.
+/// Filtered by distance/altitude safety thresholds.
+QVariantList MissionController::branchingCandidates(void) const
+{
+    QVariantList result;
+
+    if (!_flyView || !_visualItems) {
+        return result;
+    }
+
+    int currentSeqNum = currentMissionIndex();
+    VisualMissionItem* currentItem = _visualItemForSequenceNumber(currentSeqNum);
+    if (!currentItem) {
+        return result;
+    }
+
+    QList<VisualMissionItem*> candidates;
+
+    for (int i = 0; i < _visualItems->count(); i++) {
+        VisualMissionItem* item = qobject_cast<VisualMissionItem*>(_visualItems->get(i));
+        if (!item || item->sequenceNumber() <= currentSeqNum) {
+            continue;
+        }
+
+        if (item->specifiesCoordinate()) {
+            candidates.append(item);
+            break;
+        }
+
+        SimpleMissionItem* simpleItem = qobject_cast<SimpleMissionItem*>(item);
+        if (simpleItem && simpleItem->command() == MAV_CMD_DO_JUMP) {
+            int targetSeqNum = static_cast<int>(simpleItem->param1());
+            VisualMissionItem* target = _visualItemForSequenceNumber(targetSeqNum);
+            if (target && !candidates.contains(target)) {
+                candidates.append(target);
+            }
+        }
+    }
+
+    for (int i = 0; i < candidates.count(); i++) {
+        if (_isWaypointSafeToActivate(currentItem, candidates[i])) {
+            result.append(QVariant::fromValue(candidates[i]));
+        }
+    }
+
+    return result;
+}
+
+VisualMissionItem* MissionController::currentVisualItem(void) const
+{
+    if (!_flyView) {
+        return nullptr;
+    }
+    return _visualItemForSequenceNumber(currentMissionIndex());
+}
+
 bool MissionController::syncInProgress(void) const
 {
     return _missionManager->inProgress();

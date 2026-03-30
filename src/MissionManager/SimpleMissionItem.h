@@ -54,6 +54,7 @@ public:
     /// from an item which does not include a coordinate to an item which requires a coordinate.
     /// It uses this value to set that new coordinate.
     Q_INVOKABLE void setMapCenterHintForCommandChange(QGeoCoordinate mapCenter) { _mapCenterHint = mapCenter; }
+    Q_INVOKABLE double param1(void) const { return _missionItem.param1(); }
 
     /// Scans the loaded items for additional section settings
     ///     @param visualItems List of all visual items
