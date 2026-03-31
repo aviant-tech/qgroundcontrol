@@ -241,15 +241,17 @@ RowLayout {
                         Layout.leftMargin:  _healthAndArmingChecksSupported ? width / 2 : 0
                         Layout.alignment:   _healthAndArmingChecksSupported ? Qt.AlignLeft : Qt.AlignHCenter
                         // FIXME: forceArm is not possible anymore if _healthAndArmingChecksSupported == true
-                        enabled:            _armed || !_healthAndArmingChecksSupported || _activeVehicle.healthAndArmingCheckReport.canArm
-                        text:               _armed ?  qsTr("Disarm") : (forceArm ? qsTr("Force Arm") : qsTr("Arm"))
+                        enabled:            _armed || !_healthAndArmingChecksSupported || _activeVehicle.healthAndArmingCheckReport.canArm || _activeVehicle.flightMode === "Terminated"
+                        text:               _activeVehicle.flightMode === "Terminated" ? qsTr("Force Arm") : (_armed ?  qsTr("Disarm") : (forceArm ? qsTr("Force Arm") : qsTr("Arm")))
 
                         property bool forceArm: false
 
                         onPressAndHold: forceArm = true
 
                         onClicked: {
-                            if (_armed) {
+                            if (_activeVehicle.flightMode === "Terminated") {
+                                mainWindow.forceArmVehicleRequest()
+                            } else if (_armed) {
                                 mainWindow.disarmVehicleRequest()
                             } else {
                                 if (forceArm) {
