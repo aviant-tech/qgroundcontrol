@@ -36,6 +36,15 @@ RowLayout {
     property bool _geoFenceSupported:     _planMasterController ? _planMasterController.geoFenceController.supported : false
     property bool _rallyPointSupported:   _planMasterController ? _planMasterController.rallyPointController.supported : false
 
+    Connections {
+        target: _activeVehicle ? _activeVehicle : null
+        onFlightModeChanged: {
+            if (_activeVehicle.flightMode === "Terminated") {
+                mainWindow.showIndicatorPopup(mainStatusLabel, sensorStatusInfoComponent)
+            }
+        }
+    }
+
     QGCLabel {
         id:             mainStatusLabel
         text:           mainStatusText()
