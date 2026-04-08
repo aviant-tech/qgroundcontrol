@@ -271,6 +271,17 @@ Item {
             confirmAction(actionSetWaypoint, _activateNextWaypointSequence)
         }
     }
+    on_ActivateNextWaypointSequenceChanged: {
+        if (confirmDialog.visible && confirmDialog.action === actionSetWaypoint) {
+            if (showActivateNextWaypoint) {
+                confirmDialog.actionData = _activateNextWaypointSequence
+                _actionData = _activateNextWaypointSequence
+                confirmDialog.message = setWaypointMessage
+            } else {
+                confirmDialog.confirmCancelled()
+            }
+        }
+    }
     onShowLandAbortChanged: {
         if (showLandAbort) {
             confirmAction(actionLandAbort)
