@@ -376,18 +376,32 @@ FlightMap {
         visible:        _aviantSettings.showAcceptanceRadiusCircle.value && _activeVehicle && _activeVehicle.acceptanceRadius > 0
     }
 
-    // Yellow highlight circle around the target waypoint when "set waypoint" confirmation dialog is active
-    MapCircle {
-        property var _guidedController: globals.guidedControllerFlyView
-        property bool _isSetWaypoint:   _guidedController && _guidedController.confirmDialog.visible && _guidedController.confirmDialog.action === _guidedController.actionSetWaypoint
-        property var _targetItem:       _isSetWaypoint ? _missionController.getVisualItemByMissionSequence(_guidedController.confirmDialog.actionData) : null
-        color:          "transparent"
-        opacity:        1
-        border.color:   "yellow"
-        border.width:   1
-        radius:         10
-        center:         _targetItem ? _targetItem.coordinate : QtPositioning.coordinate()
+    // Highlight circle around the target waypoint when "set waypoint" confirmation dialog is active
+    MapQuickItem {
+        id:             setWaypointHighlight
+        property var    _guidedController: globals.guidedControllerFlyView
+        property bool   _isSetWaypoint:    _guidedController && _guidedController.confirmDialog.visible && _guidedController.confirmDialog.action === _guidedController.actionSetWaypoint
+        property var    _targetItem:       _isSetWaypoint ? _missionController.getVisualItemByMissionSequence(_guidedController.confirmDialog.actionData) : null
+        property real   _size:             ScreenTools.defaultFontPixelHeight * 2.5
+
+        coordinate:     _targetItem ? _targetItem.coordinate : QtPositioning.coordinate()
         visible:        _targetItem !== null
+        anchorPoint.x:  _size / 2
+        anchorPoint.y:  _size / 2
+        z:              QGroundControl.zOrderMapItems - 1
+
+        sourceItem: Item {
+            width:  setWaypointHighlight._size
+            height: setWaypointHighlight._size
+            enabled: false
+            Rectangle {
+                anchors.fill:   parent
+                radius:         width / 2
+                color:          Qt.rgba(0,0,0,0)
+                border.color:   "yellow"
+                border.width:   1
+            }
+        }
     }
 
     // Multidrone conflict circle indicating the area that a drone should avoid if another drone is landing
