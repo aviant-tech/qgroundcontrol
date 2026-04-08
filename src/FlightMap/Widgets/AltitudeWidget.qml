@@ -47,12 +47,9 @@ Rectangle {
     }
 
     function _calculateCenterAltitude(controller, vehicleAlt) {
-        // Calculates the center altitude to be displayed by the widget
-        if (controller.visualItems && controller.currentMissionIndex >= 0) {
-            var item = controller.visualItems.get(controller.currentMissionIndex)
-            if (item && item.amslEntryAlt !== undefined && !isNaN(item.amslEntryAlt)) {
-                return item.amslEntryAlt
-            }
+        var item = controller.getVisualItemByMissionSequence(controller.currentMissionIndex)
+        if (item && item.amslEntryAlt !== undefined && !isNaN(item.amslEntryAlt)) {
+            return item.amslEntryAlt
         }
         // When not flying, use vehicle altitude as reference point
         return vehicleAlt
