@@ -211,6 +211,13 @@
     "type":        "uint32",
     "min":         1,
     "default":     3
+},
+{
+    "name":        "showCameraControlsInPlanView",
+    "shortDesc":   "Show camera controls in plan view",
+    "longDesc":    "Show camera and gimbal controls on waypoints in the plan view editor",
+    "type":        "bool",
+    "default":     false
 }
 ]
 }
