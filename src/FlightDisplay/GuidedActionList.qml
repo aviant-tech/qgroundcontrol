@@ -179,7 +179,7 @@ Rectangle {
         }
 
         QGCButton {
-            text:               qsTr("Activate Next Waypoint (#%1)").arg(guidedController._activateNextWaypointSequence)
+            text:               qsTr("Next Waypoint (#%1)").arg(guidedController._activateNextWaypointSequence)
             visible:            guidedController.showActivateNextWaypoint
             Layout.alignment:   Qt.AlignHCenter
 
