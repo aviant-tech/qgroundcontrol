@@ -237,6 +237,7 @@ public:
 
     int missionItemCount            (void) const { return _missionItemCount; }
     int currentMissionIndex         (void) const;
+    Q_INVOKABLE VisualMissionItem* getVisualItemByMissionSequence(int sequenceNumber) const;
     int resumeMissionIndex          (void) const;
     int currentPlanViewSeqNum       (void) const { return _currentPlanViewSeqNum; }
     int currentPlanViewVIIndex      (void) const { return _currentPlanViewVIIndex; }

@@ -195,6 +195,8 @@ void SimpleMissionItem::_connectSignals(void)
     connect(&_missionItem._commandFact,         &Fact::valueChanged,                        this, &SimpleMissionItem::isStandaloneCoordinateChanged);
     connect(&_missionItem._commandFact,         &Fact::valueChanged,                        this, &SimpleMissionItem::isLandCommandChanged);
     connect(&_missionItem._commandFact,         &Fact::valueChanged,                        this, &SimpleMissionItem::isLoiterItemChanged);
+    connect(&_missionItem._commandFact,         &Fact::valueChanged,                        this, &SimpleMissionItem::holdsVehicleChanged);
+    connect(&_missionItem._param1Fact,          &Fact::valueChanged,                        this, &SimpleMissionItem::holdsVehicleChanged);
     connect(&_missionItem._commandFact,         &Fact::valueChanged,                        this, &SimpleMissionItem::showLoiterRadiusChanged);
 
     // Whenever these properties change the ui model changes as well
@@ -551,6 +553,18 @@ bool SimpleMissionItem::isLoiterItem() const
     } else {
         return false;
     }
+}
+
+bool SimpleMissionItem::holdsVehicle() const
+{
+    if (isLoiterItem()) {
+        return true;
+    }
+    // NAV_WAYPOINT with hold time > 0
+    if (command() == MAV_CMD_NAV_WAYPOINT && _missionItem.param1() > 0) {
+        return true;
+    }
+    return false;
 }
 
 bool SimpleMissionItem::showLoiterRadius() const
