@@ -376,6 +376,20 @@ FlightMap {
         visible:        _aviantSettings.showAcceptanceRadiusCircle.value && _activeVehicle && _activeVehicle.acceptanceRadius > 0
     }
 
+    // Yellow highlight circle around the target waypoint when "set waypoint" confirmation dialog is active
+    MapCircle {
+        property var _guidedController: globals.guidedControllerFlyView
+        property bool _isSetWaypoint:   _guidedController && _guidedController.confirmDialog.visible && _guidedController.confirmDialog.action === _guidedController.actionSetWaypoint
+        property var _targetItem:       _isSetWaypoint ? _missionController.getVisualItemByMissionSequence(_guidedController.confirmDialog.actionData) : null
+        color:          "transparent"
+        opacity:        1
+        border.color:   "yellow"
+        border.width:   3
+        radius:         15
+        center:         _targetItem ? _targetItem.coordinate : QtPositioning.coordinate()
+        visible:        _targetItem !== null
+    }
+
     // Multidrone conflict circle indicating the area that a drone should avoid if another drone is landing
     MapCircle {
         color:          "transparent"
