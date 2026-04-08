@@ -502,7 +502,6 @@ Item {
         case actionSetWaypoint:
             confirmDialog.title = setWaypointTitle
             confirmDialog.message = setWaypointMessage
-            confirmDialog.hideTrigger = Qt.binding(function() { return !showActivateNextWaypoint })
             break;
         case actionOrbit:
             confirmDialog.title = orbitTitle
