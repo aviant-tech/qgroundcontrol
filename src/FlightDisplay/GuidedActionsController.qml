@@ -134,7 +134,8 @@ Item {
     property bool showROI:              _guidedActionsEnabled && _vehicleFlying && __roiSupported && !_missionActive
     property bool showLandAbort:        _guidedActionsEnabled && _vehicleFlying && _fixedWingOnApproach
     property bool showGotoLocation:     _guidedActionsEnabled && _vehicleFlying
-    property bool showActionList:       _guidedActionsEnabled && (showStartMission || showResumeMission || showChangeAlt || showLandAbort)
+    property bool showActivateNextWaypoint: _guidedActionsEnabled && _vehicleFlying && _vehicleInMissionMode && _currentVisualItem && _currentVisualItem.holdsVehicle && _activateNextWaypointSequence >= 0
+    property bool showActionList:       _guidedActionsEnabled && (showStartMission || showResumeMission || showChangeAlt || showLandAbort || showActivateNextWaypoint)
 
     // Note: The '_missionItemCount - 2' is a hack to not trigger resume mission when a mission ends with an RTL item
     property bool showResumeMission:    _activeVehicle && !_vehicleArmed && _vehicleWasFlying && _missionAvailable && _resumeMissionIndex > 0 && (_resumeMissionIndex < _missionItemCount - 2)
@@ -163,6 +164,9 @@ Item {
     property bool   _vehicleWasFlying:      false
     property bool   _rcRSSIAvailable:       _activeVehicle ? _activeVehicle.rcRSSI > 0 && _activeVehicle.rcRSSI <= 100 : false
     property bool   _fixedWingOnApproach:   _activeVehicle ? _activeVehicle.fixedWing && _vehicleLanding : false
+    property var    _currentVisualItem:                 missionController.getVisualItemByMissionSequence(missionController.currentMissionIndex)
+    property var    _nextVisualItem:                    _currentVisualItem ? missionController.getVisualItemByMissionSequence(_currentVisualItem.lastSequenceNumber + 1) : null
+    property int    _activateNextWaypointSequence:      _nextVisualItem && _nextVisualItem.specifiesCoordinate ? _nextVisualItem.sequenceNumber : -1
 
     // You can turn on log output for GuidedActionsController by turning on GuidedActionsControllerLog category
     property bool __guidedModeSupported:    _activeVehicle ? _activeVehicle.guidedModeSupported : false
@@ -257,6 +261,15 @@ Item {
             console.log("showGotoLocation", showGotoLocation)
         }
         _outputState()
+    }
+    onShowActivateNextWaypointChanged: {
+        if (_corePlugin.guidedActionsControllerLogging()) {
+            console.log("showActivateNextWaypoint", showActivateNextWaypoint)
+        }
+        _outputState()
+        if (showActivateNextWaypoint) {
+            confirmAction(actionSetWaypoint, _activateNextWaypointSequence)
+        }
     }
     onShowLandAbortChanged: {
         if (showLandAbort) {
@@ -481,6 +494,7 @@ Item {
         case actionSetWaypoint:
             confirmDialog.title = setWaypointTitle
             confirmDialog.message = setWaypointMessage
+            confirmDialog.hideTrigger = Qt.binding(function() { return !showActivateNextWaypoint })
             break;
         case actionOrbit:
             confirmDialog.title = orbitTitle

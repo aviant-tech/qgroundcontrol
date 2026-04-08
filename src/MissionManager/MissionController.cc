@@ -2180,6 +2180,20 @@ void MissionController::_currentMissionIndexChanged(int sequenceNumber)
     }
 }
 
+VisualMissionItem* MissionController::getVisualItemByMissionSequence(int sequenceNumber) const
+{
+    if (!_visualItems) {
+        return nullptr;
+    }
+    for (int i = 0; i < _visualItems->count(); i++) {
+        VisualMissionItem* item = qobject_cast<VisualMissionItem*>(_visualItems->get(i));
+        if (item && item->sequenceNumber() <= sequenceNumber && sequenceNumber <= item->lastSequenceNumber()) {
+            return item;
+        }
+    }
+    return nullptr;
+}
+
 bool MissionController::syncInProgress(void) const
 {
     return _missionManager->inProgress();
