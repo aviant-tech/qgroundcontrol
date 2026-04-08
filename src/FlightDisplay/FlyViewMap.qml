@@ -370,7 +370,7 @@ FlightMap {
         color:          "transparent"
         opacity:        1
         border.color:   "white"
-        border.width:   2
+        border.width:   1
         radius:         _activeVehicle ? _activeVehicle.acceptanceRadius : 0
         center:         _activeVehicle ? _activeVehicle.coordinate : QtPositioning.coordinate()
         visible:        _aviantSettings.showAcceptanceRadiusCircle.value && _activeVehicle && _activeVehicle.acceptanceRadius > 0
@@ -384,8 +384,8 @@ FlightMap {
         color:          "transparent"
         opacity:        1
         border.color:   "yellow"
-        border.width:   3
-        radius:         15
+        border.width:   1
+        radius:         10
         center:         _targetItem ? _targetItem.coordinate : QtPositioning.coordinate()
         visible:        _targetItem !== null
     }
