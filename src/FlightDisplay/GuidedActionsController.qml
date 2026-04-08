@@ -267,8 +267,16 @@ Item {
             console.log("showActivateNextWaypoint", showActivateNextWaypoint)
         }
         _outputState()
-        if (showActivateNextWaypoint) {
+        if (showActivateNextWaypoint && !confirmDialog.visible) {
             confirmAction(actionSetWaypoint, _activateNextWaypointSequence)
+        }
+    }
+    on_CurrentVisualItemChanged: {
+        // Close set-waypoint dialog if its target waypoint is now the current waypoint
+        if (confirmDialog.visible && confirmDialog.action === actionSetWaypoint) {
+            if (_currentVisualItem && _currentVisualItem.sequenceNumber === confirmDialog.actionData) {
+                confirmDialog.confirmCancelled()
+            }
         }
     }
     onShowLandAbortChanged: {
