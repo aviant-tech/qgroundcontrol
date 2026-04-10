@@ -137,7 +137,7 @@ private:
     void    _terminateComplete          (void);
 
     Vehicle*                _vehicle;
-    uint8_t                 _ftpCompId = MAV_COMP_ID_AUTOPILOT1;
+    uint8_t                 _ftpCompId = _vehicle->defaultComponentId();
     QList<StateFunctions_t> _rgStateMachine;
     DownloadState_t         _downloadState;
     QTimer                  _ackOrNakTimeoutTimer;

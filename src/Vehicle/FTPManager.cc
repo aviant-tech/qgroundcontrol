@@ -620,7 +620,7 @@ void FTPManager::_sendRequestExpectAck(MavlinkFTP::Request* request)
 bool FTPManager::_parseURI(const QString& uri, QString& parsedURI, uint8_t& compId)
 {
     parsedURI   = uri;
-    compId      = MAV_COMP_ID_AUTOPILOT1;
+    compId      = _vehicle->defaultComponentId();
 
     // Pull scheme off the front if there
     QString ftpPrefix(QStringLiteral("%1://").arg(mavlinkFTPScheme));

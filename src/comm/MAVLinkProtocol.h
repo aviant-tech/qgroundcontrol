@@ -50,6 +50,8 @@ public:
     int getSystemId() const;
     /** @brief Get the component id of this application */
     int getComponentId();
+    /** @brief Get the target component id for the vehicle */
+    int getTargetComponentId() const { return targetComponentId; }
 
     /** @brief Get protocol version check state */
     bool versionCheckEnabled() const {
@@ -87,6 +89,9 @@ public slots:
     /** @brief Set the system id of this application */
     void setSystemId(int id);
 
+    /** @brief Set the target component id for the vehicle */
+    void setTargetComponentId(int id);
+
     /** @brief Enable / disable version check */
     void enableVersionCheck(bool enabled);
 
@@ -114,6 +119,7 @@ protected:
 
     bool        versionMismatchIgnore;
     int         systemId;
+    int         targetComponentId;
     unsigned    _current_version;
     int         _radio_version_mismatch_count;
 
@@ -129,6 +135,8 @@ signals:
     void protocolStatusMessage(const QString& title, const QString& message);
     /** @brief Emitted if a new system ID was set */
     void systemIdChanged(int systemId);
+    /** @brief Emitted if a new target component ID was set */
+    void targetComponentIdChanged(int componentId);
 
     void mavlinkMessageStatus(int uasId, uint64_t totalSent, uint64_t totalReceived, uint64_t totalLoss, float lossPercent);
 
