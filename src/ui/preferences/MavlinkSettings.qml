@@ -138,6 +138,28 @@ Rectangle {
                         }
                     }
 
+                    Row {
+                        spacing:    ScreenTools.defaultFontPixelWidth
+                        QGCLabel {
+                            width:              _labelWidth
+                            anchors.baseline:   compidField.baseline
+                            text:               qsTr("Target Component ID:")
+                        }
+                        QGCTextField {
+                            id:     compidField
+                            text:   QGroundControl.mavlinkTargetComponentID.toString()
+                            width:  _valueWidth
+                            inputMethodHints:       Qt.ImhFormattedNumbersOnly
+                            anchors.verticalCenter: parent.verticalCenter
+                            onEditingFinished: {
+                                QGroundControl.mavlinkTargetComponentID = parseInt(compidField.text)
+                            }
+                        }
+                    }
+                    QGCLabel {
+                        text:       qsTr("<i> Changing target component ID requires restart of application. </i>")
+                    }
+
                     QGCCheckBox {
                         text:       qsTr("Emit heartbeat")
                         checked:    QGroundControl.multiVehicleManager.gcsHeartBeatEnabled

@@ -8,7 +8,6 @@
  ****************************************************************************/
 
 #include "HealthAndArmingCheckReport.h"
-#include "QGCMAVLink.h"
 
 #include <libevents/libs/cpp/generated/events_generated.h>
 
@@ -35,10 +34,6 @@ HealthAndArmingCheckReport::~HealthAndArmingCheckReport()
 void HealthAndArmingCheckReport::update(uint8_t compid, const events::HealthAndArmingChecks::Results& results,
         int flightModeGroup)
 {
-    if (compid != MAV_COMP_ID_AUTOPILOT1) {
-        // only autopilot supported atm
-        return;
-    }
     if (flightModeGroup == -1) {
         qWarning() << "Flight mode group not set";
         return;
