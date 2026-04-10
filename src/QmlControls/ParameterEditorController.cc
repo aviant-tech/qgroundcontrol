@@ -68,8 +68,8 @@ void ParameterEditorController::_buildListsForComponent(int compId)
 
 void ParameterEditorController::_buildLists(void)
 {
-    // Autopilot component should always be first list
-    _buildListsForComponent(MAV_COMP_ID_AUTOPILOT1);
+    // Target autopilot component should always be first list
+    _buildListsForComponent(_vehicle->defaultComponentId());
 
     // "Standard" category should always be first
     for (int i=0; i<_categories.count(); i++) {
@@ -95,7 +95,7 @@ void ParameterEditorController::_buildLists(void)
 
     // Now add other random components
     for (int compId: _parameterMgr->componentIds()) {
-        if (compId != MAV_COMP_ID_AUTOPILOT1) {
+        if (compId != _vehicle->defaultComponentId()) {
             _buildListsForComponent(compId);
         }
     }

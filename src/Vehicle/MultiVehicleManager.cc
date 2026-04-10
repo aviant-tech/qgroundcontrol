@@ -77,14 +77,16 @@ void MultiVehicleManager::_vehicleHeartbeatInfo(LinkInterface* link, int vehicle
         vehicleType = 0;
     }
 
-    if (componentId != MAV_COMP_ID_AUTOPILOT1) {
+    int targetCompId = _mavlinkProtocol->getTargetComponentId();
+    if (componentId != targetCompId) {
         // Special case for PX4 Flow
         if (vehicleId != 81 || componentId != 50) {
-            // Don't create vehicles for components other than the autopilot
-            qCDebug(MultiVehicleManagerLog()) << "Ignoring heartbeat from unknown component port:vehicleId:componentId:fwType:vehicleType"
+            // Don't create vehicles for components other than the target
+            qCDebug(MultiVehicleManagerLog()) << "Ignoring heartbeat from non-target component port:vehicleId:componentId:targetCompId:fwType:vehicleType"
                                               << link->linkConfiguration()->name()
                                               << vehicleId
                                               << componentId
+                                              << targetCompId
                                               << vehicleFirmwareType
                                               << vehicleType;
             return;

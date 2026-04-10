@@ -35,7 +35,7 @@ public:
     Q_INVOKABLE bool    parameterExists     (int componentId, const QString& name);
 
     /// Queries the vehicle for parameters which were not available on initial download but should be available now.
-    /// Signals missingParametersAvailable when done. Only works for MAV_COMP_ID_AUTOPILOT1 parameters.
+    /// Signals missingParametersAvailable when done. Only works for default component id parameters.
     Q_INVOKABLE void    getMissingParameters(QStringList rgNames);
 
 signals:
