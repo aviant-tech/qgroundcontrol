@@ -50,6 +50,7 @@ MAVLinkProtocol::MAVLinkProtocol(QGCApplication* app, QGCToolbox* toolbox)
     , _status({})
     , versionMismatchIgnore(false)
     , systemId(255)
+    , targetComponentId(MAV_COMP_ID_AUTOPILOT1)
     , _current_version(100)
     , _radio_version_mismatch_count(0)
     , _logSuspendError(false)
@@ -128,6 +129,12 @@ void MAVLinkProtocol::loadSettings()
     {
         systemId = temp;
     }
+
+    // Load target component id
+    int tempComp = settings.value("TARGET_COMPONENT_ID", targetComponentId).toInt();
+    if (tempComp >= 0 && tempComp < 256) {
+        targetComponentId = tempComp;
+    }
 }
 
 void MAVLinkProtocol::storeSettings()
@@ -137,7 +144,7 @@ void MAVLinkProtocol::storeSettings()
     settings.beginGroup("QGC_MAVLINK_PROTOCOL");
     settings.setValue("VERSION_CHECK_ENABLED", m_enable_version_check);
     settings.setValue("GCS_SYSTEM_ID", systemId);
-    // Parameter interface settings
+    settings.setValue("TARGET_COMPONENT_ID", targetComponentId);
 }
 
 void MAVLinkProtocol::resetMetadataForLink(LinkInterface *link)
@@ -392,6 +399,13 @@ int MAVLinkProtocol::getSystemId() const
 void MAVLinkProtocol::setSystemId(int id)
 {
     systemId = id;
+}
+
+void MAVLinkProtocol::setTargetComponentId(int id)
+{
+    targetComponentId = id;
+    storeSettings();
+    emit targetComponentIdChanged(id);
 }
 
 /** @return Component id of this application */
