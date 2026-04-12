@@ -19,7 +19,15 @@ RUN apt-get update && apt-get upgrade -y && \
     qt5-qmake \
     libxcb-xinerama0 \
     locales \
+    speech-dispatcher \
+    pulseaudio-utils \
+    rhvoice \
+    rhvoice-english \
     && rm -rf /var/lib/apt/lists/*
+ARG RHVOICE_CONF_PATH=".github/docker/rhvoice.conf"
+COPY ${RHVOICE_CONF_PATH} /etc/speech-dispatcher/modules/rhvoice.conf
+RUN echo 'AddModule "rhvoice" "sd_generic" "rhvoice.conf"' >> /etc/speech-dispatcher/speechd.conf && \
+    sed -i 's|^#\?DefaultModule.*|DefaultModule rhvoice|' /etc/speech-dispatcher/speechd.conf
 RUN groupadd -r qgc -g 1000 && useradd -m -u 1000 -r -g qgc qgc
 RUN mkdir app
 ARG APPIMAGE_PATH="./QGroundControl.AppImage"
