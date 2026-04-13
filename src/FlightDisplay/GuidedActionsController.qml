@@ -267,8 +267,8 @@ Item {
             console.log("showActivateNextWaypoint", showActivateNextWaypoint)
         }
         _outputState()
-        if (showActivateNextWaypoint && !confirmDialog.visible) {
-            confirmAction(actionSetWaypoint, _activateNextWaypointSequence)
+        if (showActivateNextWaypoint && !confirmDialog.visible && !actionList.visible) {
+            confirmAction(actionActionList)
         }
     }
     on_CurrentVisualItemChanged: {
