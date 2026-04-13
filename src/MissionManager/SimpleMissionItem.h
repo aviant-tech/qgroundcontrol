@@ -74,6 +74,7 @@ public:
     Fact*           altitude            (void) { return &_altitudeFact; }
     Fact*           amslAltAboveTerrain (void) { return &_amslAltAboveTerrainFact; }
     bool            isLoiterItem        (void) const;
+    bool            holdsVehicle        (void) const override;
     bool            showLoiterRadius    (void) const;
     double          loiterRadius        (void) const;
 

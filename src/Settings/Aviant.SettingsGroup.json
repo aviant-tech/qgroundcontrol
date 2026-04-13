@@ -18,6 +18,13 @@
     "default":     true
 },
 {
+    "name":        "allowManualFlightModeChange",
+    "shortDesc":   "Allow manual flight mode change",
+    "longDesc":    "Allow changing the flight mode from the fly view toolbar",
+    "type":        "bool",
+    "default":     false
+},
+{
     "name":        "showAltitudeWidget",
     "shortDesc":   "Show altitude widget",
     "longDesc":    "Show altitude widget",
@@ -80,6 +87,13 @@
     "name":             "showMultidroneConflictCircle",
     "shortDesc":        "Show multidrone conflict circle",
     "longDesc":         "Show a circle around the landing point with the multidrone conflict distance as radius.",
+    "type":             "bool",
+    "default":          true
+},
+{
+    "name":             "showAcceptanceRadiusCircle",
+    "shortDesc":        "Show acceptance radius circle",
+    "longDesc":         "Show a circle around the aircraft with the acceptance radius reported by the flight controller.",
     "type":             "bool",
     "default":          true
 },
@@ -189,6 +203,21 @@
     "min":         0,
     "units":       "s",
     "default":     3
+},
+{
+    "name":        "minSeenTraffic",
+    "shortDesc":   "Min seen traffic for green",
+    "longDesc":    "Minimum number of ADSB vehicles that must be seen for the traffic indicator to show green. Below this (but above 0) the indicator shows orange.",
+    "type":        "uint32",
+    "min":         1,
+    "default":     3
+},
+{
+    "name":        "showCameraControlsInPlanView",
+    "shortDesc":   "Show camera controls in plan view",
+    "longDesc":    "Show camera and gimbal controls on waypoints in the plan view editor",
+    "type":        "bool",
+    "default":     false
 }
 ]
 }

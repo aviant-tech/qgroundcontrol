@@ -735,8 +735,8 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
         _handleGlobalPositionInt(message);
         break;
-    case MAVLINK_MSG_ID_UTM_GLOBAL_POSITION:
-        _handleUtmGlobalPosition(message);
+    case MAVLINK_MSG_ID_POSITION_TARGET_GLOBAL_INT:
+        _handlePositionTargetGlobalInt(message);
         break;
     case MAVLINK_MSG_ID_ALTITUDE:
         _handleAltitude(message);
@@ -1034,6 +1034,11 @@ void Vehicle::_handleNavControllerOutput(mavlink_message_t& message)
     _altitudeTuningSetpointFact.setRawValue(_altitudeTuningFact.rawValue().toDouble() - navControllerOutput.alt_error);
     _xTrackErrorFact.setRawValue(navControllerOutput.xtrack_error);
     _airSpeedSetpointFact.setRawValue(_airSpeedFact.rawValue().toDouble() - navControllerOutput.aspd_error);
+
+    if (navControllerOutput.acceptance_radius != _acceptanceRadius) {
+        _acceptanceRadius = navControllerOutput.acceptance_radius;
+        emit acceptanceRadiusChanged(_acceptanceRadius);
+    }
 }
 
 // Ignore warnings from mavlink headers for both GCC/Clang and MSVC
@@ -1181,27 +1186,23 @@ void Vehicle::_handleGlobalPositionInt(mavlink_message_t& message)
     }
 }
 
-void Vehicle::_handleUtmGlobalPosition(mavlink_message_t& message)
+void Vehicle::_handlePositionTargetGlobalInt(mavlink_message_t& message)
 {
-    mavlink_utm_global_position_t utmGlobalPosition;
-    mavlink_msg_utm_global_position_decode(&message, &utmGlobalPosition);
+    mavlink_position_target_global_int_t positionTarget;
+    mavlink_msg_position_target_global_int_decode(&message, &positionTarget);
 
     // Both values being zero typically corresponds to the current waypoint not
     // being initialized. We make sure it gets invalid values so it is cleared
     // from the UI.
-    if (utmGlobalPosition.next_lat == 0 && utmGlobalPosition.next_lon == 0) {
+    if (positionTarget.lat_int == 0 && positionTarget.lon_int == 0) {
         if (_positionSetpoint.isValid()) {
             _positionSetpoint = QGeoCoordinate(qQNaN(), qQNaN(), qQNaN());
             emit positionSetpointChanged(_positionSetpoint);
         }
         return;
     }
-    _utmGlobalPositionMessageAvailable = true;
 
-    // We have GLOBAL_POSITION_INT for other position information, so we use
-    // UTM_GLOBAL_POSITION only for information about the next position
-    // setpoint.
-    QGeoCoordinate newPositionSetpoint(utmGlobalPosition.next_lat  / (double)1E7, utmGlobalPosition.next_lon / (double)1E7, utmGlobalPosition.next_alt  / 1000.0);
+    QGeoCoordinate newPositionSetpoint(positionTarget.lat_int / (double)1E7, positionTarget.lon_int / (double)1E7, (double)positionTarget.alt);
     if (newPositionSetpoint != _positionSetpoint) {
         _positionSetpoint = newPositionSetpoint;
         emit positionSetpointChanged(_positionSetpoint);
@@ -3858,6 +3859,7 @@ void Vehicle::_updateMissionItemIndex()
     if (!_firmwarePlugin->sendHomePositionToVehicle()) {
         offset = 1;
     }
+
 
     _missionItemIndexFact.setRawValue(currentIndex + offset);
 }

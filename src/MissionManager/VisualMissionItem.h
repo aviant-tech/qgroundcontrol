@@ -72,6 +72,7 @@ public:
     Q_PROPERTY(bool             isTakeoffItem                       READ isTakeoffItem                                                      NOTIFY isTakeoffItemChanged)                        ///< true: Takeoff item special case
     Q_PROPERTY(bool             isLandCommand                       READ isLandCommand                                                      NOTIFY isLandCommandChanged)
     Q_PROPERTY(bool             isSurveyItem                        READ isSurveyItem                                                       )                                                   ///< true: Survey item special case for editing center position through mission item list menue
+    Q_PROPERTY(bool             holdsVehicle                        READ holdsVehicle                                                       NOTIFY holdsVehicleChanged)                         ///< true: Vehicle will hold position at this item (loiter or waypoint with hold time)
     Q_PROPERTY(QString          editorQml                           MEMBER _editorQml                                                       CONSTANT)                                           ///< Qml code for editing this item
     Q_PROPERTY(QString          mapVisualQML                        READ mapVisualQML                                                       CONSTANT)                                           ///< QMl code for map visuals
     Q_PROPERTY(double           specifiedFlightSpeed                READ specifiedFlightSpeed                                               NOTIFY specifiedFlightSpeedChanged)                 ///< NaN for not specified
@@ -145,6 +146,7 @@ public:
     virtual bool            isTakeoffItem           (void) const { return false; }
     virtual bool            isLandCommand           (void) const { return false; }
     virtual bool            isSurveyItem            (void) const { return false; }
+    virtual bool            holdsVehicle            (void) const { return false; }
     virtual bool            isStandaloneCoordinate  (void) const = 0;
     virtual bool            specifiesCoordinate     (void) const = 0;
     virtual bool            specifiesAltitudeOnly   (void) const = 0;
@@ -242,6 +244,7 @@ signals:
     void parentItemChanged              (VisualMissionItem* parentItem);
     void amslEntryAltChanged            (double alt);
     void amslExitAltChanged             (double alt);
+    void holdsVehicleChanged            (void);
     void previousVTOLModeChanged        (void);
     void currentVTOLModeChanged         (void);                             ///< Signals that this item has changed the VTOL mode (MAV_CMD_DO_VTOL_TRANSITION)
 

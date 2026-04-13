@@ -177,6 +177,17 @@ Rectangle {
                 }
             }
         }
+
+        QGCButton {
+            text:               qsTr("Next Waypoint (#%1)").arg(guidedController._activateNextWaypointSequence)
+            visible:            guidedController.showActivateNextWaypoint
+            Layout.alignment:   Qt.AlignHCenter
+
+            onClicked: {
+                _root.visible = false
+                guidedController.confirmAction(guidedController.actionSetWaypoint, guidedController._activateNextWaypointSequence)
+            }
+        }
     }
 
     QGCColoredImage {

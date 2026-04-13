@@ -22,10 +22,12 @@ ColumnLayout {
     id:         root
     spacing:    ScreenTools.defaultFontPixelHeight / 4
 
-    property real   _innerRadius:           (width - (_topBottomMargin * 3)) / 4
+    property bool   _showWind:              globals.activeVehicle && globals.activeVehicle.wind && !isNaN(globals.activeVehicle.wind.speed.rawValue)
+    property int    _instrumentCount:       _showWind ? 3 : 2
+    property real   _topBottomMargin:       (width * 0.05) / 2
+    property real   _innerRadius:           (width - (_topBottomMargin * (_instrumentCount + 1))) / (_instrumentCount * 2)
     property real   _outerRadius:           _innerRadius + _topBottomMargin
     property real   _spacing:               ScreenTools.defaultFontPixelHeight * 0.33
-    property real   _topBottomMargin:       (width * 0.05) / 2
 
     QGCPalette { id: qgcPal }
 
@@ -54,6 +56,16 @@ ColumnLayout {
             size:                   _innerRadius * 2
             vehicle:                globals.activeVehicle
             anchors.verticalCenter: parent.verticalCenter
+        }
+
+        WindIndicator {
+            id:                     windIndicator
+            anchors.leftMargin:     _spacing
+            anchors.left:           compass.right
+            size:                   _innerRadius * 2
+            vehicle:                globals.activeVehicle
+            anchors.verticalCenter: parent.verticalCenter
+            visible:                _showWind
         }
     }
 
