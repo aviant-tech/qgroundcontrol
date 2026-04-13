@@ -112,7 +112,7 @@ void PlanManager::_writeMissionCount(void)
                                             sharedLink->mavlinkChannel(),
                                             &message,
                                             _vehicle->id(),
-                                            MAV_COMP_ID_AUTOPILOT1,
+                                            _vehicle->defaultComponentId(),
                                             _writeMissionItems.count(),
                                             _planType,
                                             0);
@@ -159,7 +159,7 @@ void PlanManager::_requestList(void)
                                                    sharedLink->mavlinkChannel(),
                                                    &message,
                                                    _vehicle->id(),
-                                                   MAV_COMP_ID_AUTOPILOT1,
+                                                   _vehicle->defaultComponentId(),
                                                    _planType);
 
         _vehicle->sendMessageOnLinkThreadSafe(sharedLink.get(), message);
@@ -302,7 +302,7 @@ void PlanManager::_readTransactionComplete(void)
                                           sharedLink->mavlinkChannel(),
                                           &message,
                                           _vehicle->id(),
-                                          MAV_COMP_ID_AUTOPILOT1,
+                                          _vehicle->defaultComponentId(),
                                           MAV_MISSION_ACCEPTED,
                                           _planType,
                                           0);
@@ -365,7 +365,7 @@ void PlanManager::_requestNextMissionItem(void)
                                                   sharedLink->mavlinkChannel(),
                                                   &message,
                                                   _vehicle->id(),
-                                                  MAV_COMP_ID_AUTOPILOT1,
+                                                  _vehicle->defaultComponentId(),
                                                   _itemIndicesToRead[0],
                                                   _planType);
         _vehicle->sendMessageOnLinkThreadSafe(sharedLink.get(), message);
@@ -526,7 +526,7 @@ void PlanManager::_handleMissionRequest(const mavlink_message_t& message)
                                                sharedLink->mavlinkChannel(),
                                                &messageOut,
                                                _vehicle->id(),
-                                               MAV_COMP_ID_AUTOPILOT1,
+                                               _vehicle->defaultComponentId(),
                                                missionRequestSeq,
                                                item->frame(),
                                                item->command(),
@@ -877,7 +877,7 @@ void PlanManager::_removeAllWorker(void)
                                                 sharedLink->mavlinkChannel(),
                                                 &message,
                                                 _vehicle->id(),
-                                                MAV_COMP_ID_AUTOPILOT1,
+                                                _vehicle->defaultComponentId(),
                                                 _planType);
         _vehicle->sendMessageOnLinkThreadSafe(sharedLink.get(), message);
     }

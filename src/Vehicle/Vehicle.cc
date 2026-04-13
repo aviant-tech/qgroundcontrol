@@ -1733,12 +1733,18 @@ EventHandler& Vehicle::_eventHandler(uint8_t compid)
 
         // connect health and arming check updates
         connect(eventHandler.data(), &EventHandler::healthAndArmingChecksUpdated, this, [compid, this]() {
+            if (compid != _defaultComponentId) {
+                return;
+            }
             // TODO: use user-intended mode instead of currently set mode
             const QSharedPointer<EventHandler>& eventHandler = _events[compid];
             _healthAndArmingCheckReport.update(compid, eventHandler->healthAndArmingCheckResults(),
                     eventHandler->getModeGroup(_custom_mode));
         });
         connect(this, &Vehicle::flightModeChanged, this, [compid, this]() {
+            if (compid != _defaultComponentId) {
+                return;
+            }
             const QSharedPointer<EventHandler>& eventHandler = _events[compid];
             if (eventHandler->healthAndArmingCheckResultsValid()) {
                 _healthAndArmingCheckReport.update(compid, eventHandler->healthAndArmingCheckResults(),
@@ -4144,7 +4150,7 @@ void Vehicle::sendParamMapRC(const QString& paramName, double scale, double cent
                                        sharedLink->mavlinkChannel(),
                                        &message,
                                        _id,
-                                       MAV_COMP_ID_AUTOPILOT1,
+                                       _defaultComponentId,
                                        param_id_cstr,
                                        -1,                                                  // parameter name specified as string in previous argument
                                        static_cast<uint8_t>(tuningID),
@@ -4172,7 +4178,7 @@ void Vehicle::clearAllParamMapRC(void)
                                            sharedLink->mavlinkChannel(),
                                            &message,
                                            _id,
-                                           MAV_COMP_ID_AUTOPILOT1,
+                                           _defaultComponentId,
                                            param_id_cstr,
                                            -2,                                                  // Disable map for specified tuning id
                                            i,                                                   // tuning id

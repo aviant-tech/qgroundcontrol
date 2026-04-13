@@ -140,6 +140,11 @@ MavlinkConsoleController::_sendSerialData(QByteArray data, bool close)
         return;
     }
 
+    // Force v2 so SERIAL_CONTROL extension fields (target_system, target_component) are sent
+    mavlink_status_t* mavlinkStatus = mavlink_get_channel_status(sharedLink->mavlinkChannel());
+    uint8_t savedFlags = mavlinkStatus->flags;
+    mavlinkStatus->flags &= ~MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
     // Send maximum sized chunks until the complete buffer is transmitted
     while(data.size()) {
         QByteArray chunk{data.left(MAVLINK_MSG_SERIAL_CONTROL_FIELD_DATA_LEN)};
@@ -165,6 +170,8 @@ MavlinkConsoleController::_sendSerialData(QByteArray data, bool close)
         _vehicle->sendMessageOnLinkThreadSafe(sharedLink.get(), msg);
         data.remove(0, chunk.size());
     }
+
+    mavlinkStatus->flags = savedFlags;
 }
 
 bool

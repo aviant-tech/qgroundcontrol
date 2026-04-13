@@ -105,6 +105,7 @@ public:
     // MavLink Protocol
     Q_PROPERTY(bool     isVersionCheckEnabled   READ isVersionCheckEnabled      WRITE setIsVersionCheckEnabled      NOTIFY isVersionCheckEnabledChanged)
     Q_PROPERTY(int      mavlinkSystemID         READ mavlinkSystemID            WRITE setMavlinkSystemID            NOTIFY mavlinkSystemIDChanged)
+    Q_PROPERTY(int      mavlinkTargetComponentID READ mavlinkTargetComponentID  WRITE setMavlinkTargetComponentID   NOTIFY mavlinkTargetComponentIDChanged)
     Q_PROPERTY(bool     hasAPMSupport           READ hasAPMSupport              CONSTANT)
     Q_PROPERTY(bool     hasMAVLinkInspector     READ hasMAVLinkInspector        CONSTANT)
 
@@ -195,6 +196,7 @@ public:
 
     bool    isVersionCheckEnabled   () { return _toolbox->mavlinkProtocol()->versionCheckEnabled(); }
     int     mavlinkSystemID         () { return _toolbox->mavlinkProtocol()->getSystemId(); }
+    int     mavlinkTargetComponentID() { return _toolbox->mavlinkProtocol()->getTargetComponentId(); }
 #if defined(NO_ARDUPILOT_DIALECT)
     bool    hasAPMSupport           () { return false; }
 #else
@@ -216,6 +218,7 @@ public:
 
     void    setIsVersionCheckEnabled    (bool enable);
     void    setMavlinkSystemID          (int  id);
+    void    setMavlinkTargetComponentID (int  id);
     void    setFlightMapPosition        (QGeoCoordinate& coordinate);
     void    setFlightMapZoom            (double zoom);
 
@@ -238,6 +241,7 @@ signals:
     void isMultiplexingEnabledChanged   (bool enabled);
     void isVersionCheckEnabledChanged   (bool enabled);
     void mavlinkSystemIDChanged         (int id);
+    void mavlinkTargetComponentIDChanged(int id);
     void flightMapPositionChanged       (QGeoCoordinate flightMapPosition);
     void flightMapZoomChanged           (double flightMapZoom);
     void skipSetupPageChanged           ();

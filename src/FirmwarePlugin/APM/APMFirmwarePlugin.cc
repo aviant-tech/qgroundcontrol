@@ -286,7 +286,7 @@ void APMFirmwarePlugin::_handleIncomingHeartbeat(Vehicle* vehicle, mavlink_messa
     mavlink_heartbeat_t heartbeat;
     mavlink_msg_heartbeat_decode(message, &heartbeat);
 
-    if (message->compid == MAV_COMP_ID_AUTOPILOT1) {
+    if (message->compid == vehicle->defaultComponentId()) {
         // We pull Vehicle::flying state from HEARTBEAT on ArduPilot. This is a firmware specific test.
         if (vehicle->armed()) {
 
@@ -453,7 +453,7 @@ void APMFirmwarePlugin::initializeStreamRates(Vehicle* vehicle)
     // This can cause various features to not be available. So we request home position streaming ourselves.
     // The MAV_CMD_SET_MESSAGE_INTERVAL command is only supported on newer firmwares. So we set showError=false.
     // Which also means than on older firmwares you may be left with some missing features.
-    vehicle->sendMavCommand(MAV_COMP_ID_AUTOPILOT1, MAV_CMD_SET_MESSAGE_INTERVAL, false /* showError */, MAVLINK_MSG_ID_HOME_POSITION, 1000000 /* 1 second interval in usec */);
+    vehicle->sendMavCommand(vehicle->defaultComponentId(), MAV_CMD_SET_MESSAGE_INTERVAL, false /* showError */, MAVLINK_MSG_ID_HOME_POSITION, 1000000 /* 1 second interval in usec */);
 
     instanceData->lastBatteryStatusTime = instanceData->lastHomePositionTime = QTime::currentTime();
 }

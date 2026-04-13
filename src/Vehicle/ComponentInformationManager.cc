@@ -51,10 +51,11 @@ ComponentInformationManager::ComponentInformationManager(Vehicle* vehicle)
     , _requestTypeStateMachine  (this)
     , _fileCache(ComponentInformationCache::defaultInstance())
 {
-    _compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_GENERAL]    = new CompInfoGeneral   (MAV_COMP_ID_AUTOPILOT1, vehicle, this);
-    _compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_PARAMETER]  = new CompInfoParam     (MAV_COMP_ID_AUTOPILOT1, vehicle, this);
-    _compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_EVENTS]     = new CompInfoEvents    (MAV_COMP_ID_AUTOPILOT1, vehicle, this);
-    _compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_ACTUATORS]  = new CompInfoActuators (MAV_COMP_ID_AUTOPILOT1, vehicle, this);
+    uint8_t compId = _vehicle->defaultComponentId();
+    _compInfoMap[compId][COMP_METADATA_TYPE_GENERAL]    = new CompInfoGeneral   (compId, vehicle, this);
+    _compInfoMap[compId][COMP_METADATA_TYPE_PARAMETER]  = new CompInfoParam     (compId, vehicle, this);
+    _compInfoMap[compId][COMP_METADATA_TYPE_EVENTS]     = new CompInfoEvents    (compId, vehicle, this);
+    _compInfoMap[compId][COMP_METADATA_TYPE_ACTUATORS]  = new CompInfoActuators (compId, vehicle, this);
 }
 
 int ComponentInformationManager::stateCount(void) const
@@ -92,7 +93,7 @@ void ComponentInformationManager::requestAllComponentInformation(RequestAllCompl
 void ComponentInformationManager::_stateRequestCompInfoGeneral(StateMachine* stateMachine)
 {
     ComponentInformationManager* compMgr = static_cast<ComponentInformationManager*>(stateMachine);
-    compMgr->_requestTypeStateMachine.request(compMgr->_compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_GENERAL]);
+    compMgr->_requestTypeStateMachine.request(compMgr->_compInfoMap[compMgr->_vehicle->defaultComponentId()][COMP_METADATA_TYPE_GENERAL]);
 }
 
 void ComponentInformationManager::_stateRequestCompInfoGeneralComplete(StateMachine* stateMachine)
@@ -104,8 +105,9 @@ void ComponentInformationManager::_stateRequestCompInfoGeneralComplete(StateMach
 
 void ComponentInformationManager::_updateAllUri()
 {
-    CompInfoGeneral* general = qobject_cast<CompInfoGeneral*>(_compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_GENERAL]);
-    for (auto& compInfo : _compInfoMap[MAV_COMP_ID_AUTOPILOT1]) {
+    uint8_t compId = _vehicle->defaultComponentId();
+    CompInfoGeneral* general = qobject_cast<CompInfoGeneral*>(_compInfoMap[compId][COMP_METADATA_TYPE_GENERAL]);
+    for (auto& compInfo : _compInfoMap[compId]) {
         general->setUris(*compInfo);
     }
 }
@@ -120,7 +122,7 @@ void ComponentInformationManager::_stateRequestCompInfoParam(StateMachine* state
     ComponentInformationManager* compMgr = static_cast<ComponentInformationManager*>(stateMachine);
 
     if (compMgr->_isCompTypeSupported(COMP_METADATA_TYPE_PARAMETER)) {
-        compMgr->_requestTypeStateMachine.request(compMgr->_compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_PARAMETER]);
+        compMgr->_requestTypeStateMachine.request(compMgr->_compInfoMap[compMgr->_vehicle->defaultComponentId()][COMP_METADATA_TYPE_PARAMETER]);
     } else {
         qCDebug(ComponentInformationManagerLog) << "_stateRequestCompInfoParam skipping, not supported";
         compMgr->advance();
@@ -132,7 +134,7 @@ void ComponentInformationManager::_stateRequestCompInfoEvents(StateMachine* stat
     ComponentInformationManager* compMgr = static_cast<ComponentInformationManager*>(stateMachine);
 
     if (compMgr->_isCompTypeSupported(COMP_METADATA_TYPE_EVENTS)) {
-        compMgr->_requestTypeStateMachine.request(compMgr->_compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_EVENTS]);
+        compMgr->_requestTypeStateMachine.request(compMgr->_compInfoMap[compMgr->_vehicle->defaultComponentId()][COMP_METADATA_TYPE_EVENTS]);
     } else {
         qCDebug(ComponentInformationManagerLog) << "_stateRequestCompInfoEvents skipping, not supported";
         compMgr->advance();
@@ -144,7 +146,7 @@ void ComponentInformationManager::_stateRequestCompInfoActuators(StateMachine* s
     ComponentInformationManager* compMgr = static_cast<ComponentInformationManager*>(stateMachine);
 
     if (compMgr->_isCompTypeSupported(COMP_METADATA_TYPE_ACTUATORS)) {
-        compMgr->_requestTypeStateMachine.request(compMgr->_compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_ACTUATORS]);
+        compMgr->_requestTypeStateMachine.request(compMgr->_compInfoMap[compMgr->_vehicle->defaultComponentId()][COMP_METADATA_TYPE_ACTUATORS]);
     } else {
         qCDebug(ComponentInformationManagerLog) << "_stateRequestCompInfoActuators skipping, not supported";
         compMgr->advance();
@@ -161,7 +163,7 @@ void ComponentInformationManager::_stateRequestAllCompInfoComplete(StateMachine*
 
 bool ComponentInformationManager::_isCompTypeSupported(COMP_METADATA_TYPE type)
 {
-    return qobject_cast<CompInfoGeneral*>(_compInfoMap[MAV_COMP_ID_AUTOPILOT1][COMP_METADATA_TYPE_GENERAL])->isMetaDataTypeSupported(type);
+    return qobject_cast<CompInfoGeneral*>(_compInfoMap[_vehicle->defaultComponentId()][COMP_METADATA_TYPE_GENERAL])->isMetaDataTypeSupported(type);
 }
 
 CompInfoParam* ComponentInformationManager::compInfoParam(uint8_t compId)
@@ -280,7 +282,7 @@ void RequestMetaDataTypeStateMachine::_stateRequestCompInfo(StateMachine* stateM
             vehicle->requestMessage(
                         _requestMessageResultHandler,
                         stateMachine,
-                        MAV_COMP_ID_AUTOPILOT1,
+                        vehicle->defaultComponentId(),
                         MAVLINK_MSG_ID_COMPONENT_INFORMATION);
         }
     }

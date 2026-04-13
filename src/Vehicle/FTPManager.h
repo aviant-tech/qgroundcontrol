@@ -33,7 +33,7 @@ public:
 
 	/// Downloads the specified file.
     ///     @param fromURI  File to download from vehicle, fully qualified path. May be in the format "mftp://[;comp=<id>]..." where the component id is specified.
-    ///                     If component id is not specified MAV_COMP_ID_AUTOPILOT1 is used.
+    ///                     If component id is not specified the vehicle's default component id is used.
     ///     @param toDir    Local directory to download file to
     /// @return true: download has started, false: error, no download
     /// Signals downloadComplete, commandError, commandProgress

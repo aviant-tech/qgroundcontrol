@@ -131,7 +131,7 @@ FactMetaData* CompInfoParam::factMetaDataForName(const QString& name, FactMetaDa
                 if (i > 0) {
                     factMetaData->setGroup(name.left(i));
                 }
-                if (compId != MAV_COMP_ID_AUTOPILOT1) {
+                if (compId != vehicle->defaultComponentId()) {
                     factMetaData->setCategory(tr("Component %1").arg(compId));
                 }
             }
@@ -303,7 +303,7 @@ QObject* CompInfoParam::_getOpaqueParameterMetaData(void)
         qWarning() << "CompInfoParam::_getOpaqueParameterMetaData _noJsonMetadata == false";
     }
 
-    if (!_opaqueParameterMetaData && compId == MAV_COMP_ID_AUTOPILOT1) {
+    if (!_opaqueParameterMetaData && compId == vehicle->defaultComponentId()) {
         // Load best parameter meta data set
         int majorVersion, minorVersion;
         QString metaDataFile = _parameterMetaDataFile(vehicle, vehicle->firmwareType(), majorVersion, minorVersion);
