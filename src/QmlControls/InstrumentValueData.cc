@@ -313,7 +313,8 @@ void InstrumentValueData::_updateColor(void)
     QColor newColor;
 
     if (_fact && _fact->timedOut()) {
-        newColor = QColor::fromRgb(255, 170, 0); // Orange
+        const QColor timeoutColor = _fact->timeoutIndicatorColor();
+        newColor = timeoutColor.isValid() ? timeoutColor : QColor::fromRgb(255, 170, 0); // Orange default
     } else if (_fact && _fact->overrideColorEnabled()) {
         newColor = _fact->overrideColor();
     } else {

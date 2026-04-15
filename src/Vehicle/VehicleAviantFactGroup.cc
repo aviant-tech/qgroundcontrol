@@ -197,6 +197,10 @@ void VehicleAviantFactGroup::handleAtsStatusMsg(Vehicle* vehicle, mavlink_messag
         _atsStatusFact.setRawValue(VALUE_DEACT);
         return;
     }
+
+    // If the ATS is enabled, a timeout is critical
+    _atsStatusFact.setTimeoutIndicatorColor(COLOR_CRITICAL);
+
     uint32_t ats_status_flags = atsStatus.ats_status_flags;
     if (!atsStatus.power_loss_trigger_enabled) {
         ats_status_flags &= ~AVIANT_ATS_STATUS_FLAG_POWER_LOSS;

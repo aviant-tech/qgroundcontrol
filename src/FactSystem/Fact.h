@@ -151,6 +151,10 @@ public:
     void setEnumStringValue (const QString& value);
     void setOverrideColor   (const QColor& color);
     void unsetOverrideColor (void);
+
+    void            setTimeoutIndicatorColor(const QColor& color);
+    void            unsetTimeoutIndicatorColor(void);
+    QColor          timeoutIndicatorColor(void) const { return _timeoutIndicatorColor; }
     int  valueIndex         (const QString& value);
 
     // The following methods allow you to defer sending of the valueChanged signals in order to implement
@@ -226,6 +230,7 @@ protected:
     bool                        _ignoreQGCRebootRequired;
     bool                        _overrideColorEnabled;
     QColor                      _overrideColor;
+    QColor                      _timeoutIndicatorColor;
     QElapsedTimer               _timeSinceLastUpdate;
     bool                        _timedOut = false;
 };
