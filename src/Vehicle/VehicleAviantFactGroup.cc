@@ -187,14 +187,14 @@ void VehicleAviantFactGroup::handleAtsStatusMsg(Vehicle* vehicle, mavlink_messag
     mavlink_msg_aviant_ats_status_decode(&message, &atsStatus);
 
     // These should match atsStatus in AviantFactGroup.json
-    constexpr uint32_t VALUE_BLANK = 0;
+    constexpr uint32_t VALUE_DEACT = 0;
     constexpr uint32_t VALUE_OK = 1;
     constexpr uint32_t VALUE_WARN = 2;
     constexpr uint32_t VALUE_FAIL = 3;
 
     if (!atsStatus.ats_enabled) {
         _atsStatusFact.setOverrideColor(COLOR_UNKNOWN);
-        _atsStatusFact.setRawValue(VALUE_BLANK);
+        _atsStatusFact.setRawValue(VALUE_DEACT);
         return;
     }
     uint32_t ats_status_flags = atsStatus.ats_status_flags;
