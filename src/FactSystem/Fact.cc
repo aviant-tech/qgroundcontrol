@@ -100,6 +100,7 @@ const Fact& Fact::operator=(const Fact& other)
     _ignoreQGCRebootRequired    = other._ignoreQGCRebootRequired;
     _timeSinceLastUpdate        = other._timeSinceLastUpdate;
     _timedOut                   = other._timedOut;
+    _timeoutIndicatorColor      = other._timeoutIndicatorColor;
     if (_metaData && other._metaData) {
         *_metaData = *other._metaData;
     } else {
@@ -193,6 +194,16 @@ void Fact::setOverrideColor(const QColor& color)
 void Fact::unsetOverrideColor(void)
 {
     _overrideColorEnabled = false;
+}
+
+void Fact::setTimeoutIndicatorColor(const QColor& color)
+{
+    _timeoutIndicatorColor = color;
+}
+
+void Fact::unsetTimeoutIndicatorColor(void)
+{
+    _timeoutIndicatorColor = QColor();
 }
 
 void Fact::_containerSetRawValue(const QVariant& value)

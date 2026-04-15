@@ -26,7 +26,7 @@
     "name":             "atsStatus",
     "shortDesc":        "ATS",
     "type":             "uint32",
-    "enumStrings":      "--,OK,WARN,FAIL",
+    "enumStrings":      "DEACT,OK,WARN,FAIL",
     "enumValues":       "0,1,2,3"
 },
 {
