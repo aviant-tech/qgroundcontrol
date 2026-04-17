@@ -28,6 +28,7 @@ public:
     Q_PROPERTY(Fact* tempBaroInternal      READ tempBaroInternal      CONSTANT)
     Q_PROPERTY(Fact* anomalousCurrent      READ anomalousCurrent      CONSTANT)
     Q_PROPERTY(Fact* topMotorLoad          READ topMotorLoad          CONSTANT)
+    Q_PROPERTY(Fact* pusherMotorLoad       READ pusherMotorLoad       CONSTANT)
     Q_PROPERTY(Fact* motVoltage0           READ motVoltage0           CONSTANT)
     Q_PROPERTY(Fact* motVoltage1           READ motVoltage1           CONSTANT)
     Q_PROPERTY(Fact* motVoltage2           READ motVoltage2           CONSTANT)
@@ -57,6 +58,7 @@ public:
     Fact* tempBaroInternal() { return &_tempBaroInternalFact; }
     Fact* anomalousCurrent() { return &_anomalousCurrentFact; }
     Fact* topMotorLoad() { return &_topMotorLoadFact; }
+    Fact* pusherMotorLoad() { return &_pusherMotorLoadFact; }
     Fact* motVoltage0() { return &_motVoltage0Fact; }
     Fact* motVoltage1() { return &_motVoltage1Fact; }
     Fact* motVoltage2() { return &_motVoltage2Fact; }
@@ -83,6 +85,7 @@ private:
 
     static void setIndicatorColorOverride(Fact& fact, int state);
     void resolveRotorClassification(Vehicle* vehicle);
+    void updateMotorLoadFact(const mavlink_aviant_indicator_motors_t& motors, uint32_t mask, Fact& fact);
 
     Fact _navigationAccuracyFact;
     Fact _navigationRedundancyFact;
@@ -100,6 +103,7 @@ private:
     Fact _tempBaroInternalFact;
     Fact _anomalousCurrentFact;
     Fact _topMotorLoadFact;
+    Fact _pusherMotorLoadFact;
     Fact _motVoltage0Fact;
     Fact _motVoltage1Fact;
     Fact _motVoltage2Fact;
@@ -135,6 +139,7 @@ private:
     static constexpr const char* tempBaroInternalFactName = "tempBaroInternal";
     static constexpr const char* anomalousCurrentFactName = "anomalousCurrent";
     static constexpr const char* topMotorLoadFactName = "topMotorLoad";
+    static constexpr const char* pusherMotorLoadFactName = "pusherMotorLoad";
     static constexpr const char* motVoltage0FactName = "motVoltage0";
     static constexpr const char* motVoltage1FactName = "motVoltage1";
     static constexpr const char* motVoltage2FactName = "motVoltage2";
@@ -157,6 +162,7 @@ private:
     time_t _time_last_ats_status_ok = 0;
 
     static constexpr int NUM_ROTORS_MAX = 12;
-    uint32_t _upwardsMotorsMask = 0;
+    uint32_t _topMotorsMask = 0;
+    uint32_t _pusherMotorsMask = 0;
     bool     _rotorClassificationResolved = false;
 };

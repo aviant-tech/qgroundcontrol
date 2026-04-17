@@ -105,6 +105,13 @@
     "decimalPlaces":    2
 },
 {
+    "name":             "pusherMotorLoad",
+    "shortDesc":        "PshMot",
+    "type":             "double",
+    "units":            "V",
+    "decimalPlaces":    2
+},
+{
     "name":             "motVoltage0",
     "shortDesc":        "Mot0V",
     "type":             "double",
