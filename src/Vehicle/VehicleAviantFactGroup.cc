@@ -3,7 +3,6 @@
 #include "ParameterManager.h"
 #include "mavlink.h"
 
-#include <QtMath>
 #include <algorithm>
 
 const QColor VehicleAviantFactGroup::COLOR_UNKNOWN { QColor::fromRgb(128, 128, 128) }; // Gray
@@ -29,6 +28,7 @@ VehicleAviantFactGroup::VehicleAviantFactGroup(QObject* parent)
     _tempBaroInternalFact     (0, tempBaroInternalFactName,      FactMetaData::valueTypeInt8),
     _anomalousCurrentFact     (0, anomalousCurrentFactName,      FactMetaData::valueTypeDouble),
     _topMotorLoadFact         (0, topMotorLoadFactName,          FactMetaData::valueTypeDouble),
+    _pusherMotorLoadFact      (0, pusherMotorLoadFactName,       FactMetaData::valueTypeDouble),
     _motVoltage0Fact          (0, motVoltage0FactName,           FactMetaData::valueTypeDouble),
     _motVoltage1Fact          (0, motVoltage1FactName,           FactMetaData::valueTypeDouble),
     _motVoltage2Fact          (0, motVoltage2FactName,           FactMetaData::valueTypeDouble),
@@ -58,6 +58,7 @@ VehicleAviantFactGroup::VehicleAviantFactGroup(QObject* parent)
     _addFact(&_tempBaroInternalFact, tempBaroInternalFactName);
     _addFact(&_anomalousCurrentFact, anomalousCurrentFactName);
     _addFact(&_topMotorLoadFact, topMotorLoadFactName);
+    _addFact(&_pusherMotorLoadFact, pusherMotorLoadFactName);
     _addFact(&_motVoltage0Fact, motVoltage0FactName);
     _addFact(&_motVoltage1Fact, motVoltage1FactName);
     _addFact(&_motVoltage2Fact, motVoltage2FactName);
@@ -233,33 +234,41 @@ void VehicleAviantFactGroup::resolveRotorClassification(Vehicle* vehicle)
     }
 
     ParameterManager* pm = vehicle->parameterManager();
-    if (!pm || !pm->parametersReady() || !pm->parameterExists(-1, QStringLiteral("CA_ROTOR_COUNT"))) {
+    if (!pm || !pm->parametersReady()) {
         return;
     }
 
-    int rotorCount = pm->getParameter(-1, QStringLiteral("CA_ROTOR_COUNT"))->rawValue().toInt();
-    _upwardsMotorsMask = 0;
-
-    for (int i = 0; i < std::min(rotorCount, NUM_ROTORS_MAX); i++) {
-        QString axParam = QStringLiteral("CA_ROTOR%1_AX").arg(i);
-        QString ayParam = QStringLiteral("CA_ROTOR%1_AY").arg(i);
-        QString azParam = QStringLiteral("CA_ROTOR%1_AZ").arg(i);
-
-        if (!pm->parameterExists(-1, axParam)) {
-            continue;
-        }
-
-        float ax = pm->getParameter(-1, axParam)->rawValue().toFloat();
-        float ay = pm->getParameter(-1, ayParam)->rawValue().toFloat();
-        float az = pm->getParameter(-1, azParam)->rawValue().toFloat();
-
-        // Same logic as PX4 getUpwardsMotors(): vertical thrust = axis ~(0, 0, -1)
-        if (fabsf(ax) < 0.1f && fabsf(ay) < 0.1f && az < -0.5f) {
-            _upwardsMotorsMask |= (1u << i);
-        }
+    if (!pm->parameterExists(-1, QStringLiteral("AV_THR_MOT_TOP")) ||
+        !pm->parameterExists(-1, QStringLiteral("AV_THR_MOT_PSH"))) {
+        return;
     }
 
+    _topMotorsMask = pm->getParameter(-1, QStringLiteral("AV_THR_MOT_TOP"))->rawValue().toUInt();
+    _pusherMotorsMask  = pm->getParameter(-1, QStringLiteral("AV_THR_MOT_PSH"))->rawValue().toUInt();
+
     _rotorClassificationResolved = true;
+}
+
+void VehicleAviantFactGroup::updateMotorLoadFact(
+    const mavlink_aviant_indicator_motors_t& motors, uint32_t mask, Fact& fact)
+{
+    if (mask == 0) {
+        return;
+    }
+
+    int worstState = AVIANT_INDICATOR_STATE_INACTIVE;
+    int16_t maxVoltage = INT16_MIN;
+
+    for (int i = 0; i < NUM_ROTORS_MAX; i++) {
+        if (!(mask & (1u << i))) {
+            continue;
+        }
+        worstState = std::max(worstState, (int)motors.mot_load_status[i]);
+        maxVoltage = std::max(maxVoltage, motors.mot_voltage_cv[i]);
+    }
+
+    setIndicatorColorOverride(fact, worstState);
+    fact.setRawValue(maxVoltage / 100.0);
 }
 
 void VehicleAviantFactGroup::handleMotorsMsg(Vehicle* vehicle, mavlink_message_t& message)
@@ -276,22 +285,8 @@ void VehicleAviantFactGroup::handleMotorsMsg(Vehicle* vehicle, mavlink_message_t
         _motVoltageFacts[i]->setRawValue(motors.mot_voltage_cv[i] / 100.0);
     }
 
-    // topMotorLoad: max voltage across upwards (top) motors, colored by worst state
-    if (_upwardsMotorsMask != 0) {
-        int worstState = AVIANT_INDICATOR_STATE_INACTIVE;
-        int16_t maxVoltage = INT16_MIN;
-
-        for (int i = 0; i < NUM_ROTORS_MAX; i++) {
-            if (!(_upwardsMotorsMask & (1u << i))) {
-                continue;
-            }
-            worstState = std::max(worstState, (int)motors.mot_load_status[i]);
-            maxVoltage = std::max(maxVoltage, motors.mot_voltage_cv[i]);
-        }
-
-        setIndicatorColorOverride(_topMotorLoadFact, worstState);
-        _topMotorLoadFact.setRawValue(maxVoltage / 100.0);
-    }
+    updateMotorLoadFact(motors, _topMotorsMask, _topMotorLoadFact);
+    updateMotorLoadFact(motors, _pusherMotorsMask, _pusherMotorLoadFact);
 
     setIndicatorColorOverride(_anomalousCurrentFact, motors.anomalous_current_status);
     _anomalousCurrentFact.setRawValue(motors.anomalous_current_ca / 100.0);
