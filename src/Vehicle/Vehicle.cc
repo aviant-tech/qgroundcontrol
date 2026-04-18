@@ -3457,7 +3457,24 @@ void Vehicle::_rebootCommandResultHandler(void* resultHandlerData, int /*compId*
 
 void Vehicle::rebootVehicle()
 {
-    sendMavCommandWithHandler(_rebootCommandResultHandler, this, _defaultComponentId, MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN, 1);
+    sendMavCommandWithHandler(
+        _rebootCommandResultHandler,
+        this,
+        _defaultComponentId,
+        MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN,
+        1,  // param1: reboot autopilot
+        0,  // param2: no onboard computer action
+        0,  // param3: no extra component action
+        0); // param4: no extra component id
+    sendMavCommandWithHandler(
+        nullptr, // no result handler callback
+        nullptr, // no result handler data
+        161, // parachute component id
+        MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN,
+        0,   // param1: no autopilot action
+        0,   // param2: no onboard computer action
+        1,   // param3: reboot extra component
+        161); // param4: extra component id (parachute)
 }
 
 void Vehicle::startCalibration(Vehicle::CalibrationType calType)
