@@ -439,6 +439,18 @@ FlightMap {
         }
     }
 
+    // Aviant (A41): append the distance from the active vehicle to the given coordinate to a label
+    function generateLabelTextWithDistance(defaultText, coord) {
+        if (!coord || !_activeVehicleCoordinate || !_activeVehicleCoordinate.isValid) {
+            return defaultText
+        }
+        const distance = _activeVehicleCoordinate.distanceTo(coord)
+        if (distance !== undefined) {
+            return defaultText + " (" + distance.toFixed(1) + "m)"
+        }
+        return defaultText
+    }
+
     // GoTo Location visuals
     MapQuickItem {
         id:             gotoLocationItem
@@ -447,9 +459,10 @@ FlightMap {
         anchorPoint.x:  sourceItem.anchorPointX
         anchorPoint.y:  sourceItem.anchorPointY
         sourceItem: MissionItemIndexLabel {
+            property string defaultText: gotoLocationItem.inGotoFlightMode ? qsTr("Going here", "Going to location waypoint") : qsTr("Go here", "Go to location waypoint")
             checked:    true
             index:      -1
-            label:      qsTr("Go here", "Go to location waypoint")
+            label:      _root.generateLabelTextWithDistance(defaultText, gotoLocationItem.coordinate)
         }
 
         property bool inGotoFlightMode: _activeVehicle ? _activeVehicle.flightMode === _activeVehicle.gotoFlightMode : false
@@ -679,7 +692,8 @@ FlightMap {
 
                     QGCButton {
                         Layout.fillWidth:   true
-                        text:               qsTr("Go to location")
+                        // Aviant (A41): show distance from vehicle to the clicked location
+                        text:               _root.generateLabelTextWithDistance(qsTr("Go to location"), mapClickCoord)
                         visible:            globals.guidedControllerFlyView.showGotoLocation
                         onClicked: {
                             mapClickDropPanel.close()

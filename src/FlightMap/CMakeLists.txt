@@ -31,6 +31,7 @@ qt_add_qml_module(FlightMapModule
         Widgets/QGCAttitudeWidget.qml
         Widgets/QGCCompassWidget.qml
         Widgets/QGCPitchIndicator.qml
+        Widgets/VehicleWarningSideBar.qml
         Widgets/VerticalCompassAttitude.qml
         FlightMap.qml
         MapScale.qml

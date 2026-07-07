@@ -205,7 +205,9 @@ QGCApplication::QGCApplication(int &argc, char *argv[], bool unitTesting, bool s
     setLanguage();
 
 #ifndef QGC_DAILY_BUILD
-    _checkForNewVersion();
+    // Aviant (A54/A46): outdated versions are handled in the multi-QGC setup, so we do not check
+    // for new versions nor show the "newer version available" warning.
+    // _checkForNewVersion();
 #endif
 }
 

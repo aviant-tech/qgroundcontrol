@@ -27,6 +27,7 @@ RowLayout {
     property var    _activeVehicle:       QGroundControl.multiVehicleManager.activeVehicle
     property bool   _multipleVehicles:    QGroundControl.multiVehicleManager.vehicles.count > 1
     property var    _vehicleModel:        [ ]
+    property var    _vehicleIds:          [ ]
 
     Connections {
         target:         QGroundControl.multiVehicleManager.vehicles
@@ -49,7 +50,7 @@ RowLayout {
         }
 
         QGCLabel {
-            text:               _activeVehicle ? qsTr("Vehicle") + " " + _activeVehicle.id : qsTr("N/A")
+            text:               _activeVehicle ? _activeVehicle.name : qsTr("N/A")
             font.pointSize:     ScreenTools.mediumFontPointSize
             Layout.alignment:   Qt.AlignCenter
 
@@ -78,9 +79,10 @@ RowLayout {
                             Layout.fillWidth:   true
 
                             onClicked: {
-                                var vehicleId = modelData.split(" ")[1]
-                                var vehicle = QGroundControl.multiVehicleManager.getVehicleById(vehicleId)
-                                QGroundControl.multiVehicleManager.activeVehicle = vehicle
+                                var vehicle = QGroundControl.multiVehicleManager.getVehicleById(_vehicleIds[index])
+                                if (vehicle) {
+                                    QGroundControl.multiVehicleManager.activeVehicle = vehicle
+                                }
                                 mainWindow.closeIndicatorDrawer()
                             }
                         }
@@ -107,12 +109,15 @@ RowLayout {
 
     function _updateVehicleModel() {
         var newModel = [ ]
+        var newIds = [ ]
         if (_multipleVehicles) {
             for (var i = 0; i < QGroundControl.multiVehicleManager.vehicles.count; i++) {
                 var vehicle = QGroundControl.multiVehicleManager.vehicles.get(i)
-                newModel.push(qsTr("Vehicle") + " " + vehicle.id)
+                newModel.push(vehicle.name)
+                newIds.push(vehicle.id)
             }
         }
         _vehicleModel = newModel
+        _vehicleIds = newIds
     }
 }

@@ -34,7 +34,7 @@ ToolIndicatorPage {
             spacing: ScreenTools.defaultFontPixelHeight / 2
 
             SettingsGroupLayout {
-                heading: qsTr("Vehicle GPS Status")
+                heading: qsTr("Vehicle GPS 1 Status")
                 visible: activeVehicle
 
                 LabelledLabel {

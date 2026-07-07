@@ -230,6 +230,34 @@ Item {
                 Layout.minimumWidth:    _mediumValueWidth
             }
         }
+
+        // Aviant (A43/A45): display the loaded mission file name in the plan-mode toolbar
+        GridLayout {
+            columns:                1
+            rowSpacing:             _rowSpacing
+            columnSpacing:          _labelToValueSpacing
+            Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+            visible:                !_controllerSyncInProgress && _controllerValid &&
+                                    _planMasterController.currentPlanFile && _planMasterController.currentPlanFile !== ""
+
+            QGCLabel {
+                text:           qsTr("Mission File")
+                font.pointSize: ScreenTools.smallFontPointSize
+            }
+
+            QGCLabel {
+                text:                   extractFileName(_controllerValid ? _planMasterController.currentPlanFile : "")
+                font.pointSize:         _dataFontSize
+                Layout.minimumWidth:    _mediumValueWidth
+
+                function extractFileName(fullPath) {
+                    const parts = fullPath.split('/');
+                    return parts.pop();
+                }
+            }
+
+            Item { width: 1; height: 1 }
+        }
     }
 }
 

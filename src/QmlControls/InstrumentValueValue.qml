@@ -16,7 +16,9 @@ import QGroundControl.Controls
 import QGroundControl.ScreenTools
 import QGroundControl.Palette
 
-ColumnLayout {
+// Aviant (A67): the range/limit colour is drawn as the cell background instead of colouring the
+// value text, so limit states are more visible on the editable telemetry bar.
+Item {
     property var    instrumentValueData:            null
     property bool   settingsUnlocked:               false
     property alias  contentWidth:                   label.contentWidth
@@ -28,22 +30,35 @@ ColumnLayout {
     property var    _rgFontSizeTightHeights:        [ _tightDefaultFontHeight * _rgFontSizeRatios[0] + 2, _tightDefaultFontHeight * _rgFontSizeRatios[1] + 2, _tightDefaultFontHeight * _rgFontSizeRatios[2] + 2, _tightDefaultFontHeight * _rgFontSizeRatios[3] + 2 ]
     property real   _tightHeight:                   _rgFontSizeTightHeights[instrumentValueData.factValueGrid.fontSize]
     property real   _fontSize:                      _rgFontSizes[instrumentValueData.factValueGrid.fontSize]
-    property real   _horizontalLabelSpacing:        ScreenTools.defaultFontPixelWidth
-    property real   _width:                         0
-    property real   _height:                        0
 
-    QGCLabel {
-        id:                 label
-        Layout.alignment:   Qt.AlignVCenter
-        font.pointSize:     _fontSize
-        color:              instrumentValueData.isValidColor(instrumentValueData.currentColor) ? instrumentValueData.currentColor : qgcPal.text
-        text:               valueText()
+    QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
 
-        function valueText() {
-            if (instrumentValueData.fact) {
-                return instrumentValueData.fact.enumOrValueString + (instrumentValueData.showUnits ? " " + instrumentValueData.fact.units : "")
-            } else {
-                return qsTr("--.--")
+    Layout.fillHeight:      true
+    Layout.fillWidth:       true
+    Layout.alignment:       Qt.AlignVCenter
+    Layout.preferredHeight: _tightHeight + ScreenTools.defaultFontPixelHeight
+
+    Rectangle {
+        anchors.fill:       parent
+        anchors.leftMargin: -ScreenTools.defaultFontPixelWidth
+        color:              instrumentValueData.isValidColor(instrumentValueData.currentColor) ? instrumentValueData.currentColor : "transparent"
+        opacity:            instrumentValueData.currentOpacity
+
+        QGCLabel {
+            id:                     label
+            anchors.fill:           parent
+            horizontalAlignment:    Text.AlignHCenter
+            verticalAlignment:      Text.AlignVCenter
+            font.pointSize:         _fontSize
+            color:                  qgcPal.text
+            text:                   valueText()
+
+            function valueText() {
+                if (instrumentValueData.fact) {
+                    return instrumentValueData.fact.enumOrValueString + (instrumentValueData.showUnits ? " " + instrumentValueData.fact.units : "")
+                } else {
+                    return qsTr("--.--")
+                }
             }
         }
     }

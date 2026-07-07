@@ -4337,11 +4337,23 @@ void Vehicle::_textMessageReceived(MAV_COMPONENT componentid, MAV_SEVERITY sever
     m_statusTextHandler->handleHTMLEscapedTextMessage(componentid, severity, text.toHtmlEscaped(), description);
 }
 
+QString Vehicle::name() const
+{
+    // Aviant (A36): deduce name from id for now, until we can receive more complex information from the vehicle
+    return QString("%1%2").arg(_id > 199 ? "TEST" : _id > 99 ? "NX" : "NT").arg(_id % 100, 2, 10, QLatin1Char('0'));
+}
+
 void Vehicle::_errorMessageReceived(QString message)
 {
-    if (_isActiveVehicle) {
-        qgcApp()->showCriticalVehicleMessage(message);
+    if (!_isActiveVehicle) {
+        return;
     }
+    // Aviant (A44): PreArm messages are handled by Vehicle and shown in Map
+    if (message.startsWith(QStringLiteral("PreArm")) || message.startsWith(QStringLiteral("preflight"), Qt::CaseInsensitive)) {
+        return;
+    }
+    // Aviant (A44): route critical messages to the fly-view warning sidebar instead of the modal popup
+    emit newCriticalVehicleMessage(message);
 }
 
 /*---------------------------------------------------------------------------*/

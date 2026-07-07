@@ -202,6 +202,19 @@ Item {
         z:                  QGroundControl.zOrderTopMost
     }
 
+    // Aviant (A44/A49): dismissible critical-message sidebar, anchored bottom-left above the tool strip area
+    VehicleWarningSideBar {
+        id:                     vehicleWarningSideBar
+        anchors.margins:        _toolsMargin
+        anchors.left:           parent.left
+        anchors.bottom:         parent.bottom
+        anchors.bottomMargin:   _toolsMargin * 4
+        z:                      QGroundControl.zOrderWidgets
+        minWidth:               _rightPanelWidth
+        maxWidth:               _rightPanelWidth * 2
+        availableHeight:        parent.height - (toolStrip.height + ScreenTools.defaultFontPixelHeight)
+    }
+
     MapScale {
         id:                 mapScale
         anchors.margins:    _toolsMargin

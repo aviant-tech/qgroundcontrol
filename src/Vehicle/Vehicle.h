@@ -135,6 +135,7 @@ public:
     Q_ENUM(CheckList)
 
     Q_PROPERTY(int                  id                          READ id                                                             CONSTANT)
+    Q_PROPERTY(QString              name                        READ name                                                           CONSTANT)
     Q_PROPERTY(AutoPilotPlugin*     autopilotPlugin             MEMBER _autopilotPlugin                                             CONSTANT)
     Q_PROPERTY(QGeoCoordinate       coordinate                  READ coordinate                                                     NOTIFY coordinateChanged)
     Q_PROPERTY(QGeoCoordinate       homePosition                READ homePosition                                                   NOTIFY homePositionChanged)
@@ -451,6 +452,8 @@ public:
 
     // Property accesors
     int id() const{ return _id; }
+    // Aviant (A36): human-readable drone name derived from the MAVLink system id.
+    QString name() const;
     int compId() const{ return _compID; }
     MAV_AUTOPILOT firmwareType() const { return _firmwareType; }
     MAV_TYPE vehicleType() const { return _vehicleType; }
@@ -1405,6 +1408,8 @@ public:
 
 signals:
     void textMessageReceived(int sysid, int componentid, int severity, QString text, QString description);
+    // Aviant (A44): a new critical vehicle message that should be shown in the fly-view warning sidebar
+    void newCriticalVehicleMessage(QString message);
 
     void messagesReceivedChanged();
     void messagesSentChanged();
