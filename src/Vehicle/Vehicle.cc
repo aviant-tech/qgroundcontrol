@@ -113,6 +113,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _escStatusFactGroup           (this)
     , _estimatorStatusFactGroup     (this)
     , _hygrometerFactGroup          (this)
+    , _aviantFactGroup              (this)
     , _generatorFactGroup           (this)
     , _efiFactGroup                 (this)
     , _rpmFactGroup                 (this)
@@ -334,6 +335,7 @@ void Vehicle::_commonInit()
     _addFactGroup(&_escStatusFactGroup,         _escStatusFactGroupName);
     _addFactGroup(&_estimatorStatusFactGroup,   _estimatorStatusFactGroupName);
     _addFactGroup(&_hygrometerFactGroup,        _hygrometerFactGroupName);
+    _addFactGroup(&_aviantFactGroup,            _aviantFactGroupName);
     _addFactGroup(&_generatorFactGroup,         _generatorFactGroupName);
     _addFactGroup(&_efiFactGroup,               _efiFactGroupName);
     _addFactGroup(&_rpmFactGroup,               _rpmFactGroupName);
@@ -3950,10 +3952,10 @@ void Vehicle::sendGripperAction(QGCMAVLink::GRIPPER_OPTIONS gripperOption)
 {
     switch(gripperOption) {
         case QGCMAVLink::Gripper_release:
-            setGripperAction(GRIPPER_ACTION_RELEASE);
+            setGripperAction(GRIPPER_ACTION_OPEN); // MAVLink renamed GRIPPER_ACTION_RELEASE(0) -> GRIPPER_ACTION_OPEN(0)
             break;
         case QGCMAVLink::Gripper_grab:
-            setGripperAction(GRIPPER_ACTION_GRAB);
+            setGripperAction(GRIPPER_ACTION_CLOSE); // MAVLink renamed GRIPPER_ACTION_GRAB(1) -> GRIPPER_ACTION_CLOSE(1)
             break;
         case QGCMAVLink::Invalid_option:
             qDebug("unknown function");

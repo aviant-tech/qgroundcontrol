@@ -150,8 +150,17 @@ void FactGroup::_addFactGroup(FactGroup *factGroup, const QString &name)
 
 void FactGroup::_updateAllValues()
 {
+    // Aviant telemetry timeout (A86): telemetry facts that have not refreshed within this window are
+    // flagged as timed out (display "TOUT" + indicator color). In 4.2 the window was the user setting
+    // AviantSettings.factTimeoutSecs (default 3s); that settings group is not yet ported to v5, so the
+    // default is applied here as a constant. Set to <= 0 to disable.
+    constexpr double kFactTimeoutSecs = 3.0;
+
     for (Fact *fact: _nameToFactMap) {
         fact->sendDeferredValueChangedSignal();
+        if (kFactTimeoutSecs > 0) {
+            fact->checkTimeout(kFactTimeoutSecs);
+        }
     }
 }
 

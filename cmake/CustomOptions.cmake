@@ -41,8 +41,12 @@ option(QGC_ENABLE_GST_VIDEOSTREAMING "Enable GStreamer Video Backend" ON)
 option(QGC_ENABLE_QT_VIDEOSTREAMING "Enable QtMultimedia Video Backend" OFF) # Qt6Multimedia_FOUND
 
 # MAVLink
-set(QGC_MAVLINK_GIT_REPO "https://github.com/mavlink/c_library_v2.git" CACHE STRING "URL to MAVLink Git Repo")
-set(QGC_MAVLINK_GIT_TAG "19f9955598af9a9181064619bd2e3c04bd2d848a" CACHE STRING "Tag of MAVLink Git Repo")
+# Aviant fork of c_library_v2. Adds the generated `aviant` dialect (custom messages 59000-59700:
+# AVIANT_HEARTBEAT/NAV/ATS_STATUS/INDICATOR_* etc.) on top of upstream common/development. The fork's
+# generated all/all.h includes ../aviant/aviant.h, so the standard `all` dialect QGC compiles against
+# (see src/MAVLink/CMakeLists.txt) exposes the AVIANT_* message ids/structs with no include changes.
+set(QGC_MAVLINK_GIT_REPO "https://github.com/aviant-tech/c_library_v2.git" CACHE STRING "URL to MAVLink Git Repo")
+set(QGC_MAVLINK_GIT_TAG "19c47b3f5af6058ec173e0c337c956e0782061bb" CACHE STRING "Tag of MAVLink Git Repo")
 
 # APM
 option(QGC_DISABLE_APM_MAVLINK "Disable APM Dialect" OFF)

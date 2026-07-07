@@ -1,5 +1,7 @@
 target_sources(${CMAKE_PROJECT_NAME}
     PRIVATE
+        VehicleAviantFactGroup.cc
+        VehicleAviantFactGroup.h
         TerrainFactGroup.cc
         TerrainFactGroup.h
         VehicleBatteryFactGroup.cc

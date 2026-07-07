@@ -74,6 +74,7 @@ void InstrumentValueData::_setFactWorker(void)
 {
     if (_fact) {
         disconnect(_fact, &Fact::rawValueChanged, this, &InstrumentValueData::_updateRanges);
+        disconnect(_fact, &Fact::timedOutChanged, this, &InstrumentValueData::_updateRanges);
         _fact = nullptr;
     }
 
@@ -97,6 +98,7 @@ void InstrumentValueData::_setFactWorker(void)
     if (_fact) {
         _factName = nonEmptyFactName;
         connect(_fact, &Fact::rawValueChanged, this, &InstrumentValueData::_updateRanges);
+        connect(_fact, &Fact::timedOutChanged, this, &InstrumentValueData::_updateRanges);
     }
 
     emit factValueNamesChanged  ();
@@ -265,13 +267,22 @@ void InstrumentValueData::_updateColor(void)
 {
     QColor newColor;
 
-    int rangeIndex = -1;
+    if (_fact && _fact->timedOut()) {
+        // Aviant telemetry timeout (A86): timed-out facts use their indicator color, defaulting to orange.
+        const QColor timeoutColor = _fact->timeoutIndicatorColor();
+        newColor = timeoutColor.isValid() ? timeoutColor : QColor::fromRgb(255, 170, 0); // Orange default
+    } else if (_fact && _fact->overrideColorEnabled()) {
+        // Aviant override color: a decoder has forced this fact's color (e.g. VehicleAviantFactGroup).
+        newColor = _fact->overrideColor();
+    } else {
+        int rangeIndex = -1;
 
-    if (_rangeType == ColorRange && _fact) {
-        rangeIndex =_currentRangeIndex(_fact->rawValue().toDouble());
-    }
-    if (rangeIndex != -1) {
-        newColor = _rangeColors[rangeIndex].value<QColor>();
+        if (_rangeType == ColorRange && _fact) {
+            rangeIndex =_currentRangeIndex(_fact->rawValue().toDouble());
+        }
+        if (rangeIndex != -1) {
+            newColor = _rangeColors[rangeIndex].value<QColor>();
+        }
     }
 
     if (newColor != _currentColor) {

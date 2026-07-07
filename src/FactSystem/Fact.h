@@ -9,10 +9,12 @@
 
 #pragma once
 
+#include <QtCore/QElapsedTimer>
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QVariant>
+#include <QtGui/QColor>
 
 #include "FactMetaData.h"
 
@@ -62,6 +64,9 @@ class Fact : public QObject
     Q_PROPERTY(bool         readOnly                READ readOnly                                               CONSTANT)
     Q_PROPERTY(bool         writeOnly               READ writeOnly                                              CONSTANT)
     Q_PROPERTY(bool         volatileValue           READ volatileValue                                          CONSTANT)
+    Q_PROPERTY(QColor       overrideColor           READ overrideColor                                          CONSTANT)
+    Q_PROPERTY(bool         overrideColorEnabled    READ overrideColorEnabled                                   CONSTANT)
+    Q_PROPERTY(bool         timedOut                READ timedOut                       NOTIFY timedOutChanged)
 
 public:
     explicit Fact(QObject *parent = nullptr);
@@ -128,6 +133,21 @@ public:
     bool writeOnly() const;
     bool volatileValue() const;
 
+    // Aviant: allow a decoder (e.g. VehicleAviantFactGroup) to force the display color of a fact
+    // independently of any range-based coloring. Consumed by InstrumentValueData.
+    QColor overrideColor() const { return _overrideColor; }
+    bool overrideColorEnabled() const { return _overrideColorEnabled; }
+    void setOverrideColor(const QColor &color);
+    void unsetOverrideColor();
+
+    // Aviant telemetry timeout (A86): a fact is "timed out" when its value has not been refreshed
+    // within a configurable window. Timed-out facts display "TOUT" and an optional indicator color.
+    bool timedOut() const { return _timedOut; }
+    void checkTimeout(double timeoutSecs);
+    QColor timeoutIndicatorColor() const { return _timeoutIndicatorColor; }
+    void setTimeoutIndicatorColor(const QColor &color);
+    void unsetTimeoutIndicatorColor();
+
     Q_INVOKABLE FactValueSliderListModel *valueSliderModel();
 
     /// Returns the values as a string with full 18 digit precision if float/double.
@@ -182,6 +202,9 @@ signals:
     /// This signal is meant for use by Fact container implementations. Used to send changed values to vehicle.
     void containerRawValueChanged(const QVariant &value);
 
+    /// Aviant telemetry timeout: signalled when the timed-out state of the fact changes.
+    void timedOutChanged(bool timedOut);
+
 protected:
     QString _variantToString(const QVariant &variant, int decimalPlaces) const;
     void _sendValueChangedSignal(const QVariant &value);
@@ -194,6 +217,13 @@ protected:
     bool _sendValueChangedSignals = true;
     bool _deferredValueChangeSignal = false;
     FactValueSliderListModel *_valueSliderModel = nullptr;
+
+    // Aviant override color / telemetry timeout state
+    bool _overrideColorEnabled = false;
+    QColor _overrideColor;
+    QColor _timeoutIndicatorColor;
+    QElapsedTimer _timeSinceLastUpdate;
+    bool _timedOut = false;
 
     static constexpr const char *kMissingMetadata = "Meta data pointer missing";
 

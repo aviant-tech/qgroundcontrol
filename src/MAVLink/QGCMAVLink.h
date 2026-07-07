@@ -51,6 +51,13 @@ public:
 
     static constexpr const uint8_t        maxRcChannels           = 18; // mavlink_rc_channels_t->chancount
 
+    // Aviant custom component IDs (foundation for the winch widget (PB2) and parachute/ATS UI (PB3)).
+    // Winch: MAV_COMP_ID_USER18(42) was the winch component in firmware 1.13; MAV_COMP_ID_WINCH(169)
+    // exists from 1.15. Commands are sent to both for compatibility. Parachute controller is 161.
+    static constexpr const uint8_t        compIdAviantWinchLegacy = 42;  // MAV_COMP_ID_USER18
+    static constexpr const uint8_t        compIdAviantWinch       = 169; // MAV_COMP_ID_WINCH
+    static constexpr const uint8_t        compIdAviantParachute   = 161;
+
     static bool                     isPX4FirmwareClass          (MAV_AUTOPILOT autopilot) { return autopilot == MAV_AUTOPILOT_PX4; }
     static bool                     isArduPilotFirmwareClass    (MAV_AUTOPILOT autopilot) { return autopilot == MAV_AUTOPILOT_ARDUPILOTMEGA; }
     static bool                     isGenericFirmwareClass      (MAV_AUTOPILOT autopilot) { return !isPX4FirmwareClass(autopilot) && ! isArduPilotFirmwareClass(autopilot); }
@@ -134,8 +141,10 @@ public:
     Q_ENUM(MavlinkSysStatus)
 
     enum GRIPPER_OPTIONS {
-        Gripper_release = GRIPPER_ACTION_RELEASE,
-        Gripper_grab    = GRIPPER_ACTION_GRAB,
+        // MAVLink renamed GRIPPER_ACTION_RELEASE/GRAB to GRIPPER_ACTION_OPEN/CLOSE in the reference
+        // pulled by the Aviant c_library_v2 fork (A87/A88 mavlink update).
+        Gripper_release = GRIPPER_ACTION_OPEN,
+        Gripper_grab    = GRIPPER_ACTION_CLOSE,
         Invalid_option  = GRIPPER_ACTIONS_ENUM_END,
     };
     Q_ENUM(GRIPPER_OPTIONS)

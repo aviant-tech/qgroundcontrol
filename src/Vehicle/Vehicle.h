@@ -33,6 +33,7 @@
 #include "VehicleEFIFactGroup.h"
 #include "VehicleEscStatusFactGroup.h"
 #include "VehicleEstimatorStatusFactGroup.h"
+#include "VehicleAviantFactGroup.h"
 #include "VehicleGeneratorFactGroup.h"
 #include "VehicleGPS2FactGroup.h"
 #include "VehicleGPSFactGroup.h"
@@ -267,6 +268,7 @@ public:
     Q_PROPERTY(FactGroup*           localPosition   READ localPositionFactGroup     CONSTANT)
     Q_PROPERTY(FactGroup*           localPositionSetpoint READ localPositionSetpointFactGroup CONSTANT)
     Q_PROPERTY(FactGroup*           hygrometer      READ hygrometerFactGroup        CONSTANT)
+    Q_PROPERTY(FactGroup*           aviant          READ aviantFactGroup            CONSTANT)
     Q_PROPERTY(FactGroup*           generator       READ generatorFactGroup         CONSTANT)
     Q_PROPERTY(FactGroup*           efi             READ efiFactGroup               CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  batteries       READ batteries                  CONSTANT)
@@ -610,6 +612,7 @@ public:
     FactGroup* estimatorStatusFactGroup     () { return &_estimatorStatusFactGroup; }
     FactGroup* terrainFactGroup             () { return &_terrainFactGroup; }
     FactGroup* hygrometerFactGroup          () { return &_hygrometerFactGroup; }
+    FactGroup* aviantFactGroup              () { return &_aviantFactGroup; }
     FactGroup* generatorFactGroup           () { return &_generatorFactGroup; }
     FactGroup* efiFactGroup                 () { return &_efiFactGroup; }
     FactGroup* rpmFactGroup                 () { return &_rpmFactGroup; }
@@ -1251,6 +1254,7 @@ private:
     const QString _estimatorStatusFactGroupName =    QStringLiteral("estimatorStatus");
     const QString _terrainFactGroupName =            QStringLiteral("terrain");
     const QString _hygrometerFactGroupName =         QStringLiteral("hygrometer");
+    const QString _aviantFactGroupName =             QStringLiteral("aviant");
     const QString _generatorFactGroupName =          QStringLiteral("generator");
     const QString _efiFactGroupName =                QStringLiteral("efi");
     const QString _rpmFactGroupName =                QStringLiteral("rpm");
@@ -1269,6 +1273,7 @@ private:
     VehicleEscStatusFactGroup       _escStatusFactGroup;
     VehicleEstimatorStatusFactGroup _estimatorStatusFactGroup;
     VehicleHygrometerFactGroup      _hygrometerFactGroup;
+    VehicleAviantFactGroup          _aviantFactGroup;
     VehicleGeneratorFactGroup       _generatorFactGroup;
     VehicleEFIFactGroup             _efiFactGroup;
     VehicleRPMFactGroup             _rpmFactGroup;
