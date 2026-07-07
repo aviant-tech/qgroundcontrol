@@ -82,6 +82,8 @@ Item {
     readonly property string rtlMessage:                        qsTr("Return to the launch position of the vehicle.")
     readonly property string missionRtlMessage:                 qsTr("Return following the mission path.")
     readonly property string changeAltMessage:                  qsTr("Change the altitude of the vehicle up or down.")
+    readonly property string stepUpAltMessage:                  qsTr("Adjust the altitude of the vehicle UP")
+    readonly property string stepDownAltMessage:                qsTr("Adjust the altitude of the vehicle DOWN")
     readonly property string changeLoiterRadiusMessage:         qsTr("Change the forward flight loiter radius.")
     readonly property string changeCruiseSpeedMessage:          qsTr("Change the maximum horizontal cruise speed.")
     readonly property string changeAirspeedMessage:             qsTr("Change the equivalent airspeed setpoint.")
@@ -132,6 +134,7 @@ Item {
     readonly property int actionMVDisarm:                   32
     readonly property int actionChangeLoiterRadius:         33
     readonly property int actionMissionRTL:                 34
+    readonly property int actionStepAlt:                    35
 
 
 
@@ -518,6 +521,11 @@ Item {
             confirmDialog.hideTrigger = Qt.binding(function() { return !showChangeAlt })
             guidedValueSlider.visible = true
             break;
+        case actionStepAlt:
+            confirmDialog.title = changeAltTitle
+            confirmDialog.message = actionData > 0 ? stepUpAltMessage : stepDownAltMessage
+            confirmDialog.hideTrigger = Qt.binding(function() { return !showChangeAlt })
+            break;
         case actionChangeLoiterRadius:
             confirmDialog.title = changeLoiterRadiusTitle
             confirmDialog.message = changeLoiterRadiusMessage
@@ -676,6 +684,10 @@ Item {
             var valueInMeters = _unitsConversion.appSettingsVerticalDistanceUnitsToMeters(sliderOutputValue)
             var altitudeChangeInMeters = valueInMeters - _activeVehicle.altitudeRelative.rawValue
             _activeVehicle.guidedModeChangeAltitude(altitudeChangeInMeters, false /* pauseVehicle */)
+            break
+        case actionStepAlt:
+            // actionData is the altitude delta in meters (positive = up, negative = down)
+            _activeVehicle.guidedModeChangeAltitude(actionData, false /* pauseVehicle */)
             break
         case actionChangeLoiterRadius:
             _activeVehicle.guidedModeGotoLocation(

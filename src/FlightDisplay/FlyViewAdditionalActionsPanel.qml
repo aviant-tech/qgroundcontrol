@@ -32,7 +32,7 @@ ColumnLayout {
 
             onClicked: {
                 dropPanel.hide()
-                _guidedController.confirmAction(modelData.action)
+                _guidedController.confirmAction(modelData.action, modelData.actionData)
             }
         }
     }

@@ -47,6 +47,8 @@ FlightMap {
     property real   _toolsMargin:               ScreenTools.defaultFontPixelWidth * 0.75
     property var    _flyViewSettings:           QGroundControl.settingsManager.flyViewSettings
     property bool   _keepMapCenteredOnVehicle:  _flyViewSettings.keepMapCenteredOnVehicle.rawValue
+    property bool   _showProximityRadar:        _flyViewSettings.showProximityRadar.rawValue
+    property bool   _showPositionSetpointLine:  _flyViewSettings.showPositionSetpointLine.rawValue
 
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
@@ -290,7 +292,18 @@ FlightMap {
             coordinate:     object.coordinate
             map:            _root
             z:              QGroundControl.zOrderVehicles
+            enabled:        _showProximityRadar
         }
+    }
+
+    // Line from vehicle to the current position setpoint (A17)
+    MapPolyline {
+        id:             positionSetpointLine
+        visible:        _showPositionSetpointLine && _activeVehicle && _activeVehicle.positionSetpoint.isValid
+        path:           _activeVehicle && _activeVehicle.positionSetpoint.isValid ? [_activeVehicle.coordinate, _activeVehicle.positionSetpoint ] : []
+        z:              QGroundControl.zOrderMapItems + 1
+        line.color:     "white"
+        line.width:     1
     }
     // Add ADSB vehicles to the map
     MapItemView {

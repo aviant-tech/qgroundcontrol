@@ -21,6 +21,13 @@ public:
 
     DEFINE_SETTINGFACT(guidedMinimumAltitude)
     DEFINE_SETTINGFACT(guidedMaximumAltitude)
+    DEFINE_SETTINGFACT(guidedStepUpAltitude)
+    DEFINE_SETTINGFACT(guidedStepDownAltitude)
+    DEFINE_SETTINGFACT(showProximityRadar)
+    DEFINE_SETTINGFACT(showPositionSetpointLine)
+    DEFINE_SETTINGFACT(showAltitudeWidget)
+    DEFINE_SETTINGFACT(minVisibleRangeInMeters)
+    DEFINE_SETTINGFACT(metersBetweenLines)
     DEFINE_SETTINGFACT(showLogReplayStatusBar)
     DEFINE_SETTINGFACT(showAdditionalIndicatorsCompass)
     DEFINE_SETTINGFACT(lockNoseUpCompass)

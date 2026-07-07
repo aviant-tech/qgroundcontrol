@@ -47,6 +47,8 @@ Item {
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
     property rect   _centerViewport:        Qt.rect(0, 0, width, height)
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
+    property var    _flyViewSettings:       QGroundControl.settingsManager.flyViewSettings
+    property bool   _showAltitudeWidget:    _activeVehicle != null && _flyViewSettings.showAltitudeWidget.rawValue
     property alias  _gripperMenu:           gripperOptions
     property real   _layoutMargin:          ScreenTools.defaultFontPixelWidth * 0.75
     property bool   _layoutSpacing:         ScreenTools.defaultFontPixelWidth
@@ -107,6 +109,20 @@ Item {
         property real bottomEdgeRightInset:     height + _layoutMargin
         property real bottomEdgeCenterInset:    bottomEdgeRightInset
         property real rightEdgeBottomInset:     width + _layoutMargin
+    }
+
+    // A68: Altitude widget showing vehicle altitude relative to the current waypoint
+    AltitudeWidget {
+        id:                         altitudeWidget
+        anchors.margins:            _layoutMargin
+        anchors.top:                topRightPanel.bottom
+        anchors.right:              parent.right
+        width:                      _rightPanelWidth / 2
+        visible:                    _showAltitudeWidget
+        missionController:          _missionController
+        availableHeight:            parent.height - (topRightPanel.height + ScreenTools.defaultFontPixelHeight * 4)
+        minVisibleRangeInMeters:    _flyViewSettings.minVisibleRangeInMeters.rawValue
+        metersBetweenLines:         _flyViewSettings.metersBetweenLines.rawValue
     }
 
     FlyViewMissionCompleteDialog {

@@ -98,6 +98,45 @@ SettingsPage {
 
         FactCheckBoxSlider {
             Layout.fillWidth:   true
+            text:               qsTr("Show proximity sensor radar")
+            fact:               _showProximityRadar
+            visible:            _showProximityRadar.visible
+            property Fact _showProximityRadar: _flyViewSettings.showProximityRadar
+        }
+
+        FactCheckBoxSlider {
+            Layout.fillWidth:   true
+            text:               qsTr("Show line from vehicle to position setpoint")
+            fact:               _showPositionSetpointLine
+            visible:            _showPositionSetpointLine.visible
+            property Fact _showPositionSetpointLine: _flyViewSettings.showPositionSetpointLine
+        }
+
+        FactCheckBoxSlider {
+            id:                 showAltitudeWidgetCheckBox
+            Layout.fillWidth:   true
+            text:               qsTr("Show altitude widget")
+            fact:               _showAltitudeWidget
+            visible:            _showAltitudeWidget.visible
+            property Fact _showAltitudeWidget: _flyViewSettings.showAltitudeWidget
+        }
+
+        LabelledFactTextField {
+            Layout.fillWidth:   true
+            label:              _flyViewSettings.minVisibleRangeInMeters.shortDescription
+            fact:               _flyViewSettings.minVisibleRangeInMeters
+            visible:            showAltitudeWidgetCheckBox.checked && _flyViewSettings.minVisibleRangeInMeters.visible
+        }
+
+        LabelledFactTextField {
+            Layout.fillWidth:   true
+            label:              _flyViewSettings.metersBetweenLines.shortDescription
+            fact:               _flyViewSettings.metersBetweenLines
+            visible:            showAltitudeWidgetCheckBox.checked && _flyViewSettings.metersBetweenLines.visible
+        }
+
+        FactCheckBoxSlider {
+            Layout.fillWidth:   true
             text:               qsTr("Show simple camera controls (DIGICAM_CONTROL)")
             visible:            _showDumbCameraControl.visible
             fact:               _showDumbCameraControl
@@ -132,6 +171,20 @@ SettingsPage {
             Layout.fillWidth:   true
             label:              qsTr("Maximum Altitude")
             fact:               _guidedMaximumAltitude
+            visible:            fact.visible
+        }
+
+        LabelledFactTextField {
+            Layout.fillWidth:   true
+            label:              qsTr("Step up altitude")
+            fact:               _flyViewSettings.guidedStepUpAltitude
+            visible:            fact.visible
+        }
+
+        LabelledFactTextField {
+            Layout.fillWidth:   true
+            label:              qsTr("Step down altitude")
+            fact:               _flyViewSettings.guidedStepDownAltitude
             visible:            fact.visible
         }
 
