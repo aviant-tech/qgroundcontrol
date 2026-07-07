@@ -20,7 +20,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -y --quiet install \
     gnupg \
     gnupg2 \
     libfuse2 \
-    libfuse3-3 \
+    libfuse3-4 \
     libtool \
     locales \
     make \
@@ -74,7 +74,6 @@ DEBIAN_FRONTEND=noninteractive apt-get -y --quiet install \
     libgstreamer1.0-dev \
     libgstreamer-plugins-bad1.0-dev \
     libgstreamer-plugins-base1.0-dev \
-    libgstreamer-plugins-good1.0-dev \
     libgstreamer-gl1.0-0 \
     gstreamer1.0-plugins-bad \
     gstreamer1.0-plugins-base \
@@ -85,6 +84,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -y --quiet install \
     gstreamer1.0-libav \
     gstreamer1.0-rtsp \
     gstreamer1.0-x
+    #libgstreamer-plugins-good1.0-dev \
 
 if apt-cache show gstreamer1.0-qt6 >/dev/null 2>&1 && apt-cache show gstreamer1.0-qt6 2>/dev/null | grep -q "^Package: gstreamer1.0-qt6"; then
     DEBIAN_FRONTEND=noninteractive apt-get install -y --quiet gstreamer1.0-qt6
