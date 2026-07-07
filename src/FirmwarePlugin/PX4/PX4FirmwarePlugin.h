@@ -36,6 +36,7 @@ public:
     QString             pauseFlightMode                 (void) const override;
     QString             missionFlightMode               (void) const override;
     QString             rtlFlightMode                   (void) const override;
+    QString             missionRtlFlightMode            (void) const override;
     QString             landFlightMode                  (void) const override;
     QString             takeControlFlightMode           (void) const override;
     QString             gotoFlightMode                  (void) const override;
@@ -44,6 +45,7 @@ public:
     QString             stabilizedFlightMode            (void) const override;
     void                pauseVehicle                    (Vehicle* vehicle) const override;
     void                guidedModeRTL                   (Vehicle* vehicle, bool smartRTL) const override;
+    void                guidedModeMissionRTL            (Vehicle* vehicle) const override;
     void                guidedModeLand                  (Vehicle* vehicle) const override;
     void                guidedModeTakeoff               (Vehicle* vehicle, double takeoffAltRel) const override;
     double              maximumHorizontalSpeedMultirotor(Vehicle* vehicle) const override;

@@ -51,6 +51,7 @@ PX4FirmwarePlugin::PX4FirmwarePlugin()
     const QString holdFlightModeName = tr("Hold");
     const QString missionFlightModeName = tr("Mission");
     const QString rtlFlightModeName = tr("Return");
+    const QString missionRtlFlightModeName = tr("MissionRTL");
     const QString landingFlightModeName = tr("Land");
     const QString preclandFlightModeName = tr("Precision Land");
     const QString rtgsFlightModeName = tr("Return to Groundstation");
@@ -71,6 +72,7 @@ PX4FirmwarePlugin::PX4FirmwarePlugin()
         { PX4CustomMode::AUTO_LOITER,   holdFlightModeName        },
         { PX4CustomMode::AUTO_MISSION,  missionFlightModeName     },
         { PX4CustomMode::AUTO_RTL,      rtlFlightModeName         },
+        { PX4CustomMode::AUTO_MISSION_RTL, missionRtlFlightModeName },
         { PX4CustomMode::AUTO_LAND,     landingFlightModeName     },
         { PX4CustomMode::AUTO_PRECLAND, preclandFlightModeName    },
         { PX4CustomMode::AUTO_READY,    readyFlightModeName       },
@@ -92,6 +94,7 @@ PX4FirmwarePlugin::PX4FirmwarePlugin()
         { holdFlightModeName,       PX4CustomMode::AUTO_LOITER,     true,   true },
         { missionFlightModeName,    PX4CustomMode::AUTO_MISSION,    true,   true },
         { rtlFlightModeName,        PX4CustomMode::AUTO_RTL,        true,   true },
+        { missionRtlFlightModeName, PX4CustomMode::AUTO_MISSION_RTL,true,   true },
         { landingFlightModeName,    PX4CustomMode::AUTO_LAND,       false,  true },
         { preclandFlightModeName,   PX4CustomMode::AUTO_PRECLAND,   true,   true },
         { readyFlightModeName,      PX4CustomMode::AUTO_READY,      false,  false},
@@ -310,6 +313,10 @@ void PX4FirmwarePlugin::guidedModeRTL(Vehicle* vehicle, bool smartRTL) const
 {
     Q_UNUSED(smartRTL);
     _setFlightModeAndValidate(vehicle, rtlFlightMode());
+}
+void PX4FirmwarePlugin::guidedModeMissionRTL(Vehicle* vehicle) const
+{
+    _setFlightModeAndValidate(vehicle, missionRtlFlightMode());
 }
 
 void PX4FirmwarePlugin::guidedModeLand(Vehicle* vehicle) const
@@ -619,6 +626,10 @@ QString PX4FirmwarePlugin::missionFlightMode() const
 QString PX4FirmwarePlugin::rtlFlightMode() const
 {
     return _modeEnumToString.value(PX4CustomMode::AUTO_RTL);
+}
+QString PX4FirmwarePlugin::missionRtlFlightMode() const
+{
+    return _modeEnumToString.value(PX4CustomMode::AUTO_MISSION_RTL);
 }
 
 QString PX4FirmwarePlugin::landFlightMode() const

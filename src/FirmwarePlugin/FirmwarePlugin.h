@@ -141,6 +141,9 @@ public:
     /// Returns the flight mode for RTL
     virtual QString rtlFlightMode() const { return QString(); }
 
+    /// Returns the flight mode for Mission RTL (return following the mission path). Aviant custom.
+    virtual QString missionRtlFlightMode() const { return QString(); }
+
     /// Returns the flight mode for Smart RTL
     virtual QString smartRTLFlightMode() const { return QString(); }
 
@@ -179,6 +182,9 @@ public:
 
     /// Command vehicle to return to launch
     virtual void guidedModeRTL(Vehicle *vehicle, bool smartRTL) const;
+
+    /// Command vehicle to return following the mission path (Aviant custom Mission RTL mode)
+    virtual void guidedModeMissionRTL(Vehicle *vehicle) const {}
 
     /// Command vehicle to land at current location
     virtual void guidedModeLand(Vehicle *vehicle) const;
