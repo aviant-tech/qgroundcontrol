@@ -1802,18 +1802,54 @@ void Vehicle::_missionManagerError(int errorCode, const QString& errorMsg)
 {
     Q_UNUSED(errorCode);
     qgcApp()->showAppMessage(tr("Mission transfer failed. Error: %1").arg(errorMsg));
+    if (_missionManagerErrorMsg != errorMsg) {
+        _missionManagerErrorMsg = errorMsg;
+        emit missionManagerErrorChanged();
+    }
+}
+
+void Vehicle::clearMissionManagerError()
+{
+    if (!_missionManagerErrorMsg.isEmpty()) {
+        _missionManagerErrorMsg.clear();
+        emit missionManagerErrorChanged();
+    }
 }
 
 void Vehicle::_geoFenceManagerError(int errorCode, const QString& errorMsg)
 {
     Q_UNUSED(errorCode);
     qgcApp()->showAppMessage(tr("GeoFence transfer failed. Error: %1").arg(errorMsg));
+    if (_geoFenceManagerErrorMsg != errorMsg) {
+        _geoFenceManagerErrorMsg = errorMsg;
+        emit geoFenceManagerErrorChanged();
+    }
+}
+
+void Vehicle::clearGeoFenceManagerError()
+{
+    if (!_geoFenceManagerErrorMsg.isEmpty()) {
+        _geoFenceManagerErrorMsg.clear();
+        emit geoFenceManagerErrorChanged();
+    }
 }
 
 void Vehicle::_rallyPointManagerError(int errorCode, const QString& errorMsg)
 {
     Q_UNUSED(errorCode);
     qgcApp()->showAppMessage(tr("Rally Point transfer failed. Error: %1").arg(errorMsg));
+    if (_rallyPointManagerErrorMsg != errorMsg) {
+        _rallyPointManagerErrorMsg = errorMsg;
+        emit rallyPointManagerErrorChanged();
+    }
+}
+
+void Vehicle::clearRallyPointManagerError()
+{
+    if (!_rallyPointManagerErrorMsg.isEmpty()) {
+        _rallyPointManagerErrorMsg.clear();
+        emit rallyPointManagerErrorChanged();
+    }
 }
 
 void Vehicle::_clearCameraTriggerPoints()
@@ -2246,7 +2282,7 @@ void Vehicle::guidedModeOrbit(const QGeoCoordinate& centerCoord, double radius, 
                     true,                           // show error if fails
                     static_cast<float>(radius),
                     static_cast<float>(qQNaN()),    // Use default velocity
-                    static_cast<float>(ORBIT_YAW_BEHAVIOUR_UNCHANGED),       // Use current or vehicle default yaw behavior
+                    static_cast<float>(ORBIT_YAW_BEHAVIOUR_HOLD_FRONT_TANGENT_TO_CIRCLE),    // Vehicle points tangentially to circle
                     static_cast<float>(qQNaN()),    // Use vehicle default num of orbits behavior
                     centerCoord.latitude(), centerCoord.longitude(), static_cast<float>(amslAltitude));
     } else {
@@ -2256,7 +2292,7 @@ void Vehicle::guidedModeOrbit(const QGeoCoordinate& centerCoord, double radius, 
                     true,                           // show error if fails
                     static_cast<float>(radius),
                     static_cast<float>(qQNaN()),    // Use default velocity
-                    static_cast<float>(ORBIT_YAW_BEHAVIOUR_UNCHANGED),       // Use current or vehicle default yaw behavior
+                    static_cast<float>(ORBIT_YAW_BEHAVIOUR_HOLD_FRONT_TANGENT_TO_CIRCLE),    // Vehicle points tangentially to circle
                     static_cast<float>(qQNaN()),    // Use vehicle default num of orbits behavior
                     static_cast<float>(centerCoord.latitude()),
                     static_cast<float>(centerCoord.longitude()),

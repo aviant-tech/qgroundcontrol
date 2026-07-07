@@ -171,6 +171,9 @@ public:
     Q_PROPERTY(bool                 supportsRadio               READ supportsRadio                                                  CONSTANT)
     Q_PROPERTY(bool               supportsMotorInterference     READ supportsMotorInterference                                      CONSTANT)
     Q_PROPERTY(QString              prearmError                 READ prearmError                WRITE setPrearmError                NOTIFY prearmErrorChanged)
+    Q_PROPERTY(QString              missionManagerError         READ missionManagerError                                            NOTIFY missionManagerErrorChanged)
+    Q_PROPERTY(QString              geoFenceManagerError        READ geoFenceManagerError                                           NOTIFY geoFenceManagerErrorChanged)
+    Q_PROPERTY(QString              rallyPointManagerError      READ rallyPointManagerError                                         NOTIFY rallyPointManagerErrorChanged)
     Q_PROPERTY(int                  motorCount                  READ motorCount                                                     CONSTANT)
     Q_PROPERTY(bool                 coaxialMotors               READ coaxialMotors                                                  CONSTANT)
     Q_PROPERTY(bool                 xConfigMotors               READ xConfigMotors                                                  CONSTANT)
@@ -519,6 +522,13 @@ public:
     QString prearmError() const { return _prearmError; }
     void setPrearmError(const QString& prearmError);
 
+    QString missionManagerError    () const { return _missionManagerErrorMsg; }
+    QString geoFenceManagerError   () const { return _geoFenceManagerErrorMsg; }
+    QString rallyPointManagerError () const { return _rallyPointManagerErrorMsg; }
+    void clearMissionManagerError    ();
+    void clearGeoFenceManagerError   ();
+    void clearRallyPointManagerError ();
+
     QmlObjectListModel* cameraTriggerPoints () { return &_cameraTriggerPoints; }
 
     //-- Mavlink Logging
@@ -850,6 +860,9 @@ signals:
     void inFwdFlightChanged             ();
     void vtolInFwdFlightChanged         (bool vtolInFwdFlight);
     void prearmErrorChanged             (const QString& prearmError);
+    void missionManagerErrorChanged     ();
+    void geoFenceManagerErrorChanged    ();
+    void rallyPointManagerErrorChanged  ();
     void soloFirmwareChanged            (bool soloFirmware);
     void defaultCruiseSpeedChanged      (double cruiseSpeed);
     void defaultHoverSpeedChanged       (double hoverSpeed);
@@ -1077,6 +1090,9 @@ private:
     QGCCameraManager* _cameraManager = nullptr;
 
     QString             _prearmError;
+    QString             _missionManagerErrorMsg;
+    QString             _geoFenceManagerErrorMsg;
+    QString             _rallyPointManagerErrorMsg;
     QTimer              _prearmErrorTimer;
     static const int    _prearmErrorTimeoutMSecs = 35 * 1000;   ///< Take away prearm error after 35 seconds
 

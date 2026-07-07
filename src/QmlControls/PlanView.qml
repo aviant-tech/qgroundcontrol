@@ -38,6 +38,8 @@ Item {
     readonly property real  _toolsMargin:               ScreenTools.defaultFontPixelWidth * 0.75
     readonly property real  _radius:                    ScreenTools.defaultFontPixelWidth  * 0.5
     readonly property real  _rightPanelWidth:           Math.min(width / 3, ScreenTools.defaultFontPixelWidth * 30)
+    readonly property real  _validationPanelMinWidth:   _rightPanelWidth
+    readonly property real  _validationPanelMaxWidth:   2 * width / 3
     readonly property var   _defaultVehicleCoordinate:  QtPositioning.coordinate(37.803784, -122.462276)
     readonly property bool  _waypointsOnlyMode:         QGroundControl.corePlugin.options.missionWaypointsOnly
 
@@ -45,6 +47,7 @@ Item {
     property var    _missionController:                 _planMasterController.missionController
     property var    _geoFenceController:                _planMasterController.geoFenceController
     property var    _rallyPointController:              _planMasterController.rallyPointController
+    property var    _aviantMissionTools:                _planMasterController.aviantMissionTools
     property var    _visualItems:                       _missionController.visualItems
     property bool   _lightWidgetBorders:                editorMap.isSatelliteMap
     property bool   _addROIOnClick:                     false
@@ -53,6 +56,7 @@ Item {
     property int    _toolStripBottom:                   toolStrip.height + toolStrip.y
     property var    _appSettings:                       QGroundControl.settingsManager.appSettings
     property var    _planViewSettings:                  QGroundControl.settingsManager.planViewSettings
+    property var    _aviantSettings:                    QGroundControl.settingsManager.aviantSettings
     property bool   _promptForPlanUsageShowing:         false
     property bool   _utmspEnabled:                      QGroundControl.utmspSupported
     property bool   _resetGeofencePolygon:              false   //Reset the Geofence Polygon
@@ -571,6 +575,8 @@ Item {
             readonly property int patternButtonIndex:   4
             readonly property int landButtonIndex:      5
             readonly property int centerButtonIndex:    6
+            readonly property int missionToolButtonIndex:       7
+            readonly property int missionValidationButtonIndex: 8
 
             property bool _isRallyLayer:    _editingLayer == _layerRallyPoints
             property bool _isMissionLayer:  _editingLayer == _layerMission
@@ -656,6 +662,20 @@ Item {
                         enabled:            true
                         visible:            true
                         dropPanelComponent: centerMapDropPanel
+                    },
+                    ToolStripAction {
+                        text:               qsTr("Tools")
+                        iconSource:         "/qmlimages/MissionTools.svg"
+                        enabled:            _aviantSettings.missionToolsUrl.rawValue != ""
+                        visible:            true
+                        dropPanelComponent: missionToolsDropPanel
+                    },
+                    ToolStripAction {
+                        text:               qsTr("Validate")
+                        iconSource:         "/qmlimages/MissionValidation.svg"
+                        enabled:            _aviantSettings.missionToolsUrl.rawValue != "" && !_planMasterController.syncInProgress && _planMasterController.containsItems
+                        visible:            true
+                        dropPanelComponent: missionValidationDropPanel
                     }
                 ]
             }
@@ -1121,6 +1141,28 @@ Item {
             }
 
             SectionHeader {
+                id:                 downloadFromWebSection
+                Layout.fillWidth:   true
+                text:               qsTr("Download from web")
+            }
+
+            RowLayout {
+                Layout.fillWidth:   true
+                spacing:            _margin
+                visible:            downloadFromWebSection.checked
+
+                QGCButton {
+                    text:               qsTr("Kyte")
+                    Layout.fillWidth:   true
+                    enabled:            !_planMasterController.syncInProgress && _aviantSettings.kyteBackendUrl.rawValue != ""
+                    onClicked: {
+                        dropPanel.hide()
+                        promptForBrowsingKyteOrders.createObject(mainWindow).open()
+                    }
+                }
+            }
+
+            SectionHeader {
                 id:                 vehicleSection
                 Layout.fillWidth:   true
                 text:               qsTr("Vehicle")
@@ -1181,6 +1223,324 @@ Item {
             _planMasterController.removeAllFromVehicle();
             _missionController.setCurrentPlanViewSeqNum(0, true);
             if(_utmspEnabled){_resetRegisterFlightPlan = true}
+        }
+    }
+
+    // Aviant: browse and download landing-point-adjusted missions from Kyte orders (via MMS)
+    Component {
+        id: promptForBrowsingKyteOrders
+
+        QGCPopupDialog {
+            id:                 ordersPopup
+            title:              qsTr("Select mission from Kyte Orders")
+            width:              Math.min(800, mainWindow.width - 2 * _margin)
+            anchors.centerIn:   parent
+
+            property var kyteOrders: []
+
+            ColumnLayout {
+                id:                 contentColumn
+                anchors.left:       parent.left
+                anchors.right:      parent.right
+                anchors.top:        parent.top
+                anchors.margins:    _margin
+                spacing:            _margin
+
+                Rectangle {
+                    id:                     ordersContainer
+                    Layout.fillWidth:       true
+                    Layout.preferredHeight: Math.min(600, ordersList.contentHeight + headerRect.height + 2 * _margin)
+                    color:                  "transparent"
+
+                    ColumnLayout {
+                        anchors.fill: parent
+
+                        Rectangle {
+                            id:                 headerRect
+                            Layout.fillWidth:   true
+                            height:             headerRow.height + 2 * _margin
+                            color:              qgcPal.windowShade
+                            visible:            ordersPopup.kyteOrders.length !== 0
+
+                            RowLayout {
+                                id:                     headerRow
+                                anchors.left:           parent.left
+                                anchors.right:          parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.margins:        _margin
+                                spacing:                _margin
+
+                                QGCLabel {
+                                    Layout.preferredWidth: parent.width / 4
+                                    text:                  qsTr("Order ID")
+                                    font.bold:             true
+                                }
+
+                                QGCLabel {
+                                    Layout.preferredWidth: parent.width / 4
+                                    text:                  qsTr("Requested at")
+                                    font.bold:             true
+                                }
+
+                                QGCLabel {
+                                    Layout.preferredWidth: parent.width / 4
+                                    text:                  qsTr("Mission")
+                                    font.bold:             true
+                                    horizontalAlignment:   Text.AlignHCenter
+                                }
+                            }
+                        }
+
+                        ListView {
+                            id:                ordersList
+                            Layout.fillWidth:  true
+                            Layout.fillHeight: true
+                            clip:              true
+                            model:             ordersPopup.kyteOrders
+
+                            delegate: Rectangle {
+                                width:  ordersList.width
+                                height: contentLayout.implicitHeight + 2 * _margin
+                                color:  index % 2 === 0 ? qgcPal.windowShadeDark : qgcPal.windowShade
+
+                                RowLayout {
+                                    id:              contentLayout
+                                    anchors.fill:    parent
+                                    anchors.margins: _margin
+                                    spacing:         _margin
+
+                                    QGCLabel {
+                                        Layout.preferredWidth: parent.width / 4
+                                        text:                  modelData && modelData.display_id !== undefined ? modelData.display_id : qsTr("Order ID not available")
+                                        wrapMode:              Text.WordWrap
+                                    }
+
+                                    QGCLabel {
+                                        Layout.preferredWidth: parent.width / 4
+                                        text:                  modelData && modelData.requested_ts ? removeMilliseconds(modelData.requested_ts) : qsTr("Requested time not available")
+                                        wrapMode:              Text.WordWrap
+
+                                        function removeMilliseconds(dateString) {
+                                            if (!dateString) return qsTr("Date not available")
+                                            const formattedDate = dateString.replace(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d+)?(.*)/, "$1$3")
+                                            return formattedDate
+                                        }
+                                    }
+
+                                    Item {
+                                        Layout.fillHeight:     true
+                                        Layout.preferredWidth: parent.width / 4
+
+                                        QGCButton {
+                                            anchors.centerIn: parent
+                                            id:               missionButton
+                                            text:             qsTr("Select mission")
+                                            visible:          modelData && modelData.mms_mission_id
+                                            onClicked: {
+                                                var currentActiveVehicle = QGroundControl.multiVehicleManager ? QGroundControl.multiVehicleManager.activeVehicle : null
+                                                var aircraftName = currentActiveVehicle ? currentActiveVehicle.name : ""
+
+                                                if (!aircraftName || aircraftName === "") {
+                                                    mainWindow.showMessageDialog(
+                                                        qsTr("Missing Aircraft Name"),
+                                                        qsTr("Cannot download mission. No active vehicle found or the active vehicle does not have a name configured.")
+                                                    )
+                                                    return
+                                                }
+                                                _aviantMissionTools.downloadMissionFileFromOrder(modelData.mms_mission_id, aircraftName)
+                                                ordersPopup.close()
+                                            }
+                                        }
+
+                                        QGCLabel {
+                                            anchors.centerIn: parent
+                                            id:               missionNotAvailableLabel
+                                            visible:          !modelData || !modelData.mms_mission_id
+                                            text:             qsTr("Mission not available")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    QGCLabel {
+                        anchors.centerIn: parent
+                        visible:          ordersPopup.kyteOrders.length === 0
+                        text:             qsTr("No orders available")
+                    }
+                }
+            }
+
+            Component.onCompleted: {
+                _aviantMissionTools.fetchKyteOrderMissions()
+            }
+
+            Connections {
+                target: _aviantMissionTools
+                function onKyteOrdersChanged(orders) {
+                    ordersPopup.kyteOrders = orders
+                }
+            }
+        }
+    }
+
+    // Aviant: mission validation drop panel (MMS /validate_mission)
+    Component {
+        id: missionValidationDropPanel
+
+        ColumnLayout {
+            id:         validationColumnHolder
+            spacing:    _margin
+            width:      Math.min(_validationPanelMaxWidth, Math.max(_validationPanelMinWidth, validationSummaryLabel.implicitWidth))
+
+            function typesSet() {
+                if (_aviantMissionTools.takeoffType == AviantMissionTools.TakeoffTypeNotSet) return false
+                if (_aviantMissionTools.winchType == AviantMissionTools.WinchTypeNotSet) return false
+                return true
+            }
+
+            Component.onCompleted: {
+                if (typesSet()) {
+                    _aviantMissionTools.requestOperation(AviantMissionTools.MissionValidation)
+                }
+            }
+
+            SectionHeader {
+                id:                 missionValidationSection
+                Layout.fillWidth:   true
+                text:               qsTr("Mission Validation")
+            }
+
+            GridLayout {
+                columns:           2
+                Layout.fillWidth:  true
+
+                QGCLabel {
+                    Layout.preferredWidth:  parent.width / 4
+                    text:                   qsTr("Takeoff type:")
+                }
+
+                QGCComboBox {
+                    Layout.fillWidth:  true
+                    model:             _aviantMissionTools.takeoffTypeList
+                    currentIndex:      _aviantMissionTools.takeoffType
+                    onActivated: {
+                        _aviantMissionTools.takeoffType = index
+                        if (typesSet()) {
+                            _aviantMissionTools.requestOperation(AviantMissionTools.MissionValidation)
+                        }
+                    }
+                }
+
+                QGCLabel {
+                    Layout.preferredWidth:  parent.width / 4
+                    text:                   qsTr("Winch type:")
+                }
+
+                QGCComboBox {
+                    Layout.fillWidth:   true
+                    model:              _aviantMissionTools.winchTypeList
+                    currentIndex:       _aviantMissionTools.winchType
+                    onActivated: {
+                        _aviantMissionTools.winchType = index
+                        if (typesSet()) {
+                            _aviantMissionTools.requestOperation(AviantMissionTools.MissionValidation)
+                        }
+                    }
+                }
+            }
+
+            QGCLabel {
+                id:                 validationSummaryLabel
+                Layout.fillWidth:   true
+                text:               _aviantMissionTools.validationResult
+            }
+
+            QGCButton {
+                text:               qsTr("Cancel")
+                Layout.fillWidth:   true
+                visible:            _aviantMissionTools.currentOperation == AviantMissionTools.MissionValidation
+                onClicked: {
+                    _aviantMissionTools.cancelOperation(AviantMissionTools.MissionValidation)
+                }
+            }
+        }
+    }
+
+    // Aviant: mission tools drop panel (mission type + rally-point height via MMS /set_rally_points_height)
+    Component {
+        id: missionToolsDropPanel
+
+        ColumnLayout {
+            id:                  toolsColumnHolder
+            spacing:             _margin
+
+            SectionHeader {
+                id:                 missionToolsSettingsSection
+                Layout.fillWidth:   true
+                Layout.minimumWidth: _validationPanelMinWidth
+                text:               qsTr("Mission settings")
+            }
+
+            GridLayout {
+                columns:           2
+                Layout.fillWidth:  true
+                visible:           missionToolsSettingsSection.checked
+
+                QGCLabel {
+                    Layout.preferredWidth:  parent.width / 4
+                    text:                   qsTr("Takeoff type:")
+                }
+
+                QGCComboBox {
+                    Layout.fillWidth:   true
+                    model:              _aviantMissionTools.takeoffTypeList
+                    currentIndex:       _aviantMissionTools.takeoffType
+                    onActivated:        _aviantMissionTools.takeoffType = index
+                }
+
+                QGCLabel {
+                    Layout.preferredWidth:  parent.width / 4
+                    text:                   qsTr("Winch type:")
+                }
+
+                QGCComboBox {
+                    Layout.fillWidth:   true
+                    model:              _aviantMissionTools.winchTypeList
+                    currentIndex:       _aviantMissionTools.winchType
+                    onActivated:        _aviantMissionTools.winchType = index
+                }
+            }
+
+            SectionHeader {
+                id:                 missionToolsRallyPointSection
+                Layout.fillWidth:   true
+                text:               qsTr("Rally point")
+            }
+
+            RowLayout {
+                Layout.fillWidth:   true
+                spacing:            _margin
+                visible:            missionToolsRallyPointSection.checked
+
+                QGCButton {
+                    text:               qsTr("Set height")
+                    Layout.fillWidth:   true
+                    visible:            !_aviantMissionTools.requestInProgress
+                    onClicked: {
+                        _aviantMissionTools.requestOperation(AviantMissionTools.RallyPointHeight)
+                    }
+                }
+                QGCButton {
+                    text:               qsTr("Cancel")
+                    Layout.fillWidth:   true
+                    visible:            _aviantMissionTools.currentOperation == AviantMissionTools.RallyPointHeight
+                    onClicked: {
+                        _aviantMissionTools.cancelOperation(AviantMissionTools.RallyPointHeight)
+                    }
+                }
+            }
         }
     }
 }

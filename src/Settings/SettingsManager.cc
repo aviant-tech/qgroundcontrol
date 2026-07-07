@@ -14,6 +14,7 @@
 #include "APMMavlinkStreamRateSettings.h"
 #endif
 #include "AppSettings.h"
+#include "AviantSettings.h"
 #include "AutoConnectSettings.h"
 #include "BatteryIndicatorSettings.h"
 #include "BrandImageSettings.h"
@@ -72,6 +73,7 @@ void SettingsManager::init()
     _apmMavlinkStreamRateSettings = new APMMavlinkStreamRateSettings(this);
 #endif
     _appSettings = new AppSettings(this);
+    _aviantSettings = new AviantSettings(this);
     _autoConnectSettings = new AutoConnectSettings(this);
     _batteryIndicatorSettings = new BatteryIndicatorSettings(this);
     _brandImageSettings = new BrandImageSettings(this);
@@ -98,6 +100,7 @@ ADSBVehicleManagerSettings *SettingsManager::adsbVehicleManagerSettings() const 
 APMMavlinkStreamRateSettings *SettingsManager::apmMavlinkStreamRateSettings() const { return _apmMavlinkStreamRateSettings; }
 #endif
 AppSettings *SettingsManager::appSettings() const { return _appSettings; }
+AviantSettings *SettingsManager::aviantSettings() const { return _aviantSettings; }
 AutoConnectSettings *SettingsManager::autoConnectSettings() const { return _autoConnectSettings; }
 BatteryIndicatorSettings *SettingsManager::batteryIndicatorSettings() const { return _batteryIndicatorSettings; }
 BrandImageSettings *SettingsManager::brandImageSettings() const { return _brandImageSettings; }

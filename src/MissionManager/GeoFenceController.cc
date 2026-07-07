@@ -349,6 +349,7 @@ void GeoFenceController::_managerLoadComplete(void)
         emit loadComplete();
     }
     _itemsRequested = false;
+    _managerVehicle->clearGeoFenceManagerError();
 }
 
 void GeoFenceController::_managerSendComplete(bool error)

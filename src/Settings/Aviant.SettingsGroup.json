@@ -1,0 +1,39 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name":                "missionToolsInsecureHttps",
+    "shortDesc":           "Insecure HTTPS connections",
+    "longDesc":            "Do not validate server certificate for mission tools HTTPS connection",
+    "type":                "bool",
+    "default":             false,
+    "qgcRebootRequired":   true
+},
+{
+    "name":                "missionToolsUrl",
+    "shortDesc":           "URL of mission tools",
+    "type":                "string",
+    "default":             ""
+},
+{
+    "name":                "missionToolsToken",
+    "shortDesc":           "Authentication token for mission tools",
+    "type":                "string",
+    "default":             ""
+},
+{
+    "name":                "kyteBackendUrl",
+    "shortDesc":           "URL of kyte orders endpoint",
+    "type":                "string",
+    "default":             ""
+},
+{
+    "name":                "kyteBackendToken",
+    "shortDesc":           "Authentication token for kyte backend",
+    "type":                "string",
+    "default":             ""
+}
+]
+}

@@ -148,7 +148,14 @@ Item {
     property bool   _checklistPassed:           _activeVehicle ? (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) : true
     property bool   _geoFenceSupported:         geoFenceController ? geoFenceController.supported : false
     property bool   _rallyPointSupported:       rallyPointController ? rallyPointController.supported : false
-    property bool   _canArm:                    _activeVehicle ? (_checklistPassed && _geoFenceSupported && _rallyPointSupported && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canArm)) : false
+    // Client-side (QGC-local) mission-state arming gate: block arming while the plan has un-uploaded
+    // edits, a plan transfer is in progress, or the last mission/geofence/rally transfer errored out.
+    property var    _planMasterController:       globals.planMasterControllerPlanView
+    property bool   _missionDirty:               _planMasterController ? _planMasterController.dirty : false
+    property bool   _missionSyncInProgress:      _planMasterController ? _planMasterController.syncInProgress : false
+    property bool   _planTransferError:          _activeVehicle ? (_activeVehicle.missionManagerError !== "" || _activeVehicle.geoFenceManagerError !== "" || _activeVehicle.rallyPointManagerError !== "") : false
+    property bool   _planReadyToArm:             !_missionDirty && !_missionSyncInProgress && !_planTransferError
+    property bool   _canArm:                    _activeVehicle ? (_planReadyToArm && _checklistPassed && _geoFenceSupported && _rallyPointSupported && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canArm)) : false
     property bool   _canTakeoff:                _activeVehicle ? (_checklistPassed && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canTakeoff)) : false
     property bool   _canStartMission:           _activeVehicle ? (_checklistPassed && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canStartMission)) : false
     property bool   _initialConnectComplete:    _activeVehicle ? _activeVehicle.initialConnectComplete : false
@@ -162,7 +169,7 @@ Item {
     property bool showTakeoff:              _guidedActionsEnabled && _activeVehicle.takeoffVehicleSupported && !_vehicleFlying && _canTakeoff
     property bool showLand:                 _guidedActionsEnabled && _activeVehicle.guidedModeSupported && _vehicleArmed && !_activeVehicle.fixedWing && !_vehicleInLandMode
     property bool showStartMission:         _guidedActionsEnabled && _missionAvailable && !_missionActive && !_vehicleFlying && _canStartMission
-    property bool showContinueMission:      _guidedActionsEnabled && _missionAvailable && !_missionActive && _vehicleArmed && _vehicleFlying && (_currentMissionIndex < _missionItemCount - 1)
+    property bool showContinueMission:      _guidedActionsEnabled && _missionAvailable && !_missionActive && _vehicleArmed && _vehicleFlying
     property bool showPause:                _guidedActionsEnabled && _vehicleArmed && _activeVehicle.pauseVehicleSupported && _vehicleFlying && !_vehiclePaused && !_fixedWingOnApproach
     property bool showChangeAlt:            _guidedActionsEnabled && _vehicleFlying && _activeVehicle.guidedModeSupported && _vehicleArmed && !_missionActive
     property bool showChangeLoiterRadius:   _guidedActionsEnabled && _vehicleFlying && _activeVehicle.guidedModeSupported && _vehicleArmed && !_missionActive && _vehicleInFwdFlight && fwdFlightGotoMapCircle.visible

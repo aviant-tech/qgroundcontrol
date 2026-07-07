@@ -16,6 +16,7 @@
 class ADSBVehicleManagerSettings;
 class APMMavlinkStreamRateSettings;
 class AppSettings;
+class AviantSettings;
 class AutoConnectSettings;
 class BatteryIndicatorSettings;
 class BrandImageSettings;
@@ -48,6 +49,7 @@ class SettingsManager : public QObject
     Q_MOC_INCLUDE("APMMavlinkStreamRateSettings.h")
 #endif
     Q_MOC_INCLUDE("AppSettings.h")
+    Q_MOC_INCLUDE("AviantSettings.h")
     Q_MOC_INCLUDE("AutoConnectSettings.h")
     Q_MOC_INCLUDE("BatteryIndicatorSettings.h")
     Q_MOC_INCLUDE("BrandImageSettings.h")
@@ -73,6 +75,7 @@ class SettingsManager : public QObject
     Q_PROPERTY(QObject *apmMavlinkStreamRateSettings    READ apmMavlinkStreamRateSettings   CONSTANT)
 #endif
     Q_PROPERTY(QObject *appSettings                     READ appSettings                    CONSTANT)
+    Q_PROPERTY(QObject *aviantSettings                  READ aviantSettings                 CONSTANT)
     Q_PROPERTY(QObject *autoConnectSettings             READ autoConnectSettings            CONSTANT)
     Q_PROPERTY(QObject *batteryIndicatorSettings        READ batteryIndicatorSettings       CONSTANT)
     Q_PROPERTY(QObject *brandImageSettings              READ brandImageSettings             CONSTANT)
@@ -107,6 +110,7 @@ public:
     APMMavlinkStreamRateSettings *apmMavlinkStreamRateSettings() const;
 #endif
     AppSettings *appSettings() const;
+    AviantSettings *aviantSettings() const;
     AutoConnectSettings *autoConnectSettings() const;
     BatteryIndicatorSettings *batteryIndicatorSettings() const;
     BrandImageSettings *brandImageSettings() const;
@@ -134,6 +138,7 @@ private:
     APMMavlinkStreamRateSettings *_apmMavlinkStreamRateSettings = nullptr;
 #endif
     AppSettings *_appSettings = nullptr;
+    AviantSettings *_aviantSettings = nullptr;
     AutoConnectSettings *_autoConnectSettings = nullptr;
     BatteryIndicatorSettings *_batteryIndicatorSettings = nullptr;
     BrandImageSettings *_brandImageSettings = nullptr;

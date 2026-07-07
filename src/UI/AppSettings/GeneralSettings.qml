@@ -24,6 +24,7 @@ import QGroundControl.Palette
 SettingsPage {
     property var    _settingsManager:           QGroundControl.settingsManager
     property var    _appSettings:               _settingsManager.appSettings
+    property var    _aviantSettings:            _settingsManager.aviantSettings
     property var    _brandImageSettings:        _settingsManager.brandImageSettings
     property Fact   _appFontPointSize:          _appSettings.appFontPointSize
     property Fact   _userBrandImageIndoor:      _brandImageSettings.userBrandImageIndoor
@@ -172,6 +173,40 @@ SettingsPage {
                 fact:                   modelData
                 indexModel:             false
             }
+        }
+    }
+
+    SettingsGroupLayout {
+        Layout.fillWidth:   true
+        heading:            qsTr("Aviant Mission Tools")
+
+        QGCLabel { text: _aviantSettings.missionToolsUrl.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.missionToolsUrl
+            Layout.fillWidth:   true
+        }
+
+        QGCLabel { text: _aviantSettings.missionToolsToken.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.missionToolsToken
+            Layout.fillWidth:   true
+        }
+
+        QGCLabel { text: _aviantSettings.kyteBackendUrl.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.kyteBackendUrl
+            Layout.fillWidth:   true
+        }
+
+        QGCLabel { text: _aviantSettings.kyteBackendToken.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.kyteBackendToken
+            Layout.fillWidth:   true
+        }
+
+        FactCheckBox {
+            text:               _aviantSettings.missionToolsInsecureHttps.shortDescription
+            fact:               _aviantSettings.missionToolsInsecureHttps
         }
     }
 
