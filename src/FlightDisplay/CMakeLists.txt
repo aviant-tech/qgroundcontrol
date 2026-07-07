@@ -37,6 +37,7 @@ qt_add_qml_module(FlightDisplayModule
         GuidedActionLand.qml
         GuidedActionPause.qml
         GuidedActionRTL.qml
+        GuidedActionMissionRTL.qml
         GuidedActionsController.qml
         GuidedActionTakeoff.qml
         GuidedToolStripAction.qml

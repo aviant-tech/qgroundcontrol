@@ -62,5 +62,5 @@ private:
 
     static constexpr const char* _longitudeFactName =    "Longitude";
     static constexpr const char* _latitudeFactName =     "Latitude";
-    static constexpr const char* _altitudeFactName =     "RelativeAltitude";
+    static constexpr const char* _altitudeFactName =     "ABSOLUTE ALTITUDE";
 };

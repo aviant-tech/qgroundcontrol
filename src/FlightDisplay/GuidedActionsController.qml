@@ -27,6 +27,8 @@ Item {
     id: _root
 
     property var missionController
+    property var geoFenceController
+    property var rallyPointController
     property var confirmDialog
     property var guidedValueSlider
     property var fwdFlightGotoMapCircle
@@ -39,6 +41,7 @@ Item {
     readonly property string disarmTitle:                   qsTr("Disarm")
     readonly property string mvDisarmTitle:                 qsTr("Disarm (MV)")
     readonly property string rtlTitle:                      qsTr("Return")
+    readonly property string missionRtlTitle:               qsTr("M-RTL")
     readonly property string takeoffTitle:                  qsTr("Takeoff")
     readonly property string gripperTitle:                  qsTr("Gripper Function")
     readonly property string landTitle:                     qsTr("Land")
@@ -77,6 +80,7 @@ Item {
     readonly property string resumeMissionUploadFailMessage:    qsTr("Upload of resume mission failed. Confirm to retry upload")
     readonly property string landMessage:                       qsTr("Land the vehicle at the current position.")
     readonly property string rtlMessage:                        qsTr("Return to the launch position of the vehicle.")
+    readonly property string missionRtlMessage:                 qsTr("Return following the mission path.")
     readonly property string changeAltMessage:                  qsTr("Change the altitude of the vehicle up or down.")
     readonly property string changeLoiterRadiusMessage:         qsTr("Change the forward flight loiter radius.")
     readonly property string changeCruiseSpeedMessage:          qsTr("Change the maximum horizontal cruise speed.")
@@ -127,6 +131,7 @@ Item {
     readonly property int actionMVArm:                      31
     readonly property int actionMVDisarm:                   32
     readonly property int actionChangeLoiterRadius:         33
+    readonly property int actionMissionRTL:                 34
 
 
 
@@ -138,7 +143,9 @@ Item {
     property bool   _useChecklist:              QGroundControl.settingsManager.appSettings.useChecklist.rawValue && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
     property bool   _enforceChecklist:          _useChecklist && QGroundControl.settingsManager.appSettings.enforceChecklist.rawValue
     property bool   _checklistPassed:           _activeVehicle ? (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) : true
-    property bool   _canArm:                    _activeVehicle ? (_checklistPassed && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canArm)) : false
+    property bool   _geoFenceSupported:         geoFenceController ? geoFenceController.supported : false
+    property bool   _rallyPointSupported:       rallyPointController ? rallyPointController.supported : false
+    property bool   _canArm:                    _activeVehicle ? (_checklistPassed && _geoFenceSupported && _rallyPointSupported && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canArm)) : false
     property bool   _canTakeoff:                _activeVehicle ? (_checklistPassed && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canTakeoff)) : false
     property bool   _canStartMission:           _activeVehicle ? (_checklistPassed && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canStartMission)) : false
     property bool   _initialConnectComplete:    _activeVehicle ? _activeVehicle.initialConnectComplete : false
@@ -148,6 +155,7 @@ Item {
     property bool showForceArm:             _guidedActionsEnabled && !_vehicleArmed
     property bool showDisarm:               _guidedActionsEnabled && _vehicleArmed && !_vehicleFlying
     property bool showRTL:                  _guidedActionsEnabled && _vehicleArmed && _activeVehicle.guidedModeSupported && _vehicleFlying && !_vehicleInRTLMode
+    property bool showMissionRTL:           _guidedActionsEnabled && _vehicleArmed && _activeVehicle.guidedModeSupported && _vehicleFlying && !_vehicleInRTLMode && _missionAvailable
     property bool showTakeoff:              _guidedActionsEnabled && _activeVehicle.takeoffVehicleSupported && !_vehicleFlying && _canTakeoff
     property bool showLand:                 _guidedActionsEnabled && _activeVehicle.guidedModeSupported && _vehicleArmed && !_activeVehicle.fixedWing && !_vehicleInLandMode
     property bool showStartMission:         _guidedActionsEnabled && _missionAvailable && !_missionActive && !_vehicleFlying && _canStartMission
@@ -499,6 +507,11 @@ Item {
             }
             confirmDialog.hideTrigger = Qt.binding(function() { return !showRTL })
             break;
+        case actionMissionRTL:
+            confirmDialog.title = missionRtlTitle
+            confirmDialog.message = missionRtlMessage
+            confirmDialog.hideTrigger = Qt.binding(function() { return !showMissionRTL })
+            break;
         case actionChangeAlt:
             confirmDialog.title = changeAltTitle
             confirmDialog.message = changeAltMessage
@@ -603,6 +616,9 @@ Item {
         switch (actionCode) {
         case actionRTL:
             _activeVehicle.guidedModeRTL(optionChecked)
+            break
+        case actionMissionRTL:
+            _activeVehicle.guidedModeMissionRTL()
             break
         case actionLand:
             _activeVehicle.guidedModeLand()

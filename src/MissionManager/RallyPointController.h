@@ -78,6 +78,7 @@ private:
     bool                _itemsRequested =       false;
 
     static constexpr int    _jsonCurrentVersion = 2;
+    static constexpr int    _jsonLegacyAviantVersion = 102;
     static constexpr const char* _jsonFileTypeValue =  "RallyPoints";
     static constexpr const char* _jsonPointsKey =      "points";
 };

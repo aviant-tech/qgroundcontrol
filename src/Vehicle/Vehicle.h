@@ -295,6 +295,9 @@ public:
     /// Command vehicle to return to launch
     Q_INVOKABLE void guidedModeRTL(bool smartRTL);
 
+    /// Command vehicle to return following the mission path
+    Q_INVOKABLE void guidedModeMissionRTL();
+
     /// Command vehicle to land at current location
     Q_INVOKABLE void guidedModeLand();
 
