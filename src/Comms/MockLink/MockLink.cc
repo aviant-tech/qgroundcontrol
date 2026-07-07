@@ -126,6 +126,16 @@ bool MockLink::_connect()
 
 void MockLink::disconnect()
 {
+    // Quiesce the worker before anything can free the mavlink channel. Disconnecting
+    // triggers LinkManager to free this link's channel; if the worker thread is still
+    // running its periodic tasks it will pack messages against the now-invalid channel
+    // (mavlink_get_channel_status() returns nullptr -> crash). A blocking queued call
+    // runs stopWork() on the worker thread after any in-flight task completes, so once
+    // it returns no further sends can happen.
+    if (_worker && _workerThread && _workerThread->isRunning() && (QThread::currentThread() != _workerThread)) {
+        (void) QMetaObject::invokeMethod(_worker, "stopWork", Qt::BlockingQueuedConnection);
+    }
+
     _missionItemHandler->shutdown();
 
     if (_connected) {
@@ -136,7 +146,7 @@ void MockLink::disconnect()
 
 void MockLink::run1HzTasks()
 {
-    if (!_mavlinkStarted || !_connected) {
+    if (!_mavlinkStarted || !_connected || !mavlinkChannelIsSet()) {
         return;
     }
 
@@ -176,7 +186,7 @@ void MockLink::run10HzTasks()
         return;
     }
 
-    if (_mavlinkStarted && _connected) {
+    if (_mavlinkStarted && _connected && mavlinkChannelIsSet()) {
         _sendHeartBeat();
         if (_sendGPSPositionDelayCount > 0) {
             // We delay gps position for better testing
@@ -195,7 +205,7 @@ void MockLink::run500HzTasks()
         return;
     }
 
-    if (_mavlinkStarted && _connected) {
+    if (_mavlinkStarted && _connected && mavlinkChannelIsSet()) {
         _paramRequestListWorker();
         _logDownloadWorker();
         _availableModesWorker();
