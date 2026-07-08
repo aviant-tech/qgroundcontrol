@@ -19,6 +19,9 @@ qt_add_qml_module(FlightMapModule
         MapItems/SplitIndicator.qml
         MapItems/VehicleMapItem.qml
         Widgets/AltitudeWidget.qml
+        Widgets/BatteryPopup.qml
+        Widgets/BatteryVisual.qml
+        Widgets/BatteryWidget.qml
         Widgets/CenterMapDropButton.qml
         Widgets/CenterMapDropPanel.qml
         Widgets/CompassDial.qml

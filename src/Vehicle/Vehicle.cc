@@ -290,6 +290,14 @@ void Vehicle::_commonInit()
 
     _vehicleLinkManager             = new VehicleLinkManager            (this);
 
+    // Aviant: latch battery consumed as a persistent offset when the link to this vehicle is lost,
+    // so a subsequent flight on the same battery accumulates from the previous consumed value.
+    connect(_vehicleLinkManager, &VehicleLinkManager::communicationLostChanged, this, [this](bool isLost) {
+        if (isLost) {
+            VehicleBatteryFactGroup::persistConsumedForVehicle(this);
+        }
+    });
+
     connect(_standardModes, &StandardModes::modesUpdated, this, &Vehicle::flightModesChanged);
 
     _parameterManager = new ParameterManager(this);
@@ -3163,8 +3171,20 @@ void Vehicle::_rebootCommandResultHandler(void* resultHandlerData, int /*compId*
         }
         qgcApp()->showAppMessage(tr("Vehicle reboot failed."));
     } else {
+        // Vehicle is soft rebooting: latch battery consumed as a persistent offset before the link closes.
+        VehicleBatteryFactGroup::persistConsumedForVehicle(vehicle);
         vehicle->closeVehicle();
     }
+}
+
+void Vehicle::resetPersistedConsumedData()
+{
+    VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(this);
+}
+
+bool Vehicle::hasPersistedConsumedData()
+{
+    return VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(this);
 }
 
 void Vehicle::rebootVehicle()

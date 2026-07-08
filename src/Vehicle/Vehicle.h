@@ -419,6 +419,10 @@ public:
     /// Trigger camera using MAV_CMD_DO_DIGICAM_CONTROL command
     Q_INVOKABLE void triggerSimpleCamera(void);
 
+    /// Aviant persistent battery consumption (bingo) accounting
+    Q_INVOKABLE void resetPersistedConsumedData();
+    Q_INVOKABLE bool hasPersistedConsumedData();
+
     /// Set home from flight map coordinate
     Q_INVOKABLE void doSetHome(const QGeoCoordinate& coord);
 

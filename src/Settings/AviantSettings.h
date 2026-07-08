@@ -33,4 +33,9 @@ public:
     DEFINE_SETTINGFACT(multidroneConflictDistance)
     DEFINE_SETTINGFACT(showMultidroneConflictCircle)
     DEFINE_SETTINGFACT(showWinchControlMenu)
+    DEFINE_SETTINGFACT(showBatteryWidget)
+    DEFINE_SETTINGFACT(preDeliveryBingoLimit)
+    DEFINE_SETTINGFACT(postDeliveryBingoLimit)
+    DEFINE_SETTINGFACT(persistentConsumeWarnLimit)
+    DEFINE_SETTINGFACT(unitUntilThreshold)
 };

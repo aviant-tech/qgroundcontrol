@@ -51,6 +51,7 @@ Item {
     property var    _aviantSettings:        QGroundControl.settingsManager.aviantSettings
     property bool   _showWinchControlMenu:  _aviantSettings.showWinchControlMenu.rawValue
     property bool   _showAltitudeWidget:    _activeVehicle != null && _flyViewSettings.showAltitudeWidget.rawValue
+    property bool   _showBatteryWidget:     _activeVehicle != null && _aviantSettings.showBatteryWidget.rawValue
     property alias  _gripperMenu:           gripperOptions
     property real   _layoutMargin:          ScreenTools.defaultFontPixelWidth * 0.75
     property bool   _layoutSpacing:         ScreenTools.defaultFontPixelWidth
@@ -136,6 +137,17 @@ Item {
         width:                  _rightPanelWidth
         visible:                _showWinchControlMenu
         z:                      QGroundControl.zOrderWidgets
+    }
+
+    // Aviant (A53/A63): Fly-view battery widget (bottom-right, above the bottom row layout)
+    BatteryWidget {
+        id:                 batteryWidget
+        anchors.margins:    _layoutMargin
+        anchors.right:      parent.right
+        anchors.bottom:     bottomRightRowLayout.top
+        width:              _rightPanelWidth
+        availableHeight:    parent.height - (topRightPanel.height + bottomRightRowLayout.height + ScreenTools.defaultFontPixelHeight * 2)
+        visible:            _showBatteryWidget
     }
 
     FlyViewMissionCompleteDialog {

@@ -255,6 +255,41 @@ SettingsPage {
 
     SettingsGroupLayout {
         Layout.fillWidth:   true
+        heading:            qsTr("Aviant Battery")
+
+        FactCheckBox {
+            text:               _aviantSettings.showBatteryWidget.shortDescription
+            fact:               _aviantSettings.showBatteryWidget
+        }
+
+        QGCLabel { text: _aviantSettings.preDeliveryBingoLimit.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.preDeliveryBingoLimit
+            Layout.fillWidth:   true
+        }
+
+        QGCLabel { text: _aviantSettings.postDeliveryBingoLimit.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.postDeliveryBingoLimit
+            Layout.fillWidth:   true
+        }
+
+        QGCLabel { text: _aviantSettings.persistentConsumeWarnLimit.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.persistentConsumeWarnLimit
+            Layout.fillWidth:   true
+        }
+
+        QGCLabel { text: _aviantSettings.unitUntilThreshold.shortDescription }
+        FactComboBox {
+            fact:               _aviantSettings.unitUntilThreshold
+            indexModel:         false
+            Layout.fillWidth:   true
+        }
+    }
+
+    SettingsGroupLayout {
+        Layout.fillWidth:   true
         heading:            qsTr("Brand Image")
         visible:            _brandImageSettings.visible && !ScreenTools.isMobile
         
