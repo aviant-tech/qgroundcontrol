@@ -25,7 +25,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
@@ -65,7 +65,7 @@ jobs:
       - name: Install Vulkan
         run: |
           wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-noble.list http://packages.lunarg.com/vulkan/lunarg-vulkan-noble.list
           sudo apt update
           sudo apt install vulkan-sdk
 
@@ -75,7 +75,7 @@ jobs:
           host: linux
           target: linux_gcc_64
           build-type: ${{ matrix.BuildType }}
-          cpm-modules: ${{ runner.temp }}/shadow_build_dir/cpm_modules
+          cpm-modules: ${{ github.workspace }}/build/cpm_modules
 
       - name: Install Qt for Linux (x64)
         uses: jurplel/install-qt-action@v4
@@ -92,28 +92,30 @@ jobs:
       #   uses: ./.github/actions/gstreamer
 
       - name: Configure
-        working-directory: ${{ runner.temp }}/shadow_build_dir
-        run: ${{ env.QT_ROOT_DIR }}/bin/qt-cmake -S ${{ github.workspace }} -B . -G Ninja
+        working-directory: ${{ github.workspace }}
+        env:
+          CMAKE_PREFIX_PATH: ${{ env.QT_ROOT_DIR }}
+        run: cmake -B ./build -G Ninja
               -DCMAKE_BUILD_TYPE=${{ matrix.BuildType }}
               -DQGC_BUILD_TESTING=${{ matrix.BuildType == 'Debug' && 'ON' || 'OFF' }}
               -DQGC_STABLE_BUILD=${{ github.ref_type == 'tag' || contains(github.ref, 'Stable') && 'ON' || 'OFF' }}
 
       - name: Build
-        working-directory: ${{ runner.temp }}/shadow_build_dir
-        run: cmake --build . --target all --config ${{ matrix.BuildType }}
+        working-directory: ${{ github.workspace }}
+        run: cmake --build ./build --target all --config ${{ matrix.BuildType }}
 
       - name: Create AppImage
-        working-directory: ${{ runner.temp }}/shadow_build_dir
-        run: cmake --install . --config ${{ matrix.BuildType }}
+        working-directory: ${{ github.workspace }}
+        run: cmake --install ./build --config ${{ matrix.BuildType }}
 
       - name: Sanity check release excecutable
         if: matrix.BuildType == 'Release'
-        working-directory: ${{ runner.temp }}/shadow_build_dir
+        working-directory: ${{ github.workspace }}/build
         run: xvfb-run -a ./${{ env.ARTIFACT }} --simple-boot-test
 
       - name: Run unit tests
         if: matrix.BuildType == 'Debug'
-        working-directory: ${{ runner.temp }}/shadow_build_dir
+        working-directory: ${{ github.workspace }}/build
         run: xvfb-run -a ./${{ env.ARTIFACT }} --unittest
 
       - name: Upload Build File
