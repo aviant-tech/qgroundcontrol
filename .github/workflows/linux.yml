@@ -117,11 +117,10 @@ jobs:
         run: xvfb-run -a ./${{ env.ARTIFACT }} --simple-boot-test
 
       - name: Upload Build File
-        if: github.event_name != 'pull_request'
         uses: ./.github/actions/upload
         with:
           artifact_name: ${{ env.ARTIFACT }}
-          package_name: ${{ env.PACKAGE }}
+          package_name: ${{ env.PACKAGE }}-${{ env.BUILD_TYPE }}
           aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
