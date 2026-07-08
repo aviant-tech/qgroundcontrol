@@ -52,6 +52,7 @@ RowLayout {
         property string _armedText:         qsTr("Armed")
         property string _flyingText:        qsTr("Flying")
         property string _landingText:       qsTr("Landing")
+        property string _terminatedText:    qsTr("Terminated")
 
         function mainStatusText() {
             var statusText
@@ -59,6 +60,10 @@ RowLayout {
                 if (_communicationLost) {
                     _mainStatusBGColor = "red"
                     return mainStatusLabel._commLostText
+                }
+                if (_activeVehicle.flightMode === _terminatedText) {
+                    _mainStatusBGColor = "red"
+                    return mainStatusLabel._terminatedText
                 }
                 if (_activeVehicle.armed) {
                     _mainStatusBGColor = "green"

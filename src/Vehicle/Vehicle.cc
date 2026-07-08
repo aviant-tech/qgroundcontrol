@@ -1299,11 +1299,17 @@ EventHandler& Vehicle::_eventHandler(uint8_t compid)
 
         // connect health and arming check updates
         connect(eventHandler.data(), &EventHandler::healthAndArmingChecksUpdated, this, [compid, this]() {
+            if (compid != _defaultComponentId) {
+                return;
+            }
             const QSharedPointer<EventHandler>& eventHandler = _events[compid];
             _healthAndArmingCheckReport.update(compid, eventHandler->healthAndArmingCheckResults(),
                     eventHandler->getModeGroup(_has_custom_mode_user_intention ? _custom_mode_user_intention : _custom_mode));
         });
         connect(this, &Vehicle::flightModeChanged, this, [compid, this]() {
+            if (compid != _defaultComponentId) {
+                return;
+            }
             const QSharedPointer<EventHandler>& eventHandler = _events[compid];
             if (eventHandler->healthAndArmingCheckResultsValid()) {
                 _healthAndArmingCheckReport.update(compid, eventHandler->healthAndArmingCheckResults(),
@@ -2429,10 +2435,9 @@ void Vehicle::emergencyStop()
 {
     sendMavCommand(
                 _defaultComponentId,
-                MAV_CMD_COMPONENT_ARM_DISARM,
+                MAV_CMD_DO_FLIGHTTERMINATION,
                 true,        // show error if fails
-                0.0f,
-                21196.0f);  // Magic number for emergency stop
+                1.0f);       // Do the termination
 }
 
 void Vehicle::landingGearDeploy()
@@ -3168,7 +3173,23 @@ void Vehicle::rebootVehicle()
     handlerInfo.resultHandler       = _rebootCommandResultHandler;
     handlerInfo.resultHandlerData   = this;
 
-    sendMavCommandWithHandler(&handlerInfo, _defaultComponentId, MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN, 1);
+    sendMavCommandWithHandler(
+        &handlerInfo,
+        _defaultComponentId,
+        MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN,
+        1,  // param1: reboot autopilot
+        0,  // param2: no onboard computer action
+        0,  // param3: no extra component action
+        0); // param4: no extra component id
+    // Also reboot the parachute (extra component) so it re-inits together with the FC
+    sendMavCommandWithHandler(
+        nullptr, // no result handler
+        161,     // parachute component id
+        MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN,
+        0,   // param1: no autopilot action
+        0,   // param2: no onboard computer action
+        1,   // param3: reboot extra component
+        161); // param4: extra component id (parachute)
 }
 
 void Vehicle::startCalibration(QGCMAVLink::CalibrationType calType)
@@ -3920,7 +3941,7 @@ void Vehicle::sendParamMapRC(const QString& paramName, double scale, double cent
                                        sharedLink->mavlinkChannel(),
                                        &message,
                                        _id,
-                                       MAV_COMP_ID_AUTOPILOT1,
+                                       _defaultComponentId,
                                        param_id_cstr,
                                        -1,                                                  // parameter name specified as string in previous argument
                                        static_cast<uint8_t>(tuningID),
@@ -3948,7 +3969,7 @@ void Vehicle::clearAllParamMapRC(void)
                                            sharedLink->mavlinkChannel(),
                                            &message,
                                            _id,
-                                           MAV_COMP_ID_AUTOPILOT1,
+                                           _defaultComponentId,
                                            param_id_cstr,
                                            -2,                                                  // Disable map for specified tuning id
                                            i,                                                   // tuning id

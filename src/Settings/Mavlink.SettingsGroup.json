@@ -72,6 +72,15 @@
     "default":      255,
     "min":          1,
     "max":          255
+},
+{
+    "name":         "targetComponentID",
+    "shortDesc":    "Target Component ID",
+    "longDesc":     "Component id of the vehicle component QGC connects to (e.g. the ATS). Requires application restart.",
+    "type":         "uint32",
+    "default":      1,
+    "min":          1,
+    "max":          255
 }
 ]
 }

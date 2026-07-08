@@ -333,7 +333,7 @@ bool VehicleLinkManager::_updatePrimaryLink()
 
     if (primaryLink && primaryLink->linkConfiguration()->isHighLatency()) {
         _vehicle->sendMavCommand(
-            MAV_COMP_ID_AUTOPILOT1,
+            _vehicle->defaultComponentId(),
             MAV_CMD_CONTROL_HIGH_LATENCY,
             true,
             0 // Stop transmission on this link
@@ -344,7 +344,7 @@ bool VehicleLinkManager::_updatePrimaryLink()
     emit primaryLinkChanged();
 
     if (bestActivePrimaryLink && bestActivePrimaryLink->linkConfiguration()->isHighLatency()) {
-        _vehicle->sendMavCommand(MAV_COMP_ID_AUTOPILOT1,
+        _vehicle->sendMavCommand(_vehicle->defaultComponentId(),
                        MAV_CMD_CONTROL_HIGH_LATENCY,
                        true,
                        1); // Start transmission on this link

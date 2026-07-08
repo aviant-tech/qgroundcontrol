@@ -284,7 +284,7 @@ void APMFirmwarePlugin::_handleIncomingHeartbeat(Vehicle *vehicle, mavlink_messa
     mavlink_heartbeat_t heartbeat{};
     mavlink_msg_heartbeat_decode(message, &heartbeat);
 
-    if (message->compid == MAV_COMP_ID_AUTOPILOT1) {
+    if (message->compid == vehicle->defaultComponentId()) {
         bool flying = false;
 
         // We pull Vehicle::flying state from HEARTBEAT on ArduPilot. This is a firmware specific test.
@@ -443,11 +443,11 @@ void APMFirmwarePlugin::initializeStreamRates(Vehicle *vehicle)
     // ArduPilot only sends home position on first boot and then when it arms. It does not stream the position.
     // This means that depending on when QGC connects to the vehicle it may not have home position.
     // This can cause various features to not be available. So we request home position streaming ourselves.
-    vehicle->sendMavCommand(MAV_COMP_ID_AUTOPILOT1, MAV_CMD_SET_MESSAGE_INTERVAL, false /* showError */, MAVLINK_MSG_ID_HOME_POSITION, 1000000 /* 1 second interval in usec */);
+    vehicle->sendMavCommand(vehicle->defaultComponentId(), MAV_CMD_SET_MESSAGE_INTERVAL, false /* showError */, MAVLINK_MSG_ID_HOME_POSITION, 1000000 /* 1 second interval in usec */);
 
     // ArduPilot doesn't send MAVLINK_MSG_ID_EXTENDED_SYS_STATE messages unless requested, so we request it to
     // make the LandAbort action available.
-    vehicle->sendMavCommand(MAV_COMP_ID_AUTOPILOT1, MAV_CMD_SET_MESSAGE_INTERVAL, false /* showError */, MAVLINK_MSG_ID_EXTENDED_SYS_STATE, 1000000 /* 1 second interval in usec */);
+    vehicle->sendMavCommand(vehicle->defaultComponentId(), MAV_CMD_SET_MESSAGE_INTERVAL, false /* showError */, MAVLINK_MSG_ID_EXTENDED_SYS_STATE, 1000000 /* 1 second interval in usec */);
 
     instanceData->lastBatteryStatusTime = instanceData->lastHomePositionTime = QTime::currentTime();
 }

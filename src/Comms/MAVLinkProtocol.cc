@@ -446,7 +446,12 @@ void MAVLinkProtocol::_vehicleCountChanged()
     }
 }
 
-int MAVLinkProtocol::getSystemId() const 
-{ 
-    return SettingsManager::instance()->mavlinkSettings()->gcsMavlinkSystemID()->rawValue().toInt(); 
+int MAVLinkProtocol::getSystemId() const
+{
+    return SettingsManager::instance()->mavlinkSettings()->gcsMavlinkSystemID()->rawValue().toInt();
+}
+
+int MAVLinkProtocol::getTargetComponentId()
+{
+    return SettingsManager::instance()->mavlinkSettings()->targetComponentID()->rawValue().toInt();
 }

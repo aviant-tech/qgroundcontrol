@@ -51,6 +51,9 @@ public:
     /// Get the component id of this application
     static int getComponentId() { return MAV_COMP_ID_MISSIONPLANNER; }
 
+    /// Get the target component id of the vehicle component QGC connects to (e.g. the ATS)
+    static int getTargetComponentId();
+
     /// Get the protocol version
     static int getVersion() { return MAVLINK_VERSION; }
 
