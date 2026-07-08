@@ -212,6 +212,44 @@ SettingsPage {
 
     SettingsGroupLayout {
         Layout.fillWidth:   true
+        heading:            qsTr("Aviant Traffic")
+
+        FactCheckBox {
+            id:                 showTrafficIndicatorsCheckBox
+            text:               _aviantSettings.showTrafficIndicators.shortDescription
+            fact:               _aviantSettings.showTrafficIndicators
+        }
+
+        QGCLabel { text: _aviantSettings.horizontalConflictDistance.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.horizontalConflictDistance
+            enabled:            showTrafficIndicatorsCheckBox.checked
+            Layout.fillWidth:   true
+        }
+
+        QGCLabel { text: _aviantSettings.verticalConflictDistance.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.verticalConflictDistance
+            enabled:            showTrafficIndicatorsCheckBox.checked
+            Layout.fillWidth:   true
+        }
+
+        FactCheckBox {
+            id:                 showMultidroneConflictCircleCheckBox
+            text:               _aviantSettings.showMultidroneConflictCircle.shortDescription
+            fact:               _aviantSettings.showMultidroneConflictCircle
+        }
+
+        QGCLabel { text: _aviantSettings.multidroneConflictDistance.shortDescription }
+        FactTextField {
+            fact:               _aviantSettings.multidroneConflictDistance
+            enabled:            showMultidroneConflictCircleCheckBox.checked
+            Layout.fillWidth:   true
+        }
+    }
+
+    SettingsGroupLayout {
+        Layout.fillWidth:   true
         heading:            qsTr("Brand Image")
         visible:            _brandImageSettings.visible && !ScreenTools.isMobile
         

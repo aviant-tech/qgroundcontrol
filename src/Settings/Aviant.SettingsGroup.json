@@ -34,6 +34,47 @@
     "shortDesc":           "Authentication token for kyte backend",
     "type":                "string",
     "default":             ""
+},
+{
+    "name":                "showTrafficIndicators",
+    "shortDesc":           "Show traffic indicators",
+    "longDesc":            "Shows traffic indicators, including conflict radius and line guides",
+    "type":                "bool",
+    "default":             true
+},
+{
+    "name":                "horizontalConflictDistance",
+    "shortDesc":           "Horizontal conflict distance",
+    "longDesc":            "The horizontal distance to nearby traffic inside which the situation is considered a conflict, and traffic indicators turn red. Twice this distance is used for proximity detection, meaning that the indicators will turn yellow.",
+    "type":                "uint32",
+    "min":                 0,
+    "units":               "m",
+    "default":             4000
+},
+{
+    "name":                "verticalConflictDistance",
+    "shortDesc":           "Vertical conflict distance",
+    "longDesc":            "The vertical distance to nearby traffic inside which the situation is considered a conflict, and traffic indicators turn red. Twice this distance is used for proximity detection, meaning that the indicators will turn yellow.",
+    "type":                "uint32",
+    "min":                 0,
+    "units":               "m",
+    "default":             600
+},
+{
+    "name":                "multidroneConflictDistance",
+    "shortDesc":           "Multidrone conflict distance",
+    "longDesc":            "The radius in meters for the multidrone conflict circle drawn around the landing point.",
+    "type":                "uint32",
+    "min":                 0,
+    "units":               "m",
+    "default":             1200
+},
+{
+    "name":                "showMultidroneConflictCircle",
+    "shortDesc":           "Show multidrone conflict circle",
+    "longDesc":            "Show a circle around the landing point with the multidrone conflict distance as radius.",
+    "type":                "bool",
+    "default":             true
 }
 ]
 }

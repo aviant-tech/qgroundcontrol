@@ -8,6 +8,7 @@
  ****************************************************************************/
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Effects
 import QtLocation
 import QtPositioning
@@ -16,6 +17,7 @@ import QGroundControl
 import QGroundControl.ScreenTools
 import QGroundControl.Vehicle
 import QGroundControl.Controls
+import QGroundControl.ADSBVehicle
 
 /// Marker for displaying a vehicle location on the map
 MapQuickItem {
@@ -28,6 +30,9 @@ MapQuickItem {
     property double heading:        vehicle ? vehicle.heading.value : Number.NaN    ///< Vehicle heading, NAN for none
     property real   size:           ScreenTools.defaultFontPixelHeight * 3          /// Default size for icon, most usage overrides this
     property bool   alert:          false                                           /// Collision alert
+    property var    emitterType:    ADSBVehicle.EMITTER_TYPE_NO_INFO                /// ADSB vehicle type
+    property int    icaoAddress                                                     /// ICAO address for ADSB vehicle
+    property bool   oldSignal:      false                                           /// True if the ADSB signal is old
 
     anchorPoint.x:  vehicleItem.width  / 2
     anchorPoint.y:  vehicleItem.height / 2
@@ -37,12 +42,13 @@ MapQuickItem {
     property bool   _adsbVehicle:   vehicle ? false : true
     property var    _map:           map
     property bool   _multiVehicle:  QGroundControl.multiVehicleManager.vehicles.count > 1
+    property var    _adsbVehicleManager: QGroundControl.adsbVehicleManager
 
     sourceItem: Item {
         id:         vehicleItem
         width:      vehicleIcon.width
         height:     vehicleIcon.height
-        opacity:    _adsbVehicle || vehicle === _activeVehicle ? 1.0 : 0.5
+        opacity:    _adsbVehicle ? (oldSignal ? 0.4 : 1.0) : (vehicle === _activeVehicle ? 1.0 : 0.5)
 
         MultiEffect {
             source: vehicleIcon
@@ -121,7 +127,7 @@ MapQuickItem {
 
         Image {
             id:                 vehicleIcon
-            source:             _adsbVehicle ? (alert ? "/qmlimages/AlertAircraft.svg" : "/qmlimages/AwarenessAircraft.svg") : vehicle.vehicleImageOpaque
+            source:             _adsbVehicle ? getAdsbIcon(emitterType, alert) : vehicle.vehicleImageOpaque
             mipmap:             true
             width:              _root.size
             sourceSize.width:   _root.size
@@ -130,6 +136,45 @@ MapQuickItem {
                 origin.x:       vehicleIcon.width  / 2
                 origin.y:       vehicleIcon.height / 2
                 angle:          isNaN(heading) ? 0 : heading
+            }
+
+            function getAdsbIcon(emitterType, alert) {
+                switch (emitterType) {
+                    case ADSBVehicle.EMITTER_TYPE_LIGHT:
+                    case ADSBVehicle.EMITTER_TYPE_SMALL:
+                    case ADSBVehicle.EMITTER_TYPE_LARGE:
+                    case ADSBVehicle.EMITTER_TYPE_HEAVY:
+                    case ADSBVehicle.EMITTER_TYPE_HIGHLY_MANUV:
+                    case ADSBVehicle.EMITTER_TYPE_GLIDER:
+                    case ADSBVehicle.EMITTER_TYPE_ULTRA_LIGHT:
+                        return alert ? "/qmlimages/AlertAircraft.svg" : "/qmlimages/AwarenessAircraft.svg"
+                    case ADSBVehicle.EMITTER_TYPE_UAV:
+                        return alert ? "/qmlimages/AlertDrone.svg" : "/qmlimages/AwarenessDrone.svg"
+                    case ADSBVehicle.EMITTER_TYPE_ROTOCRAFT:
+                        return alert ? "/qmlimages/AlertHeli.svg" : "/qmlimages/AwarenessHeli.svg"
+                    case ADSBVehicle.EMITTER_TYPE_PARACHUTE:
+                        return alert ? "/qmlimages/AlertPara.svg" : "/qmlimages/AwarenessPara.svg"
+                    default:
+                        return alert ? "/qmlimages/AlertUnknown.svg" : "/qmlimages/AwarenessUnknown.svg"
+                }
+            }
+
+            MouseArea {
+                anchors.fill:   parent
+                enabled:        _adsbVehicle
+                onClicked: {
+                    if (_adsbVehicle) {
+                        mainWindow.showMessageDialog(
+                            qsTr("Hide vehicle %1?").arg(callsign),
+                            qsTr("You can unhide it in the toolbar."),
+                            Dialog.Yes | Dialog.No,
+                            function() {
+                                if (_adsbVehicleManager && icaoAddress) {
+                                    _adsbVehicleManager.setHiddenForADSBVehicle(Number(icaoAddress), true)
+                                }
+                            })
+                    }
+                }
             }
         }
 
@@ -141,12 +186,31 @@ MapQuickItem {
             text:                       vehicleLabelText
             font.pointSize:             _adsbVehicle ? ScreenTools.defaultFontPointSize : ScreenTools.smallFontPointSize
             visible:                    _adsbVehicle ? !isNaN(altitude) : _multiVehicle
-            property string vehicleLabelText: visible ?
-                                                  (_adsbVehicle ?
-                                                       QGroundControl.unitsConversion.metersToAppSettingsVerticalDistanceUnits(altitude).toFixed(0) + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString + "\n" + callsign :
-                                                       (_multiVehicle ? vehicle.name : "")) :
-                                                  ""
+            property string vehicleLabelText: {
+                if (!visible) return ""
 
+                var label = ""
+                if (_adsbVehicle && _activeVehicle) {
+                    label += callsign
+                    if (coordinate.isValid && _activeVehicle.coordinate.isValid) {
+                        var distance = coordinate.distanceTo(_activeVehicle.coordinate)
+                        var distanceValueString = QGroundControl.unitsConversion.metersToAppSettingsHorizontalDistanceUnits(distance).toFixed(0)
+                        var distanceUnit = QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString
+                        label += "\nd+" + distanceValueString + " " + distanceUnit
+
+                        if (!isNaN(altitude)) {
+                            var altitudeDifference = altitude - _activeVehicle.coordinate.altitude
+                            var altitudePrefix = altitudeDifference > 0 ? "+" : ""
+                            var altitudeValueString = QGroundControl.unitsConversion.metersToAppSettingsVerticalDistanceUnits(altitudeDifference).toFixed(0)
+                            var altitudeUnit = QGroundControl.unitsConversion.appSettingsVerticalDistanceUnitsString
+                            label += "\na" + altitudePrefix + altitudeValueString + " " + altitudeUnit
+                        }
+                    }
+                } else if (_multiVehicle) {
+                    label += vehicle.name
+                }
+                return label
+            }
         }
     }
 }

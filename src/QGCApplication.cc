@@ -42,6 +42,7 @@
 #include "FollowMe.h"
 #include "GeoTagController.h"
 #include "GimbalController.h"
+#include "ADSBVehicle.h"
 #include "GPSRtk.h"
 #include "JoystickConfigController.h"
 #include "JoystickManager.h"
@@ -286,6 +287,7 @@ void QGCApplication::init()
 #endif
 
     qmlRegisterUncreatableType<GimbalController>("QGroundControl.Vehicle", 1, 0, "GimbalController", "Reference only");
+    qmlRegisterUncreatableType<ADSBVehicle>("QGroundControl.ADSBVehicle", 1, 0, "ADSBVehicle", "Reference only");
 
 #ifndef QGC_DISABLE_MAVLINK_INSPECTOR
     qmlRegisterUncreatableType<MAVLinkChartController>("QGroundControl", 1, 0, "MAVLinkChart", "Reference only");

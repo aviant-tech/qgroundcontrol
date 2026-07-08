@@ -49,6 +49,11 @@ FlightMap {
     property bool   _keepMapCenteredOnVehicle:  _flyViewSettings.keepMapCenteredOnVehicle.rawValue
     property bool   _showProximityRadar:        _flyViewSettings.showProximityRadar.rawValue
     property bool   _showPositionSetpointLine:  _flyViewSettings.showPositionSetpointLine.rawValue
+    property var    _aviantSettings:            QGroundControl.settingsManager.aviantSettings
+    property bool   _showTrafficIndicators:     _aviantSettings.showTrafficIndicators.rawValue
+    property var    _horizontalConflictDistance: _aviantSettings.horizontalConflictDistance.value
+    property var    _verticalConflictDistance:  _aviantSettings.verticalConflictDistance.value
+    property var    _multidroneConflictDistance: _aviantSettings.multidroneConflictDistance.value
 
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
@@ -309,15 +314,70 @@ FlightMap {
     MapItemView {
         model: QGroundControl.adsbVehicleManager.adsbVehicles
         delegate: VehicleMapItem {
-            coordinate:     object.coordinate
-            altitude:       object.altitude
-            callsign:       object.callsign
-            heading:        object.heading
-            alert:          object.alert
+            coordinate:     object ? object.coordinate : QtPositioning.coordinate()
+            altitude:       object ? object.altitude : 0
+            callsign:       object ? object.callsign : ""
+            heading:        object ? object.heading : 0
+            alert:          object ? object.alert : false
+            emitterType:    object ? object.emitterType : 0
+            icaoAddress:    object ? object.icaoAddress : ""
+            oldSignal:      object ? object.oldSignal : false
             map:            _root
             size:           pipMode ? ScreenTools.defaultFontPixelHeight : ScreenTools.defaultFontPixelHeight * 2.5
             z:              QGroundControl.zOrderVehicles
+            visible:        object ? !object.hidden : false
         }
+    }
+
+    // Draw a proximity/conflict line from each ADSB vehicle to the active vehicle
+    MapItemView {
+        model: QGroundControl.adsbVehicleManager.adsbVehicles
+        delegate: MapPolyline {
+            visible:    (_showTrafficIndicators && object) ? (!object.hidden && get_proximity(object, _activeVehicle, _horizontalConflictDistance * 2, _verticalConflictDistance * 2)) : false
+            line.width: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? 4 : 2
+            line.color: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? "red" : "yellow"
+            z:          QGroundControl.zOrderVehicles + 1
+            path:       visible ? [ object.coordinate, _activeVehicle.coordinate ] : []
+
+            function get_proximity(adsbVehicle, mainVehicle, horizontal_radius, vertical_radius) {
+                if (!adsbVehicle || !adsbVehicle.coordinate.isValid || !mainVehicle || !mainVehicle.coordinate.isValid) {
+                    return false
+                }
+                var vertical_distance = 0
+                if (!isNaN(adsbVehicle.altitude)) {
+                    vertical_distance = Math.abs(adsbVehicle.altitude - mainVehicle.coordinate.altitude)
+                }
+                var horizontal_distance = adsbVehicle.coordinate.distanceTo(mainVehicle.coordinate)
+                return vertical_distance <= vertical_radius && horizontal_distance <= horizontal_radius
+            }
+        }
+    }
+
+    // Traffic conflict radius around the active vehicle
+    MapCircle {
+        color:          "transparent"
+        opacity:        1
+        border.color:   "red"
+        border.width:   4
+        radius:         _horizontalConflictDistance
+        center:         _activeVehicleCoordinate
+        visible:        _showTrafficIndicators
+    }
+
+    // Multidrone conflict circle indicating the area to avoid around another drone's landing point
+    MapCircle {
+        color:          "transparent"
+        opacity:        1
+        border.color:   "blue"
+        border.width:   3
+        radius:         _multidroneConflictDistance
+        center: {
+            var items = _planMasterController.missionController.visualItems
+            if (!items || items.count === 0) return QtPositioning.coordinate()
+            var lastItem = items.get(items.count - 1)
+            return lastItem.coordinate
+        }
+        visible:        _aviantSettings.showMultidroneConflictCircle.value && _aviantSettings.multidroneConflictDistance.value > 0
     }
 
     // Add the items associated with each vehicles flight plan to the map

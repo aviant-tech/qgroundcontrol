@@ -38,6 +38,14 @@ void ADSBVehicle::update(const ADSB::VehicleInfo_t &vehicleInfo)
 
     qCDebug(ADSBVehicleLog) << "Updating" << QStringLiteral("%1 Flags: %2").arg(vehicleInfo.icaoAddress, 0, 16).arg(vehicleInfo.availableFlags, 0, 2);
 
+    // Any fresh update clears the "old signal" mark
+    setIsOldSignal(false);
+
+    if (vehicleInfo.emitterType != _info.emitterType) {
+        _info.emitterType = vehicleInfo.emitterType;
+        emit emitterTypeChanged();
+    }
+
     if (vehicleInfo.availableFlags & ADSB::LocationAvailable) {
         if (!QGC::fuzzyCompare(vehicleInfo.location.latitude(), coordinate().latitude()) || !QGC::fuzzyCompare(vehicleInfo.location.longitude(), coordinate().longitude())) {
             _info.location.setLatitude(vehicleInfo.location.latitude());
@@ -96,4 +104,25 @@ void ADSBVehicle::update(const ADSB::VehicleInfo_t &vehicleInfo)
     }
 
     _lastUpdateTimer.start();
+}
+
+void ADSBVehicle::setHidden(bool hidden)
+{
+    if (hidden != _hidden) {
+        _hidden = hidden;
+        emit hiddenChanged();
+    }
+}
+
+void ADSBVehicle::setIsOldSignal(bool isOldSignal)
+{
+    if (isOldSignal != _oldSignal) {
+        if (isOldSignal) {
+            qCDebug(ADSBVehicleLog) << "Old signal" << QStringLiteral("%1").arg(icaoAddress(), 0, 16);
+        } else {
+            qCDebug(ADSBVehicleLog) << "Signal restored" << QStringLiteral("%1").arg(icaoAddress(), 0, 16);
+        }
+        _oldSignal = isOldSignal;
+        emit oldSignalChanged();
+    }
 }

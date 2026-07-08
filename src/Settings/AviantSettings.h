@@ -27,4 +27,9 @@ public:
     DEFINE_SETTINGFACT(missionToolsToken)
     DEFINE_SETTINGFACT(kyteBackendUrl)
     DEFINE_SETTINGFACT(kyteBackendToken)
+    DEFINE_SETTINGFACT(showTrafficIndicators)
+    DEFINE_SETTINGFACT(horizontalConflictDistance)
+    DEFINE_SETTINGFACT(verticalConflictDistance)
+    DEFINE_SETTINGFACT(multidroneConflictDistance)
+    DEFINE_SETTINGFACT(showMultidroneConflictCircle)
 };
