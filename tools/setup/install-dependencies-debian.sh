@@ -20,7 +20,6 @@ DEBIAN_FRONTEND=noninteractive apt-get -y --quiet install \
     gnupg \
     gnupg2 \
     libfuse2 \
-    libfuse3-4 \
     libtool \
     locales \
     make \
@@ -32,6 +31,14 @@ DEBIAN_FRONTEND=noninteractive apt-get -y --quiet install \
     rsync \
     wget2 \
     zsync
+
+# libfuse3 runtime: the versioned package name differs per release
+# (libfuse3-3 on Ubuntu 22.04, libfuse3-4 on Ubuntu 24.04 / Debian 13).
+# Install whichever this release actually provides so the AppImage runtime works everywhere.
+FUSE3_PKG=$(apt-cache search --names-only '^libfuse3-[0-9]+$' | cut -d' ' -f1 | sort -V | tail -n1)
+if [ -n "$FUSE3_PKG" ]; then
+    DEBIAN_FRONTEND=noninteractive apt-get -y --quiet install "$FUSE3_PKG"
+fi
 
 # Qt Required - https://doc.qt.io/qt-6/linux-requirements.html
 DEBIAN_FRONTEND=noninteractive apt-get -y --quiet install \
