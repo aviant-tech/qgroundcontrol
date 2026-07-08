@@ -18,7 +18,14 @@ echo "QT_MODULES $QT_MODULES"
 
 apt update
 apt install python3 python3-pip -y
-pip3 install setuptools wheel py7zr ninja cmake aqtinstall
+# Ubuntu 24.04 / Debian 13 mark the system Python as externally managed (PEP 668),
+# so a plain `pip3 install` is refused. Pass --break-system-packages when the pip
+# in this image supports it; older pip (e.g. Ubuntu 22.04) neither needs nor knows it.
+PIP_FLAGS=""
+if pip3 install --help 2>/dev/null | grep -q -- "--break-system-packages"; then
+    PIP_FLAGS="--break-system-packages"
+fi
+pip3 install ${PIP_FLAGS} setuptools wheel py7zr ninja cmake aqtinstall
 aqt install-qt ${QT_HOST} ${QT_TARGET} ${QT_VERSION} ${QT_ARCH} -O ${QT_PATH} -m ${QT_MODULES}
 export PATH=$(readlink -e ${QT_PATH}/${QT_VERSION}/${QT_ARCH}/bin/):$PATH
 export PKG_CONFIG_PATH=$(readlink -e ${QT_PATH}/${QT_VERSION}/${QT_ARCH}/lib/pkgconfig):$PKG_CONFIG_PATH
