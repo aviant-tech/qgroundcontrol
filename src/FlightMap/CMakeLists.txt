@@ -34,6 +34,7 @@ qt_add_qml_module(FlightMapModule
         Widgets/QGCPitchIndicator.qml
         Widgets/VehicleWarningSideBar.qml
         Widgets/VerticalCompassAttitude.qml
+        Widgets/WinchControl.qml
         FlightMap.qml
         MapScale.qml
     NO_PLUGIN # Required by Qt 6.6.3. TODO: Remove when no longer supported.

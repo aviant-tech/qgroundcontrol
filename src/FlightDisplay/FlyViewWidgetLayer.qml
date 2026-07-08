@@ -48,6 +48,8 @@ Item {
     property rect   _centerViewport:        Qt.rect(0, 0, width, height)
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property var    _flyViewSettings:       QGroundControl.settingsManager.flyViewSettings
+    property var    _aviantSettings:        QGroundControl.settingsManager.aviantSettings
+    property bool   _showWinchControlMenu:  _aviantSettings.showWinchControlMenu.rawValue
     property bool   _showAltitudeWidget:    _activeVehicle != null && _flyViewSettings.showAltitudeWidget.rawValue
     property alias  _gripperMenu:           gripperOptions
     property real   _layoutMargin:          ScreenTools.defaultFontPixelWidth * 0.75
@@ -123,6 +125,17 @@ Item {
         availableHeight:            parent.height - (topRightPanel.height + ScreenTools.defaultFontPixelHeight * 4)
         minVisibleRangeInMeters:    _flyViewSettings.minVisibleRangeInMeters.rawValue
         metersBetweenLines:         _flyViewSettings.metersBetweenLines.rawValue
+    }
+
+    // Aviant (A8): winch control widget, gated on the Aviant winch-control-menu setting
+    WinchControl {
+        id:                     winchControl
+        anchors.margins:        _toolsMargin
+        anchors.right:          parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        width:                  _rightPanelWidth
+        visible:                _showWinchControlMenu
+        z:                      QGroundControl.zOrderWidgets
     }
 
     FlyViewMissionCompleteDialog {

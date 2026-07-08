@@ -105,6 +105,7 @@
         <file alias="Vehicle/VehicleFact.json">src/Vehicle/FactGroups/VehicleFact.json</file>
         <file alias="Vehicle/VibrationFact.json">src/Vehicle/FactGroups/VibrationFact.json</file>
         <file alias="Vehicle/WindFact.json">src/Vehicle/FactGroups/WindFact.json</file>
+        <file alias="Vehicle/WinchStatusFactGroup.json">src/Vehicle/FactGroups/WinchStatusFactGroup.json</file>
         <file alias="Vehicle/HygrometerFact.json">src/Vehicle/FactGroups/HygrometerFact.json</file>
         <file alias="Vehicle/GeneratorFact.json">src/Vehicle/FactGroups/GeneratorFact.json</file>
         <file alias="Vehicle/EFIFact.json">src/Vehicle/FactGroups/EFIFact.json</file>

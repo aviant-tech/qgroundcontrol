@@ -208,6 +208,11 @@ SettingsPage {
             text:               _aviantSettings.missionToolsInsecureHttps.shortDescription
             fact:               _aviantSettings.missionToolsInsecureHttps
         }
+
+        FactCheckBox {
+            text:               qsTr("Show winch control menu")
+            fact:               _aviantSettings.showWinchControlMenu
+        }
     }
 
     SettingsGroupLayout {

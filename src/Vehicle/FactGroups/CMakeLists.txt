@@ -38,6 +38,8 @@ target_sources(${CMAKE_PROJECT_NAME}
         VehicleVibrationFactGroup.h
         VehicleWindFactGroup.cc
         VehicleWindFactGroup.h
+        VehicleWinchStatusFactGroup.cc
+        VehicleWinchStatusFactGroup.h
         VehicleHygrometerFactGroup.cc
         VehicleHygrometerFactGroup.h
 )

@@ -32,4 +32,5 @@ public:
     DEFINE_SETTINGFACT(verticalConflictDistance)
     DEFINE_SETTINGFACT(multidroneConflictDistance)
     DEFINE_SETTINGFACT(showMultidroneConflictCircle)
+    DEFINE_SETTINGFACT(showWinchControlMenu)
 };

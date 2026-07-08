@@ -75,6 +75,13 @@
     "longDesc":            "Show a circle around the landing point with the multidrone conflict distance as radius.",
     "type":                "bool",
     "default":             true
+},
+{
+    "name":                "showWinchControlMenu",
+    "shortDesc":           "Show winch control menu",
+    "longDesc":            "Shows the winch control menu buttons and slider",
+    "type":                "bool",
+    "default":             true
 }
 ]
 }
