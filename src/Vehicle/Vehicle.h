@@ -997,7 +997,7 @@ private:
     void _handleCommandAck              (mavlink_message_t& message);
     void _handleGpsRawInt               (mavlink_message_t& message);
     void _handleGlobalPositionInt       (mavlink_message_t& message);
-    void _handleUtmGlobalPosition       (mavlink_message_t& message);
+    void _handlePositionTargetGlobalInt (mavlink_message_t& message);
     void _handleHighLatency             (mavlink_message_t& message);
     void _handleHighLatency2            (mavlink_message_t& message);
     void _handleOrbitExecutionStatus    (const mavlink_message_t& message);
@@ -1053,7 +1053,6 @@ private:
 
     QGeoCoordinate  _coordinate;
     QGeoCoordinate  _positionSetpoint;
-    bool            _utmGlobalPositionMessageAvailable = false;
     QGeoCoordinate  _homePosition;
     QGeoCoordinate  _armedPosition;
 

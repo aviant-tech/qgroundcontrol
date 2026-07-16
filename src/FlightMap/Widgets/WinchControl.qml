@@ -281,16 +281,19 @@ Rectangle {
                     } else if (_currentWinchCommand === null) {
                         console.log("Cannot send winch command, no action selected.")
                     } else {
-                        //MAV_COMP_ID_USER18(42) is the chosen component for winches
-                        // since no winch defaults exist yet in the MAVLink standard.
+                        // MAV_COMP_ID_USER18(42) was the winch component in the 1.13-era
+                        // firmware; MAV_COMP_ID_WINCH(169) is the dedicated winch component
+                        // used from 1.15 onward (the Notus companion listens on 169). We send
+                        // to both for cross-firmware compatibility. Because one of the two
+                        // will always fail to ack, we suppress the error popup (showError=0)
+                        // to avoid a spurious "Vehicle did not respond to command" warning.
                         // The QML MAVLink enum doesn't include MAV_CMD_DO_WINCH(42600).
-                        // Setting it explicitly. See src/comm/QGCMAVLink.h for details.
-                        // TODO Use 0 (broadcast) instead of 42 to not hardcode component id?
-                        // Or store id from received messages?
+                        // Setting it explicitly. See src/MAVLink/QGCMAVLink.h for details.
                         // Length (param3) is set to 1m here, this is not used but it is
                         // IMPORTANT that param3 is 1 since it is used by winch code to
                         // distinguish between manual and mission commands.
-                        _vehicle.sendCommand(42, 42600, 1, 1, _currentWinchCommand, 1 /*MANUAL*/, 1)
+                        _vehicle.sendCommand(42,  42600, 0, 1, _currentWinchCommand, 1 /*MANUAL*/, 1)
+                        _vehicle.sendCommand(169, 42600, 0, 1, _currentWinchCommand, 1 /*MANUAL*/, 1)
                         disableWinchSlider()
                         uncheckInactiveButtons()
                     }

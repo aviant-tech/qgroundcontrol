@@ -83,7 +83,7 @@ void ADSBVehicle::update(const ADSB::VehicleInfo_t &vehicleInfo)
     }
 
     if (vehicleInfo.availableFlags & ADSB::SquawkAvailable) {
-        if (!QGC::fuzzyCompare(vehicleInfo.velocity, squawk())) {
+        if (vehicleInfo.squawk != squawk()) {
             _info.squawk = vehicleInfo.squawk;
             emit squawkChanged();
         }

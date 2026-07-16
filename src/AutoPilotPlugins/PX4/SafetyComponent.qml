@@ -54,7 +54,11 @@ SetupPage {
             property Fact _objectAvoidance:     controller.getParameterFact(-1, "COM_OBS_AVOID")
             property Fact _landSpeedMC:         controller.getParameterFact(-1, "MPC_LAND_SPEED", false)
             property Fact _parachuteRequired:   controller.getParameterFact(-1, "COM_PARACHUTE", false)
-            property Fact _parachuteAltitude:   controller.getParameterFact(-1, "FD_MIN_DIST_TRM", false)
+            // Parachute termination minimum-altitude parameter was renamed in PX4 1.15
+            // (FD_MIN_DIST_TRM -> COM_FDTRM_MINAGL). Support both so the field binds on either firmware.
+            property Fact _parachuteAltitude:   controller.parameterExists(-1, "COM_FDTRM_MINAGL")
+                                                    ? controller.getParameterFact(-1, "COM_FDTRM_MINAGL", false)
+                                                    : controller.getParameterFact(-1, "FD_MIN_DIST_TRM", false)
             property bool _hitlAvailable:       controller.parameterExists(-1, hitlParam)
             property Fact _hitlEnabled:         controller.getParameterFact(-1, hitlParam, false)
 
