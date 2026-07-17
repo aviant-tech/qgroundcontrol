@@ -28,6 +28,13 @@ ListModel {
     }
 
     ListElement {
+        name: qsTr("Aviant")
+        url: "qrc:/qml/QGroundControl/AppSettings/AviantSettings.qml"
+        iconUrl: "qrc:/InstrumentValueIcons/drone.svg"
+        pageVisible: function() { return true }
+    }
+
+    ListElement {
         name: qsTr("Plan View")
         url: "qrc:/qml/QGroundControl/AppSettings/PlanViewSettings.qml"
         iconUrl: "qrc:/qmlimages/Plan.svg"
