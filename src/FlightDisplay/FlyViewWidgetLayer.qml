@@ -114,7 +114,8 @@ Item {
         property real rightEdgeBottomInset:     width + _layoutMargin
     }
 
-    // A68: Altitude widget showing vehicle altitude relative to the current waypoint
+    // A68: Altitude widget (altitude ladder) — sits directly below the top-right status
+    // panel on the right edge, matching the Human Factors report "status widgets" column.
     AltitudeWidget {
         id:                         altitudeWidget
         anchors.margins:            _layoutMargin
@@ -128,26 +129,36 @@ Item {
         metersBetweenLines:         _flyViewSettings.metersBetweenLines.rawValue
     }
 
-    // Aviant (A8): winch control widget, gated on the Aviant winch-control-menu setting
-    WinchControl {
-        id:                     winchControl
-        anchors.margins:        _toolsMargin
-        anchors.right:          parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        width:                  _rightPanelWidth
-        visible:                _showWinchControlMenu
-        z:                      QGroundControl.zOrderWidgets
-    }
-
-    // Aviant (A53/A63): Fly-view battery widget (bottom-right, above the bottom row layout)
-    BatteryWidget {
-        id:                 batteryWidget
+    // Aviant: right-edge widget stack anchored above the telemetry bar and growing upward.
+    // Ordered battery-over-winch to match the Human Factors report placement (battery in the
+    // "status widgets" region, winch in the bottom-right "winch controls" region). Using a
+    // ColumnLayout keeps the two widgets from overlapping and auto-collapses whichever is
+    // hidden, replacing the previous free-floating verticalCenter anchoring that let the
+    // winch control overlap the altitude and battery widgets.
+    ColumnLayout {
+        id:                 rightWidgetStack
         anchors.margins:    _layoutMargin
         anchors.right:      parent.right
         anchors.bottom:     bottomRightRowLayout.top
         width:              _rightPanelWidth
-        availableHeight:    parent.height - (topRightPanel.height + bottomRightRowLayout.height + ScreenTools.defaultFontPixelHeight * 2)
-        visible:            _showBatteryWidget
+        spacing:            _layoutSpacing
+        z:                  QGroundControl.zOrderWidgets
+
+        // Aviant (A53/A63): Fly-view battery widget
+        BatteryWidget {
+            id:                 batteryWidget
+            Layout.fillWidth:   true
+            visible:            _showBatteryWidget
+            winchControlVisible: _showWinchControlMenu
+            availableHeight:    _root.height - (topRightPanel.height + bottomRightRowLayout.height + winchControl.height + ScreenTools.defaultFontPixelHeight * 2)
+        }
+
+        // Aviant (A8): winch control widget, gated on the Aviant winch-control-menu setting
+        WinchControl {
+            id:                 winchControl
+            Layout.fillWidth:   true
+            visible:            _showWinchControlMenu
+        }
     }
 
     FlyViewMissionCompleteDialog {
