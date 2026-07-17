@@ -284,16 +284,23 @@ Rectangle {
                         // MAV_COMP_ID_USER18(42) was the winch component in the 1.13-era
                         // firmware; MAV_COMP_ID_WINCH(169) is the dedicated winch component
                         // used from 1.15 onward (the Notus companion listens on 169). We send
-                        // to both for cross-firmware compatibility. Because one of the two
-                        // will always fail to ack, we suppress the error popup (showError=0)
-                        // to avoid a spurious "Vehicle did not respond to command" warning.
+                        // to both for cross-firmware compatibility.
+                        //
+                        // Error surfacing: comp 169 is the current, authoritative winch
+                        // component, so we send it with showError=true — if the real winch
+                        // does not acknowledge the command, the pilot gets a "Vehicle did not
+                        // respond to command" warning instead of the failure being swallowed.
+                        // The legacy comp 42 send is expected to go unacknowledged on modern
+                        // firmware, so it stays showError=false to avoid a spurious popup on
+                        // every winch action.
+                        //
                         // The QML MAVLink enum doesn't include MAV_CMD_DO_WINCH(42600).
                         // Setting it explicitly. See src/MAVLink/QGCMAVLink.h for details.
                         // Length (param3) is set to 1m here, this is not used but it is
                         // IMPORTANT that param3 is 1 since it is used by winch code to
                         // distinguish between manual and mission commands.
-                        _vehicle.sendCommand(42,  42600, 0, 1, _currentWinchCommand, 1 /*MANUAL*/, 1)
-                        _vehicle.sendCommand(169, 42600, 0, 1, _currentWinchCommand, 1 /*MANUAL*/, 1)
+                        _vehicle.sendCommand(42,  42600, 0 /*showError:false*/, 1, _currentWinchCommand, 1 /*MANUAL*/, 1)
+                        _vehicle.sendCommand(169, 42600, 1 /*showError:true*/,  1, _currentWinchCommand, 1 /*MANUAL*/, 1)
                         disableWinchSlider()
                         uncheckInactiveButtons()
                     }
