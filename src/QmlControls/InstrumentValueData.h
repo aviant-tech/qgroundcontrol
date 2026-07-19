@@ -47,6 +47,15 @@ public:
     Q_PROPERTY(QVariantList         rangeColors         READ    rangeColors         WRITE setRangeColors    NOTIFY rangeColorsChanged)
     Q_PROPERTY(QVariantList         rangeIcons          READ    rangeIcons          WRITE setRangeIcons     NOTIFY rangeIconsChanged)
     Q_PROPERTY(QVariantList         rangeOpacities      READ    rangeOpacities      WRITE setRangeOpacities NOTIFY rangeOpacitiesChanged)
+    Q_PROPERTY(bool                 individualFwMrRanges READ individualFwMrRanges  WRITE setIndividualFwMrRanges NOTIFY individualFwMrRangesChanged)
+    Q_PROPERTY(QVariantList         fwRangeValues       READ    fwRangeValues       WRITE setFwRangeValues    NOTIFY fwRangeValuesChanged)
+    Q_PROPERTY(QVariantList         fwRangeColors       READ    fwRangeColors       WRITE setFwRangeColors    NOTIFY fwRangeColorsChanged)
+    Q_PROPERTY(QVariantList         fwRangeIcons        READ    fwRangeIcons        WRITE setFwRangeIcons     NOTIFY fwRangeIconsChanged)
+    Q_PROPERTY(QVariantList         fwRangeOpacities    READ    fwRangeOpacities    WRITE setFwRangeOpacities NOTIFY fwRangeOpacitiesChanged)
+    Q_PROPERTY(QVariantList         mrRangeValues       READ    mrRangeValues       WRITE setMrRangeValues    NOTIFY mrRangeValuesChanged)
+    Q_PROPERTY(QVariantList         mrRangeColors       READ    mrRangeColors       WRITE setMrRangeColors    NOTIFY mrRangeColorsChanged)
+    Q_PROPERTY(QVariantList         mrRangeIcons        READ    mrRangeIcons        WRITE setMrRangeIcons     NOTIFY mrRangeIconsChanged)
+    Q_PROPERTY(QVariantList         mrRangeOpacities    READ    mrRangeOpacities    WRITE setMrRangeOpacities NOTIFY mrRangeOpacitiesChanged)
     Q_PROPERTY(QColor               currentColor        MEMBER _currentColor                                NOTIFY currentColorChanged)
     Q_PROPERTY(double               currentOpacity      MEMBER _currentOpacity                              NOTIFY currentOpacityChanged)
     Q_PROPERTY(QString              currentIcon         MEMBER _currentIcon                                 NOTIFY currentIconChanged)
@@ -67,10 +76,19 @@ public:
     bool            showUnits               (void) const { return _showUnits; }
     QString         icon                    (void) const { return _icon; }
     RangeType       rangeType               (void) const { return _rangeType; }
-    QVariantList    rangeValues             (void) const { return _rangeValues; }
-    QVariantList    rangeColors             (void) const { return _rangeColors; }
-    QVariantList    rangeIcons              (void) const { return _rangeIcons; }
-    QVariantList    rangeOpacities          (void) const { return _rangeOpacities; }
+    QVariantList    rangeValues             (void) const { return _range.values; }
+    QVariantList    rangeColors             (void) const { return _range.colors; }
+    QVariantList    rangeIcons              (void) const { return _range.icons; }
+    QVariantList    rangeOpacities          (void) const { return _range.opacities; }
+    bool            individualFwMrRanges    (void) const { return _individualFwMrRanges; }
+    QVariantList    fwRangeValues           (void) const { return _fwRange.values; }
+    QVariantList    fwRangeColors           (void) const { return _fwRange.colors; }
+    QVariantList    fwRangeIcons            (void) const { return _fwRange.icons; }
+    QVariantList    fwRangeOpacities        (void) const { return _fwRange.opacities; }
+    QVariantList    mrRangeValues           (void) const { return _mrRange.values; }
+    QVariantList    mrRangeColors           (void) const { return _mrRange.colors; }
+    QVariantList    mrRangeIcons            (void) const { return _mrRange.icons; }
+    QVariantList    mrRangeOpacities        (void) const { return _mrRange.opacities; }
     void            setText                 (const QString& text);
     void            setShowUnits            (bool showUnits);
     void            setIcon                 (const QString& icon);
@@ -79,6 +97,15 @@ public:
     void            setRangeColors          (const QVariantList& rangeColors);
     void            setRangeIcons           (const QVariantList& rangeIcons);
     void            setRangeOpacities       (const QVariantList& rangeOpacities);
+    void            setIndividualFwMrRanges (bool individualFwMrRanges);
+    void            setFwRangeValues        (const QVariantList& fwRangeValues);
+    void            setFwRangeColors        (const QVariantList& fwRangeColors);
+    void            setFwRangeIcons         (const QVariantList& fwRangeIcons);
+    void            setFwRangeOpacities     (const QVariantList& fwRangeOpacities);
+    void            setMrRangeValues        (const QVariantList& mrRangeValues);
+    void            setMrRangeColors        (const QVariantList& mrRangeColors);
+    void            setMrRangeIcons         (const QVariantList& mrRangeIcons);
+    void            setMrRangeOpacities     (const QVariantList& mrRangeOpacities);
 
     static constexpr const char*  vehicleFactGroupName =   "Vehicle";
 
@@ -96,6 +123,15 @@ signals:
     void rangeColorsChanged     (const QVariantList& rangeColors);
     void rangeIconsChanged      (const QVariantList& rangeIcons);
     void rangeOpacitiesChanged  (const QVariantList& rangeOpacities);
+    void individualFwMrRangesChanged (bool individualFwMrRanges);
+    void fwRangeValuesChanged   (const QVariantList& fwRangeValues);
+    void fwRangeColorsChanged   (const QVariantList& fwRangeColors);
+    void fwRangeIconsChanged    (const QVariantList& fwRangeIcons);
+    void fwRangeOpacitiesChanged(const QVariantList& fwRangeOpacities);
+    void mrRangeValuesChanged   (const QVariantList& mrRangeValues);
+    void mrRangeColorsChanged   (const QVariantList& mrRangeColors);
+    void mrRangeIconsChanged    (const QVariantList& mrRangeIcons);
+    void mrRangeOpacitiesChanged(const QVariantList& mrRangeOpacities);
     void currentColorChanged    (const QColor& currentColor);
     void currentOpacityChanged  (double currentOpacity);
     void currentIconChanged     (const QString& currentIcon);
@@ -106,11 +142,28 @@ private slots:
     void _lookForMissingFact    (void);
 
 private:
-    int  _currentRangeIndex     (const QVariant& value);
+    struct RangeSet {
+        QVariantList    values;
+        QVariantList    colors;
+        QVariantList    icons;
+        QVariantList    opacities;
+    };
+
+    enum RangeSignalType {
+        NormalRange,
+        FwRange,
+        MrRange
+    };
+
+    void _emitRangeSignals      (const RangeSet& rangeSet, RangeSignalType signalType);
+    int  _currentRangeIndex     (const QVariant& value, const QVariantList& rangeValuesToUse);
     void _updateColor           (void);
     void _updateIcon            (void);
     void _updateOpacity         (void);
     void _setFactWorker         (void);
+    void _resetRangeInfoCommon  (RangeSet& rangeSet);
+    void _addRangeValueCommon   (RangeSet& rangeSet);
+    void _removeRangeValueCommon(int index, RangeSet& rangeSet);
 
     FactValueGrid*          _factValueGrid =        nullptr;
     Vehicle*                _vehicle =              nullptr;
@@ -134,10 +187,10 @@ private:
     // a specific value for each section of the range. There should be _rangeValues.count() + 2
     // semantic values in the apppropriate list.
     RangeType           _rangeType =        NoRangeInfo;
-    QVariantList        _rangeValues;                       ///< double values which indicate range setpoints
-    QVariantList        _rangeColors;                       ///< QColor
-    QVariantList        _rangeIcons;                        ///< QString resource name
-    QVariantList        _rangeOpacities;                    /// double opacity value
+    RangeSet            _range;                             ///< Normal (single) range set
+    RangeSet            _fwRange;                           ///< Fixed-wing specific range set
+    RangeSet            _mrRange;                           ///< Multi-rotor specific range set
+    bool                _individualFwMrRanges = false;      ///< When true, FW/MR use separate range sets
 
     // These are user facing string for the various enums.
     static const QStringList _rangeTypeNames;

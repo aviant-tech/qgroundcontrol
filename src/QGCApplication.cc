@@ -42,6 +42,7 @@
 #include "FollowMe.h"
 #include "GeoTagController.h"
 #include "GimbalController.h"
+#include "ADSBVehicle.h"
 #include "GPSRtk.h"
 #include "JoystickConfigController.h"
 #include "JoystickManager.h"
@@ -205,7 +206,9 @@ QGCApplication::QGCApplication(int &argc, char *argv[], bool unitTesting, bool s
     setLanguage();
 
 #ifndef QGC_DAILY_BUILD
-    _checkForNewVersion();
+    // Aviant (A54/A46): outdated versions are handled in the multi-QGC setup, so we do not check
+    // for new versions nor show the "newer version available" warning.
+    // _checkForNewVersion();
 #endif
 }
 
@@ -284,6 +287,7 @@ void QGCApplication::init()
 #endif
 
     qmlRegisterUncreatableType<GimbalController>("QGroundControl.Vehicle", 1, 0, "GimbalController", "Reference only");
+    qmlRegisterUncreatableType<ADSBVehicle>("QGroundControl.ADSBVehicle", 1, 0, "ADSBVehicle", "Reference only");
 
 #ifndef QGC_DISABLE_MAVLINK_INSPECTOR
     qmlRegisterUncreatableType<MAVLinkChartController>("QGroundControl", 1, 0, "MAVLinkChart", "Reference only");
@@ -330,8 +334,11 @@ void QGCApplication::init()
 void QGCApplication::_initVideo()
 {
 #ifdef QGC_GST_STREAMING
-    // Gstreamer video playback requires OpenGL
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+    // Gstreamer video playback requires OpenGL. Skip when the software
+    // Qt Quick backend is requested (headless rendering without a GPU).
+    if (qEnvironmentVariable("QT_QUICK_BACKEND") != QLatin1String("software")) {
+        QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+    }
 #endif
 
     QGCCorePlugin::instance();  // CorePlugin must be initialized before VideoManager for Video Cleanup

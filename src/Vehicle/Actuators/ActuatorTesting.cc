@@ -194,7 +194,7 @@ void ActuatorTest::sendMavlinkRequest(int function, float value, float timeout)
 
     _vehicle->sendMavCommandWithHandler(
             &handlerInfo,
-            MAV_COMP_ID_AUTOPILOT1,           // the ID of the autopilot
+            _vehicle->defaultComponentId(),           // the ID of the autopilot
             MAV_CMD_ACTUATOR_TEST,            // the mavlink command
             value,                            // value
             timeout,                          // timeout

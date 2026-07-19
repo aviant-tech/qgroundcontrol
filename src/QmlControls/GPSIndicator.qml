@@ -63,19 +63,42 @@ Item {
         Column {
             id:                     gpsValuesColumn
             anchors.verticalCenter: parent.verticalCenter
-            visible:                _activeVehicle && !isNaN(_activeVehicle.gps.hdop.value)
+            visible:                _activeVehicle && _activeVehicle.gps.count.valueString !== ""
             spacing:                0
 
             QGCLabel {
-                anchors.horizontalCenter:   hdopValue.horizontalCenter
+                anchors.horizontalCenter:   gpsLock.horizontalCenter
                 color:              qgcPal.buttonText
                 text:               _activeVehicle ? _activeVehicle.gps.count.valueString : ""
             }
 
+            // Aviant (A48/A50/A51): show the GPS lock status (using enumStringValue, not index)
+            // coloured green for RTK, orange for 3D, blue for 2D/Static and red for None.
             QGCLabel {
-                id:     hdopValue
-                color:  qgcPal.buttonText
-                text:   _activeVehicle ? _activeVehicle.gps.hdop.value.toFixed(1) : ""
+                id:         gpsLock
+                color:      getLockColor()
+                text:       getLockText()
+
+                function getLockColor() {
+                    if (!_activeVehicle || !_activeVehicle.gps.lock) return qgcPal.buttonText
+                    const lockString = _activeVehicle.gps.lock.enumStringValue
+                    if (lockString.includes("RTK")) return qgcPal.colorGreen
+                    if (lockString.includes("3D")) return qgcPal.colorOrange
+                    if (lockString.includes("2D") || lockString.includes("Static")) return qgcPal.colorBlue
+                    if (lockString.includes("None")) return qgcPal.colorRed
+                    return qgcPal.buttonText
+                }
+
+                function getLockText() {
+                    // As a pilot, I don't care if it's RTK fix or RTK float, so we just show RTK.
+                    if (!_activeVehicle || !_activeVehicle.gps.lock) return ""
+                    const lockString = _activeVehicle.gps.lock.enumStringValue
+                    if (lockString.includes("RTK")) return "RTK"
+                    if (lockString.includes("3D")) return "Lock"
+                    if (lockString.includes("2D") || lockString.includes("Static")) return "Other"
+                    if (lockString.includes("None")) return "None"
+                    return lockString
+                }
             }
         }
     }

@@ -65,7 +65,7 @@ void Action::sendMavlinkRequest()
 
     _vehicle->sendMavCommandWithHandler(
             &handlerInfo,
-            MAV_COMP_ID_AUTOPILOT1,           // the ID of the autopilot
+            _vehicle->defaultComponentId(),           // the ID of the autopilot
             MAV_CMD_CONFIGURE_ACTUATOR,       // the mavlink command
             (int)_type,                       // action type
             0,                                // unused parameter

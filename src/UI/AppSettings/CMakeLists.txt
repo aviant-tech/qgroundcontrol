@@ -6,6 +6,7 @@ qt_add_qml_module(AppSettingsModule
     RESOURCE_PREFIX /qml
     QML_FILES
         ADSBServerSettings.qml
+        AviantSettings.qml
         BluetoothSettings.qml
         DebugWindow.qml
         FlyViewSettings.qml

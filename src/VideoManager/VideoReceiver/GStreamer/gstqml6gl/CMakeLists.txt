@@ -153,8 +153,11 @@ if(EXISTS "${QGC_GST_QT6_PLUGIN_PATH}/resources.qrc")
             VERBATIM
         )
 
-        set_source_files_properties(${RGBA_EXTERNAL} PROPERTIES QT_RESOURCE_ALIAS org/freedesktop/gstreamer/qml6/RGBA.frag.qsb.external)
-        set(QGC_GSTREAMER_SHADER_RESOURCES "${RGBA_EXTERNAL}" CACHE INTERNAL "")
+        set_source_files_properties(${RGBA_EXTERNAL}
+		DIRECTORY ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
+		PROPERTIES QT_RESOURCE_ALIAS org/freedesktop/gstreamer/qml6/RGBA.frag.qsb.external
+	)
+	#set(QGC_GSTREAMER_SHADER_RESOURCES "${RGBA_EXTERNAL}" CACHE INTERNAL "")
         # qt_add_resources(gstqml6gl "gstqml6gl_shaders1"
         #     PREFIX "/org/freedesktop/gstreamer/qml6"
         #     FILES "${RGBA_EXTERNAL}"

@@ -91,12 +91,14 @@ void MultiVehicleManager::init()
 
 void MultiVehicleManager::_vehicleHeartbeatInfo(LinkInterface* link, int vehicleId, int componentId, int vehicleFirmwareType, int vehicleType)
 {
-    if (componentId != MAV_COMP_ID_AUTOPILOT1) {
-        // Don't create vehicles for components other than the autopilot
-        qCDebug(MultiVehicleManagerLog) << "Ignoring heartbeat from unknown component port:vehicleId:componentId:fwType:vehicleType"
+    const int targetComponentId = MAVLinkProtocol::getTargetComponentId();
+    if (componentId != targetComponentId) {
+        // Don't create vehicles for components other than the target (autopilot by default, e.g. the ATS)
+        qCDebug(MultiVehicleManagerLog) << "Ignoring heartbeat from non-target component port:vehicleId:componentId:targetCompId:fwType:vehicleType"
                                         << link->linkConfiguration()->name()
                                         << vehicleId
                                         << componentId
+                                        << targetComponentId
                                         << vehicleFirmwareType
                                         << vehicleType;
         return;
@@ -156,7 +158,7 @@ void MultiVehicleManager::_vehicleHeartbeatInfo(LinkInterface* link, int vehicle
     emit vehicleAdded(vehicle);
 
     if (_vehicles->count() > 1) {
-        qgcApp()->showAppMessage(tr("Connected to Vehicle %1").arg(vehicleId));
+        qgcApp()->showAppMessage(tr("Connected to %1").arg(vehicle->name()));
     } else {
         setActiveVehicle(vehicle);
     }

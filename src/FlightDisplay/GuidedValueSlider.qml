@@ -37,6 +37,22 @@ Item {
     property var    _unitsSettings:         QGroundControl.settingsManager.unitsSettings
     property real   _indicatorCenterPos:    sliderFlickable.height / 2
 
+    // Aviant (ported from V4.2 GuidedAltitudeSlider): guard the guided altitude command
+    // against the 120 m AGL regulatory ceiling and against descending below the ground.
+    // The projected above-ground level is the current AGL (downward range finder) plus the
+    // commanded change in relative altitude. When it breaches either limit the value
+    // indicator is coloured with the warning palette. Only applies to the Altitude slider,
+    // and only when a downward range finder is reporting (rawValue is NaN otherwise).
+    property var    _activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
+    property real   _maxAltitudeAGL:        120
+    property real   _distanceToGround:      _activeVehicle ? _activeVehicle.distanceSensors.rotationPitch270.rawValue : NaN
+    property real   _vehicleAltitudeRel:    _activeVehicle ? _activeVehicle.altitudeRelative.rawValue : 0
+    property real   _sliderValueMeters:     QGroundControl.unitsConversion.appSettingsVerticalDistanceUnitsToMeters(_sliderValue)
+    property real   _projectedAGL:          _distanceToGround + (_sliderValueMeters - _vehicleAltitudeRel)
+    property bool   _altitudeWarning:       _sliderType === GuidedValueSlider.SliderType.Altitude &&
+                                            !isNaN(_distanceToGround) &&
+                                            (_projectedAGL > _maxAltitudeAGL || _projectedAGL < 0)
+
     property int    _fullSliderRangeIndex:  2
     property var    _rgValueRanges:         [ 400, 200, 100, 50, 25, 10 ]
     property var    _rgValidMajorTickSteps: [ 10, 25, 50, 100 ]
@@ -259,6 +275,7 @@ Item {
             verticalAlignment:      Text.AlignVCenter
             text:                   _clampedSliderValueString(_sliderValue) + " " + unitsString
             font.pointSize:         ScreenTools.largeFontPointSize
+            color:                  _altitudeWarning ? _qgcPal.warningText : _qgcPal.text
 
             property var unitsString: _sliderType === GuidedValueSlider.Speed ? 
                                         QGroundControl.unitsConversion.appSettingsSpeedUnitsString : 

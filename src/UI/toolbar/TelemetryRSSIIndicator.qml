@@ -29,6 +29,32 @@ Item {
     property var  _activeVehicle:   QGroundControl.multiVehicleManager.activeVehicle
     property bool _hasTelemetry:    _activeVehicle.telemetryLRSSI !== 0
 
+    // Aviant (A12): colour the RSSI icon by receive strength. Thresholds were the AviantSettings
+    // facts rssiWarning/rssiAlert in 4.2; that settings group is not yet ported to v5, so the
+    // 4.2 defaults are applied here as constants.
+    property real _rssiWarning:     -90     // dBm, below this -> warning (orange)
+    property real _rssiAlert:       -105    // dBm, below this -> alert (flashing red)
+    property bool _pulser:          false   // Switches on/off at 1Hz, used to flash the rssi icon on alert
+
+    function linkColor() {
+        if (!_activeVehicle || _activeVehicle.telemetryLRSSI > -2) {
+            // -1 is used for invalid/missing data, and positive numbers are not expected/valid here,
+            // so for these numbers we use the default colour.
+            return qgcPal.buttonText
+        } else if (_activeVehicle.telemetryLRSSI > _rssiWarning) {
+            return qgcPal.colorGreen
+        } else if (_activeVehicle.telemetryLRSSI > _rssiAlert) {
+            return qgcPal.colorOrange
+        } else {
+            return _pulser ? qgcPal.colorRed : qgcPal.buttonText
+        }
+    }
+
+    Timer {
+        interval: 500; running: true; repeat: true
+        onTriggered: _pulser = !_pulser
+    }
+
     QGCColoredImage {
         id:                 telemIcon
         anchors.top:        parent.top
@@ -37,7 +63,7 @@ Item {
         sourceSize.height:  height
         source:             "/qmlimages/TelemRSSI.svg"
         fillMode:           Image.PreserveAspectFit
-        color:              qgcPal.buttonText
+        color:              linkColor()
     }
 
     MouseArea {

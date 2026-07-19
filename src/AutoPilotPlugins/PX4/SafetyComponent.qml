@@ -53,6 +53,12 @@ SetupPage {
             property Fact _collisionPrevention: controller.getParameterFact(-1, "CP_DIST")
             property Fact _objectAvoidance:     controller.getParameterFact(-1, "COM_OBS_AVOID")
             property Fact _landSpeedMC:         controller.getParameterFact(-1, "MPC_LAND_SPEED", false)
+            property Fact _parachuteRequired:   controller.getParameterFact(-1, "COM_PARACHUTE", false)
+            // Parachute termination minimum-altitude parameter was renamed in PX4 1.15
+            // (FD_MIN_DIST_TRM -> COM_FDTRM_MINAGL). Support both so the field binds on either firmware.
+            property Fact _parachuteAltitude:   controller.parameterExists(-1, "COM_FDTRM_MINAGL")
+                                                    ? controller.getParameterFact(-1, "COM_FDTRM_MINAGL", false)
+                                                    : controller.getParameterFact(-1, "FD_MIN_DIST_TRM", false)
             property bool _hitlAvailable:       controller.parameterExists(-1, hitlParam)
             property Fact _hitlEnabled:         controller.getParameterFact(-1, hitlParam, false)
 
@@ -566,6 +572,61 @@ SetupPage {
                             FactTextField {
                                 fact:               _disarmLandDelay
                                 enabled:            disarmDelayCheckBox.checked
+                                Layout.fillWidth:   true
+                            }
+                        }
+                    }
+                }
+
+                QGCLabel {
+                    text:               qsTr("Parachute Settings")
+                }
+
+                Rectangle {
+                    width:              mainRow.width        + (_margins * 2)
+                    height:             parachuteGrid.height + (_margins * 2)
+                    color:              qgcPal.windowShade
+                    Row {
+                        id:                 parachuteGrid
+                        spacing:            _margins
+                        anchors.centerIn:   parent
+                        Item {
+                            width:                  _imageWidth
+                            height:                 _imageHeight
+                            anchors.verticalCenter: parent.verticalCenter
+                            QGCColoredImage {
+                                color:              qgcPal.text
+                                source:             "/qmlimages/Parachute.svg"
+                                height:             _imageHeight
+                                width:              _imageHeight
+                                anchors.centerIn:   parent
+                            }
+                        }
+                        GridLayout {
+                            columns:                2
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            QGCLabel {
+                                id:                 parachuteAltitudeLabel
+                                text:               qsTr("Minimum Ground Distance\nFor Termination:")
+                                Layout.minimumWidth:_labelWidth
+                                Layout.fillWidth:   true
+                            }
+                            FactTextField {
+                                fact:               _parachuteAltitude
+                                Layout.minimumWidth:_editFieldWidth
+                                Layout.fillWidth:   true
+                            }
+                            QGCLabel {
+                                id:                 parachuteRequiredLabel
+                                text:               qsTr("Parachute Required\nFor Arming:")
+                                Layout.minimumWidth:_labelWidth
+                                Layout.fillWidth:   true
+                            }
+                            FactComboBox {
+                                fact:               _parachuteRequired
+                                indexModel:         false
+                                Layout.minimumWidth:_editFieldWidth
                                 Layout.fillWidth:   true
                             }
                         }

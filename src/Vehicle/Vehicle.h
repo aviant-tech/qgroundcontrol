@@ -33,6 +33,7 @@
 #include "VehicleEFIFactGroup.h"
 #include "VehicleEscStatusFactGroup.h"
 #include "VehicleEstimatorStatusFactGroup.h"
+#include "VehicleAviantFactGroup.h"
 #include "VehicleGeneratorFactGroup.h"
 #include "VehicleGPS2FactGroup.h"
 #include "VehicleGPSFactGroup.h"
@@ -44,6 +45,7 @@
 #include "VehicleTemperatureFactGroup.h"
 #include "VehicleVibrationFactGroup.h"
 #include "VehicleWindFactGroup.h"
+#include "VehicleWinchStatusFactGroup.h"
 #include "GimbalController.h"
 
 class Actuators;
@@ -134,8 +136,10 @@ public:
     Q_ENUM(CheckList)
 
     Q_PROPERTY(int                  id                          READ id                                                             CONSTANT)
+    Q_PROPERTY(QString              name                        READ name                                                           CONSTANT)
     Q_PROPERTY(AutoPilotPlugin*     autopilotPlugin             MEMBER _autopilotPlugin                                             CONSTANT)
     Q_PROPERTY(QGeoCoordinate       coordinate                  READ coordinate                                                     NOTIFY coordinateChanged)
+    Q_PROPERTY(QGeoCoordinate       positionSetpoint            READ positionSetpoint                                               NOTIFY positionSetpointChanged)
     Q_PROPERTY(QGeoCoordinate       homePosition                READ homePosition                                                   NOTIFY homePositionChanged)
     Q_PROPERTY(QGeoCoordinate       armedPosition               READ armedPosition                                                  NOTIFY armedPositionChanged)
     Q_PROPERTY(bool                 armed                       READ armed                      WRITE setArmedShowError             NOTIFY armedChanged)
@@ -168,6 +172,9 @@ public:
     Q_PROPERTY(bool                 supportsRadio               READ supportsRadio                                                  CONSTANT)
     Q_PROPERTY(bool               supportsMotorInterference     READ supportsMotorInterference                                      CONSTANT)
     Q_PROPERTY(QString              prearmError                 READ prearmError                WRITE setPrearmError                NOTIFY prearmErrorChanged)
+    Q_PROPERTY(QString              missionManagerError         READ missionManagerError                                            NOTIFY missionManagerErrorChanged)
+    Q_PROPERTY(QString              geoFenceManagerError        READ geoFenceManagerError                                           NOTIFY geoFenceManagerErrorChanged)
+    Q_PROPERTY(QString              rallyPointManagerError      READ rallyPointManagerError                                         NOTIFY rallyPointManagerErrorChanged)
     Q_PROPERTY(int                  motorCount                  READ motorCount                                                     CONSTANT)
     Q_PROPERTY(bool                 coaxialMotors               READ coaxialMotors                                                  CONSTANT)
     Q_PROPERTY(bool                 xConfigMotors               READ xConfigMotors                                                  CONSTANT)
@@ -256,6 +263,7 @@ public:
     Q_PROPERTY(FactGroup*           gps             READ gpsFactGroup               CONSTANT)
     Q_PROPERTY(FactGroup*           gps2            READ gps2FactGroup              CONSTANT)
     Q_PROPERTY(FactGroup*           wind            READ windFactGroup              CONSTANT)
+    Q_PROPERTY(FactGroup*           winchStatus     READ winchStatusFactGroup       CONSTANT)
     Q_PROPERTY(FactGroup*           vibration       READ vibrationFactGroup         CONSTANT)
     Q_PROPERTY(FactGroup*           temperature     READ temperatureFactGroup       CONSTANT)
     Q_PROPERTY(FactGroup*           clock           READ clockFactGroup             CONSTANT)
@@ -267,6 +275,7 @@ public:
     Q_PROPERTY(FactGroup*           localPosition   READ localPositionFactGroup     CONSTANT)
     Q_PROPERTY(FactGroup*           localPositionSetpoint READ localPositionSetpointFactGroup CONSTANT)
     Q_PROPERTY(FactGroup*           hygrometer      READ hygrometerFactGroup        CONSTANT)
+    Q_PROPERTY(FactGroup*           aviant          READ aviantFactGroup            CONSTANT)
     Q_PROPERTY(FactGroup*           generator       READ generatorFactGroup         CONSTANT)
     Q_PROPERTY(FactGroup*           efi             READ efiFactGroup               CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  batteries       READ batteries                  CONSTANT)
@@ -294,6 +303,9 @@ public:
 
     /// Command vehicle to return to launch
     Q_INVOKABLE void guidedModeRTL(bool smartRTL);
+
+    /// Command vehicle to return following the mission path
+    Q_INVOKABLE void guidedModeMissionRTL();
 
     /// Command vehicle to land at current location
     Q_INVOKABLE void guidedModeLand();
@@ -407,6 +419,10 @@ public:
     /// Trigger camera using MAV_CMD_DO_DIGICAM_CONTROL command
     Q_INVOKABLE void triggerSimpleCamera(void);
 
+    /// Aviant persistent battery consumption (bingo) accounting
+    Q_INVOKABLE void resetPersistedConsumedData();
+    Q_INVOKABLE bool hasPersistedConsumedData();
+
     /// Set home from flight map coordinate
     Q_INVOKABLE void doSetHome(const QGeoCoordinate& coord);
 
@@ -431,6 +447,7 @@ public:
     // Property accessors
 
     QGeoCoordinate coordinate() { return _coordinate; }
+    QGeoCoordinate positionSetpoint() { return _positionSetpoint; }
     QGeoCoordinate armedPosition    () { return _armedPosition; }
 
     qreal getInitialGCSPressure() const { return _initialGCSPressure; }
@@ -446,6 +463,8 @@ public:
 
     // Property accesors
     int id() const{ return _id; }
+    // Aviant (A36): human-readable drone name derived from the MAVLink system id.
+    QString name() const;
     int compId() const{ return _compID; }
     MAV_AUTOPILOT firmwareType() const { return _firmwareType; }
     MAV_TYPE vehicleType() const { return _vehicleType; }
@@ -508,6 +527,13 @@ public:
 
     QString prearmError() const { return _prearmError; }
     void setPrearmError(const QString& prearmError);
+
+    QString missionManagerError    () const { return _missionManagerErrorMsg; }
+    QString geoFenceManagerError   () const { return _geoFenceManagerErrorMsg; }
+    QString rallyPointManagerError () const { return _rallyPointManagerErrorMsg; }
+    void clearMissionManagerError    ();
+    void clearGeoFenceManagerError   ();
+    void clearRallyPointManagerError ();
 
     QmlObjectListModel* cameraTriggerPoints () { return &_cameraTriggerPoints; }
 
@@ -596,6 +622,7 @@ public:
     FactGroup* gpsFactGroup                 () { return &_gpsFactGroup; }
     FactGroup* gps2FactGroup                () { return &_gps2FactGroup; }
     FactGroup* windFactGroup                () { return &_windFactGroup; }
+    FactGroup* winchStatusFactGroup         () { return &_winchStatusFactGroup; }
     FactGroup* vibrationFactGroup           () { return &_vibrationFactGroup; }
     FactGroup* temperatureFactGroup         () { return &_temperatureFactGroup; }
     FactGroup* clockFactGroup               () { return &_clockFactGroup; }
@@ -607,6 +634,7 @@ public:
     FactGroup* estimatorStatusFactGroup     () { return &_estimatorStatusFactGroup; }
     FactGroup* terrainFactGroup             () { return &_terrainFactGroup; }
     FactGroup* hygrometerFactGroup          () { return &_hygrometerFactGroup; }
+    FactGroup* aviantFactGroup              () { return &_aviantFactGroup; }
     FactGroup* generatorFactGroup           () { return &_generatorFactGroup; }
     FactGroup* efiFactGroup                 () { return &_efiFactGroup; }
     FactGroup* rpmFactGroup                 () { return &_rpmFactGroup; }
@@ -826,6 +854,7 @@ public slots:
 
 signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
+    void positionSetpointChanged        (QGeoCoordinate positionSetpoint);
     void joystickEnabledChanged         (bool enabled);
     void mavlinkMessageReceived         (const mavlink_message_t& message);
     void homePositionChanged            (const QGeoCoordinate& homePosition);
@@ -838,6 +867,9 @@ signals:
     void inFwdFlightChanged             ();
     void vtolInFwdFlightChanged         (bool vtolInFwdFlight);
     void prearmErrorChanged             (const QString& prearmError);
+    void missionManagerErrorChanged     ();
+    void geoFenceManagerErrorChanged    ();
+    void rallyPointManagerErrorChanged  ();
     void soloFirmwareChanged            (bool soloFirmware);
     void defaultCruiseSpeedChanged      (double cruiseSpeed);
     void defaultHoverSpeedChanged       (double hoverSpeed);
@@ -965,6 +997,7 @@ private:
     void _handleCommandAck              (mavlink_message_t& message);
     void _handleGpsRawInt               (mavlink_message_t& message);
     void _handleGlobalPositionInt       (mavlink_message_t& message);
+    void _handlePositionTargetGlobalInt (mavlink_message_t& message);
     void _handleHighLatency             (mavlink_message_t& message);
     void _handleHighLatency2            (mavlink_message_t& message);
     void _handleOrbitExecutionStatus    (const mavlink_message_t& message);
@@ -1019,6 +1052,7 @@ private:
     bool _isActiveVehicle = false;
 
     QGeoCoordinate  _coordinate;
+    QGeoCoordinate  _positionSetpoint;
     QGeoCoordinate  _homePosition;
     QGeoCoordinate  _armedPosition;
 
@@ -1062,6 +1096,9 @@ private:
     QGCCameraManager* _cameraManager = nullptr;
 
     QString             _prearmError;
+    QString             _missionManagerErrorMsg;
+    QString             _geoFenceManagerErrorMsg;
+    QString             _rallyPointManagerErrorMsg;
     QTimer              _prearmErrorTimer;
     static const int    _prearmErrorTimeoutMSecs = 35 * 1000;   ///< Take away prearm error after 35 seconds
 
@@ -1237,6 +1274,7 @@ private:
     const QString _gpsFactGroupName =                QStringLiteral("gps");
     const QString _gps2FactGroupName =               QStringLiteral("gps2");
     const QString _windFactGroupName =               QStringLiteral("wind");
+    const QString _winchStatusFactGroupName =        QStringLiteral("winchStatus");
     const QString _vibrationFactGroupName =          QStringLiteral("vibration");
     const QString _temperatureFactGroupName =        QStringLiteral("temperature");
     const QString _clockFactGroupName =              QStringLiteral("clock");
@@ -1248,6 +1286,7 @@ private:
     const QString _estimatorStatusFactGroupName =    QStringLiteral("estimatorStatus");
     const QString _terrainFactGroupName =            QStringLiteral("terrain");
     const QString _hygrometerFactGroupName =         QStringLiteral("hygrometer");
+    const QString _aviantFactGroupName =             QStringLiteral("aviant");
     const QString _generatorFactGroupName =          QStringLiteral("generator");
     const QString _efiFactGroupName =                QStringLiteral("efi");
     const QString _rpmFactGroupName =                QStringLiteral("rpm");
@@ -1256,6 +1295,7 @@ private:
     VehicleGPSFactGroup             _gpsFactGroup;
     VehicleGPS2FactGroup            _gps2FactGroup;
     VehicleWindFactGroup            _windFactGroup;
+    VehicleWinchStatusFactGroup     _winchStatusFactGroup;
     VehicleVibrationFactGroup       _vibrationFactGroup;
     VehicleTemperatureFactGroup     _temperatureFactGroup;
     VehicleClockFactGroup           _clockFactGroup;
@@ -1266,6 +1306,7 @@ private:
     VehicleEscStatusFactGroup       _escStatusFactGroup;
     VehicleEstimatorStatusFactGroup _estimatorStatusFactGroup;
     VehicleHygrometerFactGroup      _hygrometerFactGroup;
+    VehicleAviantFactGroup          _aviantFactGroup;
     VehicleGeneratorFactGroup       _generatorFactGroup;
     VehicleEFIFactGroup             _efiFactGroup;
     VehicleRPMFactGroup             _rpmFactGroup;
@@ -1397,6 +1438,8 @@ public:
 
 signals:
     void textMessageReceived(int sysid, int componentid, int severity, QString text, QString description);
+    // Aviant (A44): a new critical vehicle message that should be shown in the fly-view warning sidebar
+    void newCriticalVehicleMessage(QString message);
 
     void messagesReceivedChanged();
     void messagesSentChanged();

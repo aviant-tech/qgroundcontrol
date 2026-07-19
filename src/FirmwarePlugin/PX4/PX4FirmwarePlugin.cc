@@ -51,12 +51,14 @@ PX4FirmwarePlugin::PX4FirmwarePlugin()
     const QString holdFlightModeName = tr("Hold");
     const QString missionFlightModeName = tr("Mission");
     const QString rtlFlightModeName = tr("Return");
+    const QString missionRtlFlightModeName = tr("MissionRTL");
     const QString landingFlightModeName = tr("Land");
     const QString preclandFlightModeName = tr("Precision Land");
     const QString rtgsFlightModeName = tr("Return to Groundstation");
     const QString followMeFlightModeName = tr("Follow Me");
     const QString simpleFlightModeName = tr("Simple");
     const QString orbitFlightModeName = tr("Orbit");
+    const QString terminationFlightModeName = tr("Terminated");
 
     _setModeEnumToModeStringMapping({
         { PX4CustomMode::MANUAL,        manualFlightModeName      },
@@ -71,11 +73,13 @@ PX4FirmwarePlugin::PX4FirmwarePlugin()
         { PX4CustomMode::AUTO_LOITER,   holdFlightModeName        },
         { PX4CustomMode::AUTO_MISSION,  missionFlightModeName     },
         { PX4CustomMode::AUTO_RTL,      rtlFlightModeName         },
+        { PX4CustomMode::AUTO_MISSION_RTL, missionRtlFlightModeName },
         { PX4CustomMode::AUTO_LAND,     landingFlightModeName     },
         { PX4CustomMode::AUTO_PRECLAND, preclandFlightModeName    },
         { PX4CustomMode::AUTO_READY,    readyFlightModeName       },
         { PX4CustomMode::AUTO_RTGS,     rtgsFlightModeName        },
         { PX4CustomMode::AUTO_TAKEOFF,  takeoffFlightModeName     },
+        { PX4CustomMode::TERMINATION,   terminationFlightModeName },
     });
 
     static FlightModeList availableFlightModes = {
@@ -92,11 +96,13 @@ PX4FirmwarePlugin::PX4FirmwarePlugin()
         { holdFlightModeName,       PX4CustomMode::AUTO_LOITER,     true,   true },
         { missionFlightModeName,    PX4CustomMode::AUTO_MISSION,    true,   true },
         { rtlFlightModeName,        PX4CustomMode::AUTO_RTL,        true,   true },
+        { missionRtlFlightModeName, PX4CustomMode::AUTO_MISSION_RTL,true,   true },
         { landingFlightModeName,    PX4CustomMode::AUTO_LAND,       false,  true },
         { preclandFlightModeName,   PX4CustomMode::AUTO_PRECLAND,   true,   true },
         { readyFlightModeName,      PX4CustomMode::AUTO_READY,      false,  false},
         { rtgsFlightModeName,       PX4CustomMode::AUTO_RTGS,       false,  false},
         { takeoffFlightModeName,    PX4CustomMode::AUTO_TAKEOFF,    false,  false},
+        { terminationFlightModeName,PX4CustomMode::TERMINATION,     false,  true },
     };
 
     updateAvailableFlightModes(availableFlightModes);
@@ -233,7 +239,8 @@ QList<MAV_CMD> PX4FirmwarePlugin::supportedMissionCommands(QGCMAVLink::VehicleCl
         MAV_CMD_NAV_DELAY,
         MAV_CMD_CONDITION_YAW,
         MAV_CMD_NAV_LOITER_TO_ALT,
-        MAV_CMD_DO_GRIPPER
+        MAV_CMD_DO_GRIPPER,
+        MAV_CMD_DO_WINCH
     };
 
     QList<MAV_CMD> vtolCommands = {
@@ -310,6 +317,10 @@ void PX4FirmwarePlugin::guidedModeRTL(Vehicle* vehicle, bool smartRTL) const
 {
     Q_UNUSED(smartRTL);
     _setFlightModeAndValidate(vehicle, rtlFlightMode());
+}
+void PX4FirmwarePlugin::guidedModeMissionRTL(Vehicle* vehicle) const
+{
+    _setFlightModeAndValidate(vehicle, missionRtlFlightMode());
 }
 
 void PX4FirmwarePlugin::guidedModeLand(Vehicle* vehicle) const
@@ -619,6 +630,10 @@ QString PX4FirmwarePlugin::missionFlightMode() const
 QString PX4FirmwarePlugin::rtlFlightMode() const
 {
     return _modeEnumToString.value(PX4CustomMode::AUTO_RTL);
+}
+QString PX4FirmwarePlugin::missionRtlFlightMode() const
+{
+    return _modeEnumToString.value(PX4CustomMode::AUTO_MISSION_RTL);
 }
 
 QString PX4FirmwarePlugin::landFlightMode() const

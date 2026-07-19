@@ -50,6 +50,7 @@
         <file alias="APMMavlinkStreamRate.SettingsGroup.json">src/Settings/APMMavlinkStreamRate.SettingsGroup.json</file>
         <file alias="App.SettingsGroup.json">src/Settings/App.SettingsGroup.json</file>
         <file alias="AutoConnect.SettingsGroup.json">src/Settings/AutoConnect.SettingsGroup.json</file>
+        <file alias="Aviant.SettingsGroup.json">src/Settings/Aviant.SettingsGroup.json</file>
         <file alias="BatteryIndicator.SettingsGroup.json">src/Settings/BatteryIndicator.SettingsGroup.json</file>
         <file alias="BrandImage.SettingsGroup.json">src/Settings/BrandImage.SettingsGroup.json</file>
         <file alias="BreachReturn.FactMetaData.json">src/MissionManager/BreachReturn.FactMetaData.json</file>
@@ -86,6 +87,7 @@
         <file alias="TransectStyle.SettingsGroup.json">src/MissionManager/TransectStyle.SettingsGroup.json</file>
         <file alias="Units.SettingsGroup.json">src/Settings/Units.SettingsGroup.json</file>
         <file alias="USBBoardInfo.json">src/Comms/USBBoardInfo.json</file>
+        <file alias="Vehicle/AviantFactGroup.json">src/Vehicle/FactGroups/AviantFactGroup.json</file>
         <file alias="Vehicle/BatteryFact.json">src/Vehicle/FactGroups/BatteryFact.json</file>
         <file alias="Vehicle/ClockFact.json">src/Vehicle/FactGroups/ClockFact.json</file>
         <file alias="Vehicle/DistanceSensorFact.json">src/Vehicle/FactGroups/DistanceSensorFact.json</file>
@@ -103,6 +105,7 @@
         <file alias="Vehicle/VehicleFact.json">src/Vehicle/FactGroups/VehicleFact.json</file>
         <file alias="Vehicle/VibrationFact.json">src/Vehicle/FactGroups/VibrationFact.json</file>
         <file alias="Vehicle/WindFact.json">src/Vehicle/FactGroups/WindFact.json</file>
+        <file alias="Vehicle/WinchStatusFactGroup.json">src/Vehicle/FactGroups/WinchStatusFactGroup.json</file>
         <file alias="Vehicle/HygrometerFact.json">src/Vehicle/FactGroups/HygrometerFact.json</file>
         <file alias="Vehicle/GeneratorFact.json">src/Vehicle/FactGroups/GeneratorFact.json</file>
         <file alias="Vehicle/EFIFact.json">src/Vehicle/FactGroups/EFIFact.json</file>

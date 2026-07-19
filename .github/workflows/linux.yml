@@ -3,7 +3,8 @@ name: Linux
 on:
   push:
     branches:
-      - master
+      - 'aviant/V4.2'
+      - 'aviant/v5.0'
       - 'Stable*'
     tags:
       - 'v*'
@@ -25,12 +26,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
-
-    strategy:
-      matrix:
-        BuildType: [Debug, Release]
-        # Arch: [x64] # Arm64
+    runs-on: ubuntu-24.04
 
     defaults:
       run:
@@ -40,6 +36,8 @@ jobs:
       ARTIFACT: QGroundControl-x86_64.AppImage
       PACKAGE: QGroundControl-x86_64
       QT_VERSION: 6.8.3
+      # Debug + unit tests on pull requests; Release build on merge / tag.
+      BUILD_TYPE: ${{ github.event_name == 'pull_request' && 'Debug' || 'Release' }}
 
     steps:
       - name: Checkout repo
@@ -65,7 +63,7 @@ jobs:
       - name: Install Vulkan
         run: |
           wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-noble.list http://packages.lunarg.com/vulkan/lunarg-vulkan-noble.list
           sudo apt update
           sudo apt install vulkan-sdk
 
@@ -74,8 +72,8 @@ jobs:
         with:
           host: linux
           target: linux_gcc_64
-          build-type: ${{ matrix.BuildType }}
-          cpm-modules: ${{ runner.temp }}/shadow_build_dir/cpm_modules
+          build-type: ${{ env.BUILD_TYPE }}
+          cpm-modules: ${{ github.workspace }}/build/cpm_modules
 
       - name: Install Qt for Linux (x64)
         uses: jurplel/install-qt-action@v4
@@ -92,36 +90,37 @@ jobs:
       #   uses: ./.github/actions/gstreamer
 
       - name: Configure
-        working-directory: ${{ runner.temp }}/shadow_build_dir
-        run: ${{ env.QT_ROOT_DIR }}/bin/qt-cmake -S ${{ github.workspace }} -B . -G Ninja
-              -DCMAKE_BUILD_TYPE=${{ matrix.BuildType }}
-              -DQGC_BUILD_TESTING=${{ matrix.BuildType == 'Debug' && 'ON' || 'OFF' }}
+        working-directory: ${{ github.workspace }}
+        env:
+          CMAKE_PREFIX_PATH: ${{ env.QT_ROOT_DIR }}
+        run: cmake -B ./build -G Ninja
+              -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+              -DQGC_BUILD_TESTING=${{ github.event_name == 'pull_request' && 'ON' || 'OFF' }}
               -DQGC_STABLE_BUILD=${{ github.ref_type == 'tag' || contains(github.ref, 'Stable') && 'ON' || 'OFF' }}
 
       - name: Build
-        working-directory: ${{ runner.temp }}/shadow_build_dir
-        run: cmake --build . --target all --config ${{ matrix.BuildType }}
+        working-directory: ${{ github.workspace }}
+        run: cmake --build ./build --target all --config ${{ env.BUILD_TYPE }}
 
       - name: Create AppImage
-        working-directory: ${{ runner.temp }}/shadow_build_dir
-        run: cmake --install . --config ${{ matrix.BuildType }}
-
-      - name: Sanity check release excecutable
-        if: matrix.BuildType == 'Release'
-        working-directory: ${{ runner.temp }}/shadow_build_dir
-        run: xvfb-run -a ./${{ env.ARTIFACT }} --simple-boot-test
+        working-directory: ${{ github.workspace }}/build
+        run: cmake --install . --config ${{ env.BUILD_TYPE }}
 
       - name: Run unit tests
-        if: matrix.BuildType == 'Debug'
-        working-directory: ${{ runner.temp }}/shadow_build_dir
+        if: github.event_name == 'pull_request'
+        working-directory: ${{ github.workspace }}/build
         run: xvfb-run -a ./${{ env.ARTIFACT }} --unittest
 
+      - name: Sanity check release excecutable
+        if: github.event_name != 'pull_request'
+        working-directory: ${{ github.workspace }}/build
+        run: xvfb-run -a ./${{ env.ARTIFACT }} --simple-boot-test
+
       - name: Upload Build File
-        if: matrix.BuildType == 'Release'
         uses: ./.github/actions/upload
         with:
           artifact_name: ${{ env.ARTIFACT }}
-          package_name: ${{ env.PACKAGE }}
+          package_name: ${{ env.PACKAGE }}-${{ env.BUILD_TYPE }}
           aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}

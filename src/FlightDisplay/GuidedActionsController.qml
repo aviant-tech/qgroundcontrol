@@ -27,6 +27,8 @@ Item {
     id: _root
 
     property var missionController
+    property var geoFenceController
+    property var rallyPointController
     property var confirmDialog
     property var guidedValueSlider
     property var fwdFlightGotoMapCircle
@@ -39,6 +41,7 @@ Item {
     readonly property string disarmTitle:                   qsTr("Disarm")
     readonly property string mvDisarmTitle:                 qsTr("Disarm (MV)")
     readonly property string rtlTitle:                      qsTr("Return")
+    readonly property string missionRtlTitle:               qsTr("M-RTL")
     readonly property string takeoffTitle:                  qsTr("Takeoff")
     readonly property string gripperTitle:                  qsTr("Gripper Function")
     readonly property string landTitle:                     qsTr("Land")
@@ -77,7 +80,10 @@ Item {
     readonly property string resumeMissionUploadFailMessage:    qsTr("Upload of resume mission failed. Confirm to retry upload")
     readonly property string landMessage:                       qsTr("Land the vehicle at the current position.")
     readonly property string rtlMessage:                        qsTr("Return to the launch position of the vehicle.")
+    readonly property string missionRtlMessage:                 qsTr("Return following the mission path.")
     readonly property string changeAltMessage:                  qsTr("Change the altitude of the vehicle up or down.")
+    readonly property string stepUpAltMessage:                  qsTr("Adjust the altitude of the vehicle UP")
+    readonly property string stepDownAltMessage:                qsTr("Adjust the altitude of the vehicle DOWN")
     readonly property string changeLoiterRadiusMessage:         qsTr("Change the forward flight loiter radius.")
     readonly property string changeCruiseSpeedMessage:          qsTr("Change the maximum horizontal cruise speed.")
     readonly property string changeAirspeedMessage:             qsTr("Change the equivalent airspeed setpoint.")
@@ -127,6 +133,8 @@ Item {
     readonly property int actionMVArm:                      31
     readonly property int actionMVDisarm:                   32
     readonly property int actionChangeLoiterRadius:         33
+    readonly property int actionMissionRTL:                 34
+    readonly property int actionStepAlt:                    35
 
 
 
@@ -138,7 +146,16 @@ Item {
     property bool   _useChecklist:              QGroundControl.settingsManager.appSettings.useChecklist.rawValue && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
     property bool   _enforceChecklist:          _useChecklist && QGroundControl.settingsManager.appSettings.enforceChecklist.rawValue
     property bool   _checklistPassed:           _activeVehicle ? (_useChecklist ? (_enforceChecklist ? _activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) : true
-    property bool   _canArm:                    _activeVehicle ? (_checklistPassed && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canArm)) : false
+    property bool   _geoFenceSupported:         geoFenceController ? geoFenceController.supported : false
+    property bool   _rallyPointSupported:       rallyPointController ? rallyPointController.supported : false
+    // Client-side (QGC-local) mission-state arming gate: block arming while the plan has un-uploaded
+    // edits, a plan transfer is in progress, or the last mission/geofence/rally transfer errored out.
+    property var    _planMasterController:       globals.planMasterControllerPlanView
+    property bool   _missionDirty:               _planMasterController ? _planMasterController.dirty : false
+    property bool   _missionSyncInProgress:      _planMasterController ? _planMasterController.syncInProgress : false
+    property bool   _planTransferError:          _activeVehicle ? (_activeVehicle.missionManagerError !== "" || _activeVehicle.geoFenceManagerError !== "" || _activeVehicle.rallyPointManagerError !== "") : false
+    property bool   _planReadyToArm:             !_missionDirty && !_missionSyncInProgress && !_planTransferError
+    property bool   _canArm:                    _activeVehicle ? (_planReadyToArm && _checklistPassed && _geoFenceSupported && _rallyPointSupported && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canArm)) : false
     property bool   _canTakeoff:                _activeVehicle ? (_checklistPassed && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canTakeoff)) : false
     property bool   _canStartMission:           _activeVehicle ? (_checklistPassed && (!_activeVehicle.healthAndArmingCheckReport.supported || _activeVehicle.healthAndArmingCheckReport.canStartMission)) : false
     property bool   _initialConnectComplete:    _activeVehicle ? _activeVehicle.initialConnectComplete : false
@@ -148,10 +165,11 @@ Item {
     property bool showForceArm:             _guidedActionsEnabled && !_vehicleArmed
     property bool showDisarm:               _guidedActionsEnabled && _vehicleArmed && !_vehicleFlying
     property bool showRTL:                  _guidedActionsEnabled && _vehicleArmed && _activeVehicle.guidedModeSupported && _vehicleFlying && !_vehicleInRTLMode
+    property bool showMissionRTL:           _guidedActionsEnabled && _vehicleArmed && _activeVehicle.guidedModeSupported && _vehicleFlying && !_vehicleInRTLMode && _missionAvailable
     property bool showTakeoff:              _guidedActionsEnabled && _activeVehicle.takeoffVehicleSupported && !_vehicleFlying && _canTakeoff
     property bool showLand:                 _guidedActionsEnabled && _activeVehicle.guidedModeSupported && _vehicleArmed && !_activeVehicle.fixedWing && !_vehicleInLandMode
     property bool showStartMission:         _guidedActionsEnabled && _missionAvailable && !_missionActive && !_vehicleFlying && _canStartMission
-    property bool showContinueMission:      _guidedActionsEnabled && _missionAvailable && !_missionActive && _vehicleArmed && _vehicleFlying && (_currentMissionIndex < _missionItemCount - 1)
+    property bool showContinueMission:      _guidedActionsEnabled && _missionAvailable && !_missionActive && _vehicleArmed && _vehicleFlying
     property bool showPause:                _guidedActionsEnabled && _vehicleArmed && _activeVehicle.pauseVehicleSupported && _vehicleFlying && !_vehiclePaused && !_fixedWingOnApproach
     property bool showChangeAlt:            _guidedActionsEnabled && _vehicleFlying && _activeVehicle.guidedModeSupported && _vehicleArmed && !_missionActive
     property bool showChangeLoiterRadius:   _guidedActionsEnabled && _vehicleFlying && _activeVehicle.guidedModeSupported && _vehicleArmed && !_missionActive && _vehicleInFwdFlight && fwdFlightGotoMapCircle.visible
@@ -499,11 +517,21 @@ Item {
             }
             confirmDialog.hideTrigger = Qt.binding(function() { return !showRTL })
             break;
+        case actionMissionRTL:
+            confirmDialog.title = missionRtlTitle
+            confirmDialog.message = missionRtlMessage
+            confirmDialog.hideTrigger = Qt.binding(function() { return !showMissionRTL })
+            break;
         case actionChangeAlt:
             confirmDialog.title = changeAltTitle
             confirmDialog.message = changeAltMessage
             confirmDialog.hideTrigger = Qt.binding(function() { return !showChangeAlt })
             guidedValueSlider.visible = true
+            break;
+        case actionStepAlt:
+            confirmDialog.title = changeAltTitle
+            confirmDialog.message = actionData > 0 ? stepUpAltMessage : stepDownAltMessage
+            confirmDialog.hideTrigger = Qt.binding(function() { return !showChangeAlt })
             break;
         case actionChangeLoiterRadius:
             confirmDialog.title = changeLoiterRadiusTitle
@@ -604,6 +632,9 @@ Item {
         case actionRTL:
             _activeVehicle.guidedModeRTL(optionChecked)
             break
+        case actionMissionRTL:
+            _activeVehicle.guidedModeMissionRTL()
+            break
         case actionLand:
             _activeVehicle.guidedModeLand()
             break
@@ -660,6 +691,10 @@ Item {
             var valueInMeters = _unitsConversion.appSettingsVerticalDistanceUnitsToMeters(sliderOutputValue)
             var altitudeChangeInMeters = valueInMeters - _activeVehicle.altitudeRelative.rawValue
             _activeVehicle.guidedModeChangeAltitude(altitudeChangeInMeters, false /* pauseVehicle */)
+            break
+        case actionStepAlt:
+            // actionData is the altitude delta in meters (positive = up, negative = down)
+            _activeVehicle.guidedModeChangeAltitude(actionData, false /* pauseVehicle */)
             break
         case actionChangeLoiterRadius:
             _activeVehicle.guidedModeGotoLocation(

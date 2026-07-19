@@ -138,8 +138,8 @@ void ADSBVehicleManager::_handleADSBVehicle(const mavlink_message_t &message)
 
     }
 
-    adsbVehicleMsg.altitude_type = adsbVehicleMsg.altitude_type;
-    adsbVehicleMsg.emitter_type = adsbVehicleMsg.emitter_type;
+    vehicleInfo.altitudeeType = static_cast<ADSB_ALTITUDE_TYPE>(adsbVehicleMsg.altitude_type);
+    vehicleInfo.emitterType = static_cast<ADSB_EMITTER_TYPE>(adsbVehicleMsg.emitter_type);
 
     adsbVehicleUpdate(vehicleInfo);
 }
@@ -193,6 +193,7 @@ void ADSBVehicleManager::_stop()
 
 void ADSBVehicleManager::_cleanupStaleVehicles()
 {
+    // Remove all expired ADSB vehicles, and mark stale (old-signal) ones
     for (qsizetype i = _adsbVehicles->count() - 1; i >= 0; i--) {
         ADSBVehicle* const adsbVehicle = _adsbVehicles->value<ADSBVehicle*>(i);
         if (adsbVehicle->expired()) {
@@ -200,6 +201,28 @@ void ADSBVehicleManager::_cleanupStaleVehicles()
             (void) _adsbVehicles->removeAt(i);
             (void) _adsbICAOMap.remove(adsbVehicle->icaoAddress());
             adsbVehicle->deleteLater();
+        } else {
+            adsbVehicle->setIsOldSignal(adsbVehicle->isOldSignal());
+        }
+    }
+}
+
+void ADSBVehicleManager::setHiddenForADSBVehicle(quint32 icaoAddress, bool hidden)
+{
+    ADSBVehicle* const adsbVehicle = _adsbICAOMap.value(icaoAddress);
+    if (adsbVehicle) {
+        adsbVehicle->setHidden(hidden);
+    } else {
+        qCDebug(ADSBVehicleManagerLog) << "setHiddenForADSBVehicle: ICAO address not found" << icaoAddress;
+    }
+}
+
+void ADSBVehicleManager::unhideAllVehicles()
+{
+    for (qsizetype i = _adsbVehicles->count() - 1; i >= 0; i--) {
+        ADSBVehicle* const adsbVehicle = _adsbVehicles->value<ADSBVehicle*>(i);
+        if (adsbVehicle) {
+            adsbVehicle->setHidden(false);
         }
     }
 }

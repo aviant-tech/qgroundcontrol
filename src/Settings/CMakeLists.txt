@@ -4,6 +4,8 @@ target_sources(${CMAKE_PROJECT_NAME}
         ADSBVehicleManagerSettings.h
         AppSettings.cc
         AppSettings.h
+        AviantSettings.cc
+        AviantSettings.h
         AutoConnectSettings.cc
         AutoConnectSettings.h
         BatteryIndicatorSettings.cc

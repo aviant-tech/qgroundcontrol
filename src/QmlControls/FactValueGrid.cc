@@ -151,6 +151,43 @@ void FactValueGrid::_saveValueData(QSettings& settings, InstrumentValueData* val
 
     settings.setValue(_factGroupNameKey,    value->factGroupName());
     settings.setValue(_factNameKey,         value->factName());
+    settings.setValue(_individualFwMrRangesKey, value->individualFwMrRanges());
+
+    if (value->individualFwMrRanges()) {
+        if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
+            settings.setValue(_fwRangeValuesKey, value->fwRangeValues());
+        }
+        switch (value->rangeType()) {
+        case InstrumentValueData::NoRangeInfo:
+            break;
+        case InstrumentValueData::ColorRange:
+            settings.setValue(_fwRangeColorsKey, value->fwRangeColors());
+            break;
+        case InstrumentValueData::OpacityRange:
+            settings.setValue(_fwRangeOpacitiesKey, value->fwRangeOpacities());
+            break;
+        case InstrumentValueData::IconSelectRange:
+            settings.setValue(_fwRangeIconsKey, value->fwRangeIcons());
+            break;
+        }
+
+        if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
+            settings.setValue(_mrRangeValuesKey, value->mrRangeValues());
+        }
+        switch (value->rangeType()) {
+        case InstrumentValueData::NoRangeInfo:
+            break;
+        case InstrumentValueData::ColorRange:
+            settings.setValue(_mrRangeColorsKey, value->mrRangeColors());
+            break;
+        case InstrumentValueData::OpacityRange:
+            settings.setValue(_mrRangeOpacitiesKey, value->mrRangeOpacities());
+            break;
+        case InstrumentValueData::IconSelectRange:
+            settings.setValue(_mrRangeIconsKey, value->mrRangeIcons());
+            break;
+        }
+    }
 }
 
 void FactValueGrid::_loadValueData(QSettings& settings, InstrumentValueData* value)
@@ -180,6 +217,44 @@ void FactValueGrid::_loadValueData(QSettings& settings, InstrumentValueData* val
     case InstrumentValueData::IconSelectRange:
         value->setRangeIcons(settings.value(_rangeIconsKey).value<QVariantList>());
         break;
+    }
+
+    value->setIndividualFwMrRanges(settings.value(_individualFwMrRangesKey, false).toBool());
+
+    if (value->individualFwMrRanges()) {
+        if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
+            value->setFwRangeValues(settings.value(_fwRangeValuesKey).value<QVariantList>());
+        }
+        switch (value->rangeType()) {
+        case InstrumentValueData::NoRangeInfo:
+            break;
+        case InstrumentValueData::ColorRange:
+            value->setFwRangeColors(settings.value(_fwRangeColorsKey).value<QVariantList>());
+            break;
+        case InstrumentValueData::OpacityRange:
+            value->setFwRangeOpacities(settings.value(_fwRangeOpacitiesKey).value<QVariantList>());
+            break;
+        case InstrumentValueData::IconSelectRange:
+            value->setFwRangeIcons(settings.value(_fwRangeIconsKey).value<QVariantList>());
+            break;
+        }
+
+        if (value->rangeType() != InstrumentValueData::NoRangeInfo) {
+            value->setMrRangeValues(settings.value(_mrRangeValuesKey).value<QVariantList>());
+        }
+        switch (value->rangeType()) {
+        case InstrumentValueData::NoRangeInfo:
+            break;
+        case InstrumentValueData::ColorRange:
+            value->setMrRangeColors(settings.value(_mrRangeColorsKey).value<QVariantList>());
+            break;
+        case InstrumentValueData::OpacityRange:
+            value->setMrRangeOpacities(settings.value(_mrRangeOpacitiesKey).value<QVariantList>());
+            break;
+        case InstrumentValueData::IconSelectRange:
+            value->setMrRangeIcons(settings.value(_mrRangeIconsKey).value<QVariantList>());
+            break;
+        }
     }
 }
 

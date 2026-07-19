@@ -194,8 +194,9 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
 
         _visualItems = newControllerMissionItems;
         _settingsItem = settingsItem;
+        _managerVehicle->clearMissionManagerError();
 
-        // We set Altitude mode to mixed, otherwise if we need a non relative altitude frame we won't be able to change it 
+        // We set Altitude mode to mixed, otherwise if we need a non relative altitude frame we won't be able to change it
         setGlobalAltitudeMode(QGroundControlQmlGlobal::AltitudeModeMixed);
 
         MissionController::_scanForAdditionalSettings(_visualItems, _masterController);

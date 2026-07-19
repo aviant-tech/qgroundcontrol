@@ -17,10 +17,52 @@
 #include "RallyPointManager.h"
 #include "Vehicle.h"
 #include "QGCLoggingCategory.h"
+#include "QGCApplication.h"
 
 #include <QtCore/QJsonArray>
 
 QGC_LOGGING_CATEGORY(RallyPointControllerLog, "RallyPointControllerLog")
+
+// Helper to convert legacy Aviant rally point arrays from
+// [lat, lon, alt, type] to standard [lat, lon, alt].
+// Returns true on success and fills convertedPointsValue, false on error
+// and sets errorString.
+static bool _convertLegacyAviantRallyPoints(const QJsonValue& pointsValue,
+                                            QJsonValue&       convertedPointsValue,
+                                            QString&          errorString)
+{
+    if (!pointsValue.isArray()) {
+        errorString = QString("value for coordinate array is not array");
+        return false;
+    }
+
+    QJsonArray rgJsonPoints = pointsValue.toArray();
+    QJsonArray convertedPointsArray;
+
+    for (int i = 0; i < rgJsonPoints.count(); ++i) {
+        const QJsonValue pointValue = rgJsonPoints[i];
+
+        if (!pointValue.isArray()) {
+            errorString = QString("value for coordinate is not array");
+            return false;
+        }
+
+        QJsonArray pointArray = pointValue.toArray();
+        if (pointArray.count() != 4) {
+            errorString = QString("legacy Aviant coordinate array must contain exactly 4 values");
+            return false;
+        }
+
+        QJsonArray convertedPointArray;
+        convertedPointArray.append(pointArray[0]);
+        convertedPointArray.append(pointArray[1]);
+        convertedPointArray.append(pointArray[2]);
+        convertedPointsArray.append(convertedPointArray);
+    }
+
+    convertedPointsValue = QJsonValue(convertedPointsArray);
+    return true;
+}
 
 RallyPointController::RallyPointController(PlanMasterController* masterController, QObject* parent)
     : PlanElementController (masterController, parent)
@@ -102,13 +144,28 @@ bool RallyPointController::load(const QJsonObject& json, QString& errorString)
     QString errorStr;
     QString errorMessage = tr("Rally: %1");
 
-    if (json[JsonHelper::jsonVersionKey].toInt() != _jsonCurrentVersion) {
+    const int version = json[JsonHelper::jsonVersionKey].toInt();
+
+    if (version != _jsonCurrentVersion && version != _jsonLegacyAviantVersion) {
         errorString = tr("Rally Points supports version %1").arg(_jsonCurrentVersion);
         return false;
     }
 
     QList<QGeoCoordinate> rgPoints;
-    if (!JsonHelper::loadGeoCoordinateArray(json[_jsonPointsKey], true /* altitudeRequired */, rgPoints, errorStr)) {
+    QJsonValue pointsValue = json[_jsonPointsKey];
+
+    if (version == _jsonLegacyAviantVersion) {
+        QJsonValue convertedPointsValue;
+        QString convertError;
+        if (!_convertLegacyAviantRallyPoints(pointsValue, convertedPointsValue, convertError)) {
+            errorString = errorMessage.arg(convertError);
+            return false;
+        }
+        pointsValue = convertedPointsValue;
+        qgcApp()->showAppMessage(QString("Legacy Aviant MR/FW rally points have been converted to standard rally points"));
+    }
+
+    if (!JsonHelper::loadGeoCoordinateArray(pointsValue, true /* altitudeRequired */, rgPoints, errorStr)) {
         errorString = errorMessage.arg(errorStr);
         return false;
     }
@@ -219,6 +276,7 @@ void RallyPointController::_managerLoadComplete(void)
         setDirty(false);
         _setFirstPointCurrent();
         emit loadComplete();
+        _managerVehicle->clearRallyPointManagerError();
     }
     _itemsRequested = false;
 }

@@ -43,7 +43,7 @@ T.HorizontalFactValueGrid {
             spacing: parent.spacing
             RowLayout {
                 id:         labelValueColumnLayout
-                spacing:    ScreenTools.defaultFontPixelWidth * 1.25
+                spacing:    0
 
                 Repeater {
                     model: _root.columns
@@ -171,6 +171,9 @@ T.HorizontalFactValueGrid {
         }
     }
 
+    /*
+    Aviant (A71): We don't want pilots to be able to edit the limit values, as this is configured by
+    Multi-command. Comment out the code instead of removing to make rebasing to QGC v5 easier.
     QGCMouseArea {
         x:          labelValueColumnLayout.x
         y:          labelValueColumnLayout.y
@@ -192,6 +195,7 @@ T.HorizontalFactValueGrid {
             }
         }
     }
+    */
 
     Component {
         id: valueEditDialog

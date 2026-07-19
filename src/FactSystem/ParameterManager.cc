@@ -857,7 +857,7 @@ void ParameterManager::_tryCacheHashLoad(int vehicleId, int componentId, const Q
         const ParamTypeVal &paramTypeVal = cacheMap[name];
         const FactMetaData::ValueType_t factType = static_cast<FactMetaData::ValueType_t>(paramTypeVal.first);
 
-        if (_vehicle->compInfoManager()->compInfoParam(MAV_COMP_ID_AUTOPILOT1)->factMetaDataForName(name, factType)->volatileValue()) {
+        if (_vehicle->compInfoManager()->compInfoParam(_vehicle->defaultComponentId())->factMetaDataForName(name, factType)->volatileValue()) {
             // Does not take part in CRC
             qCDebug(ParameterManagerLog) << "Volatile parameter" << name;
         } else {
@@ -1273,7 +1273,7 @@ void ParameterManager::_loadOfflineEditingParams()
 
 void ParameterManager::resetAllParametersToDefaults()
 {
-    _vehicle->sendMavCommand(MAV_COMP_ID_AUTOPILOT1,
+    _vehicle->sendMavCommand(_vehicle->defaultComponentId(),
                              MAV_CMD_PREFLIGHT_STORAGE,
                              true,  // showError
                              2,     // Reset params to default

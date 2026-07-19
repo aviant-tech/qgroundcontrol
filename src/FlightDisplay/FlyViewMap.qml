@@ -47,6 +47,13 @@ FlightMap {
     property real   _toolsMargin:               ScreenTools.defaultFontPixelWidth * 0.75
     property var    _flyViewSettings:           QGroundControl.settingsManager.flyViewSettings
     property bool   _keepMapCenteredOnVehicle:  _flyViewSettings.keepMapCenteredOnVehicle.rawValue
+    property bool   _showProximityRadar:        _flyViewSettings.showProximityRadar.rawValue
+    property bool   _showPositionSetpointLine:  _flyViewSettings.showPositionSetpointLine.rawValue
+    property var    _aviantSettings:            QGroundControl.settingsManager.aviantSettings
+    property bool   _showTrafficIndicators:     _aviantSettings.showTrafficIndicators.rawValue
+    property var    _horizontalConflictDistance: _aviantSettings.horizontalConflictDistance.value
+    property var    _verticalConflictDistance:  _aviantSettings.verticalConflictDistance.value
+    property var    _multidroneConflictDistance: _aviantSettings.multidroneConflictDistance.value
 
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
@@ -290,21 +297,87 @@ FlightMap {
             coordinate:     object.coordinate
             map:            _root
             z:              QGroundControl.zOrderVehicles
+            enabled:        _showProximityRadar
         }
+    }
+
+    // Line from vehicle to the current position setpoint (A17)
+    MapPolyline {
+        id:             positionSetpointLine
+        visible:        _showPositionSetpointLine && _activeVehicle && _activeVehicle.positionSetpoint.isValid
+        path:           _activeVehicle && _activeVehicle.positionSetpoint.isValid ? [_activeVehicle.coordinate, _activeVehicle.positionSetpoint ] : []
+        z:              QGroundControl.zOrderMapItems + 1
+        line.color:     "white"
+        line.width:     1
     }
     // Add ADSB vehicles to the map
     MapItemView {
         model: QGroundControl.adsbVehicleManager.adsbVehicles
         delegate: VehicleMapItem {
-            coordinate:     object.coordinate
-            altitude:       object.altitude
-            callsign:       object.callsign
-            heading:        object.heading
-            alert:          object.alert
+            coordinate:     object ? object.coordinate : QtPositioning.coordinate()
+            altitude:       object ? object.altitude : 0
+            callsign:       object ? object.callsign : ""
+            heading:        object ? object.heading : 0
+            alert:          object ? object.alert : false
+            emitterType:    object ? object.emitterType : 0
+            icaoAddress:    object ? object.icaoAddress : ""
+            oldSignal:      object ? object.oldSignal : false
             map:            _root
             size:           pipMode ? ScreenTools.defaultFontPixelHeight : ScreenTools.defaultFontPixelHeight * 2.5
             z:              QGroundControl.zOrderVehicles
+            visible:        object ? !object.hidden : false
         }
+    }
+
+    // Draw a proximity/conflict line from each ADSB vehicle to the active vehicle
+    MapItemView {
+        model: QGroundControl.adsbVehicleManager.adsbVehicles
+        delegate: MapPolyline {
+            visible:    (_showTrafficIndicators && object) ? (!object.hidden && get_proximity(object, _activeVehicle, _horizontalConflictDistance * 2, _verticalConflictDistance * 2)) : false
+            line.width: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? 4 : 2
+            line.color: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? "red" : "yellow"
+            z:          QGroundControl.zOrderVehicles + 1
+            path:       visible ? [ object.coordinate, _activeVehicle.coordinate ] : []
+
+            function get_proximity(adsbVehicle, mainVehicle, horizontal_radius, vertical_radius) {
+                if (!adsbVehicle || !adsbVehicle.coordinate.isValid || !mainVehicle || !mainVehicle.coordinate.isValid) {
+                    return false
+                }
+                var vertical_distance = 0
+                if (!isNaN(adsbVehicle.altitude)) {
+                    vertical_distance = Math.abs(adsbVehicle.altitude - mainVehicle.coordinate.altitude)
+                }
+                var horizontal_distance = adsbVehicle.coordinate.distanceTo(mainVehicle.coordinate)
+                return vertical_distance <= vertical_radius && horizontal_distance <= horizontal_radius
+            }
+        }
+    }
+
+    // Traffic conflict radius around the active vehicle
+    MapCircle {
+        color:          "transparent"
+        opacity:        1
+        border.color:   "red"
+        border.width:   4
+        radius:         _horizontalConflictDistance
+        center:         _activeVehicleCoordinate
+        visible:        _showTrafficIndicators
+    }
+
+    // Multidrone conflict circle indicating the area to avoid around another drone's landing point
+    MapCircle {
+        color:          "transparent"
+        opacity:        1
+        border.color:   "blue"
+        border.width:   3
+        radius:         _multidroneConflictDistance
+        center: {
+            var items = _planMasterController.missionController.visualItems
+            if (!items || items.count === 0) return QtPositioning.coordinate()
+            var lastItem = items.get(items.count - 1)
+            return lastItem.coordinate
+        }
+        visible:        _aviantSettings.showMultidroneConflictCircle.value && _aviantSettings.multidroneConflictDistance.value > 0
     }
 
     // Add the items associated with each vehicles flight plan to the map
@@ -439,6 +512,18 @@ FlightMap {
         }
     }
 
+    // Aviant (A41): append the distance from the active vehicle to the given coordinate to a label
+    function generateLabelTextWithDistance(defaultText, coord) {
+        if (!coord || !_activeVehicleCoordinate || !_activeVehicleCoordinate.isValid) {
+            return defaultText
+        }
+        const distance = _activeVehicleCoordinate.distanceTo(coord)
+        if (distance !== undefined) {
+            return defaultText + " (" + distance.toFixed(1) + "m)"
+        }
+        return defaultText
+    }
+
     // GoTo Location visuals
     MapQuickItem {
         id:             gotoLocationItem
@@ -447,9 +532,10 @@ FlightMap {
         anchorPoint.x:  sourceItem.anchorPointX
         anchorPoint.y:  sourceItem.anchorPointY
         sourceItem: MissionItemIndexLabel {
+            property string defaultText: gotoLocationItem.inGotoFlightMode ? qsTr("Going here", "Going to location waypoint") : qsTr("Go here", "Go to location waypoint")
             checked:    true
             index:      -1
-            label:      qsTr("Go here", "Go to location waypoint")
+            label:      _root.generateLabelTextWithDistance(defaultText, gotoLocationItem.coordinate)
         }
 
         property bool inGotoFlightMode: _activeVehicle ? _activeVehicle.flightMode === _activeVehicle.gotoFlightMode : false
@@ -679,7 +765,8 @@ FlightMap {
 
                     QGCButton {
                         Layout.fillWidth:   true
-                        text:               qsTr("Go to location")
+                        // Aviant (A41): show distance from vehicle to the clicked location
+                        text:               _root.generateLabelTextWithDistance(qsTr("Go to location"), mapClickCoord)
                         visible:            globals.guidedControllerFlyView.showGotoLocation
                         onClicked: {
                             mapClickDropPanel.close()
@@ -756,10 +843,11 @@ FlightMap {
     }
 
     onMapClicked: (position) => {
-        if (!globals.guidedControllerFlyView.guidedUIVisible && 
-            (globals.guidedControllerFlyView.showGotoLocation || globals.guidedControllerFlyView.showOrbit ||
+        // Note: The guidedUIVisible guard is intentionally omitted so that a new guided action
+        // (e.g. a goto) can be issued while a confirmation box for a previous action is still active.
+        if (globals.guidedControllerFlyView.showGotoLocation || globals.guidedControllerFlyView.showOrbit ||
              globals.guidedControllerFlyView.showROI || globals.guidedControllerFlyView.showSetHome ||
-             globals.guidedControllerFlyView.showSetEstimatorOrigin)) {
+             globals.guidedControllerFlyView.showSetEstimatorOrigin) {
 
             position = Qt.point(position.x, position.y)
             var clickCoord = _root.toCoordinate(position, false /* clipToViewPort */)

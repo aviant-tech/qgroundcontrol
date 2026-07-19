@@ -1,0 +1,128 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name":                "missionToolsInsecureHttps",
+    "shortDesc":           "Insecure HTTPS connections",
+    "longDesc":            "Do not validate server certificate for mission tools HTTPS connection",
+    "type":                "bool",
+    "default":             false,
+    "qgcRebootRequired":   true
+},
+{
+    "name":                "missionToolsUrl",
+    "shortDesc":           "URL of mission tools",
+    "type":                "string",
+    "default":             ""
+},
+{
+    "name":                "missionToolsToken",
+    "shortDesc":           "Authentication token for mission tools",
+    "type":                "string",
+    "default":             ""
+},
+{
+    "name":                "kyteBackendUrl",
+    "shortDesc":           "URL of kyte orders endpoint",
+    "type":                "string",
+    "default":             ""
+},
+{
+    "name":                "kyteBackendToken",
+    "shortDesc":           "Authentication token for kyte backend",
+    "type":                "string",
+    "default":             ""
+},
+{
+    "name":                "showTrafficIndicators",
+    "shortDesc":           "Show traffic indicators",
+    "longDesc":            "Shows traffic indicators, including conflict radius and line guides",
+    "type":                "bool",
+    "default":             true
+},
+{
+    "name":                "horizontalConflictDistance",
+    "shortDesc":           "Horizontal conflict distance",
+    "longDesc":            "The horizontal distance to nearby traffic inside which the situation is considered a conflict, and traffic indicators turn red. Twice this distance is used for proximity detection, meaning that the indicators will turn yellow.",
+    "type":                "uint32",
+    "min":                 0,
+    "units":               "m",
+    "default":             4000
+},
+{
+    "name":                "verticalConflictDistance",
+    "shortDesc":           "Vertical conflict distance",
+    "longDesc":            "The vertical distance to nearby traffic inside which the situation is considered a conflict, and traffic indicators turn red. Twice this distance is used for proximity detection, meaning that the indicators will turn yellow.",
+    "type":                "uint32",
+    "min":                 0,
+    "units":               "m",
+    "default":             600
+},
+{
+    "name":                "multidroneConflictDistance",
+    "shortDesc":           "Multidrone conflict distance",
+    "longDesc":            "The radius in meters for the multidrone conflict circle drawn around the landing point.",
+    "type":                "uint32",
+    "min":                 0,
+    "units":               "m",
+    "default":             1200
+},
+{
+    "name":                "showMultidroneConflictCircle",
+    "shortDesc":           "Show multidrone conflict circle",
+    "longDesc":            "Show a circle around the landing point with the multidrone conflict distance as radius.",
+    "type":                "bool",
+    "default":             true
+},
+{
+    "name":                "showWinchControlMenu",
+    "shortDesc":           "Show winch control menu",
+    "longDesc":            "Shows the winch control menu buttons and slider",
+    "type":                "bool",
+    "default":             true
+},
+{
+    "name":                "showBatteryWidget",
+    "shortDesc":           "Show battery widget",
+    "longDesc":            "Show battery widget in the fly view",
+    "type":                "bool",
+    "default":             true
+},
+{
+    "name":                "preDeliveryBingoLimit",
+    "shortDesc":           "Pre-delivery bingo limit",
+    "type":                "double",
+    "default":             6800,
+    "units":               "mAh",
+    "min":                 0
+},
+{
+    "name":                "postDeliveryBingoLimit",
+    "shortDesc":           "Post-delivery bingo limit",
+    "type":                "double",
+    "default":             10100,
+    "units":               "mAh",
+    "min":                 0
+},
+{
+    "name":                "persistentConsumeWarnLimit",
+    "shortDesc":           "Battery failsafe warning limit",
+    "longDesc":            "A persistent consume offset above this limit will show a battery failsafe warning",
+    "type":                "double",
+    "default":             200,
+    "units":               "mAh",
+    "min":                 0
+},
+{
+    "name":                "unitUntilThreshold",
+    "shortDesc":           "Unit until next threshold",
+    "longDesc":            "The unit to show for remaining until next threshold",
+    "type":                "int32",
+    "enumStrings":         "None,mAh,min",
+    "enumValues":          "-1,0,1",
+    "default":             0
+}
+]
+}

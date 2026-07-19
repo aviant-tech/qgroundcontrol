@@ -12,8 +12,14 @@ option(QGC_ENABLE_HERELINK "Enable Herelink Support" OFF)
 set(QGC_APP_NAME "QGroundControl" CACHE STRING "App Name")
 set(QGC_APP_COPYRIGHT "Copyright (c) 2025 QGroundControl. All rights reserved." CACHE STRING "Copyright")
 set(QGC_APP_DESCRIPTION "Open Source Ground Control App" CACHE STRING "Description")
-set(QGC_ORG_NAME "QGroundControl" CACHE STRING "Org Name")
-set(QGC_ORG_DOMAIN "qgroundcontrol.com" CACHE STRING "Domain")
+# Aviant (PB11 / T8): keep the Qt org identity used by our 4.2 fork so an operator's
+# existing QSettings store is read by v5 (QSettings derives its path from org name on
+# Linux/Windows and reversed domain on macOS). 4.2 used the stock QGroundControl.org /
+# org.qgroundcontrol; upstream v5 switched to QGroundControl / qgroundcontrol.com, which
+# would orphan every operator's settings. App name ("QGroundControl") and
+# QGC_SETTINGS_VERSION (9) are already identical to 4.2, so no wipe/migration shim needed.
+set(QGC_ORG_NAME "QGroundControl.org" CACHE STRING "Org Name")
+set(QGC_ORG_DOMAIN "org.qgroundcontrol" CACHE STRING "Domain")
 set(QGC_PACKAGE_NAME "org.mavlink.qgroundcontrol" CACHE STRING "Package Name")
 set(QGC_SETTINGS_VERSION "9" CACHE STRING "Settings Version") # If you need to make an incompatible changes to stored settings, bump this version number up by 1. This will caused store settings to be cleared on next boot.
 
@@ -41,8 +47,12 @@ option(QGC_ENABLE_GST_VIDEOSTREAMING "Enable GStreamer Video Backend" ON)
 option(QGC_ENABLE_QT_VIDEOSTREAMING "Enable QtMultimedia Video Backend" OFF) # Qt6Multimedia_FOUND
 
 # MAVLink
-set(QGC_MAVLINK_GIT_REPO "https://github.com/mavlink/c_library_v2.git" CACHE STRING "URL to MAVLink Git Repo")
-set(QGC_MAVLINK_GIT_TAG "19f9955598af9a9181064619bd2e3c04bd2d848a" CACHE STRING "Tag of MAVLink Git Repo")
+# Aviant fork of c_library_v2. Adds the generated `aviant` dialect (custom messages 59000-59700:
+# AVIANT_HEARTBEAT/NAV/ATS_STATUS/INDICATOR_* etc.) on top of upstream common/development. The fork's
+# generated all/all.h includes ../aviant/aviant.h, so the standard `all` dialect QGC compiles against
+# (see src/MAVLink/CMakeLists.txt) exposes the AVIANT_* message ids/structs with no include changes.
+set(QGC_MAVLINK_GIT_REPO "https://github.com/aviant-tech/c_library_v2.git" CACHE STRING "URL to MAVLink Git Repo")
+set(QGC_MAVLINK_GIT_TAG "19c47b3f5af6058ec173e0c337c956e0782061bb" CACHE STRING "Tag of MAVLink Git Repo")
 
 # APM
 option(QGC_DISABLE_APM_MAVLINK "Disable APM Dialect" OFF)

@@ -115,6 +115,17 @@ private:
     static constexpr const char* _rangeColorsKey      = "rangeColors";
     static constexpr const char* _rangeIconsKey       = "rangeIcons";
     static constexpr const char* _rangeOpacitiesKey   = "rangeOpacities";
+    static constexpr const char* _individualFwMrRangesKey = "individualFwMrRanges";
+
+    static constexpr const char* _fwRangeValuesKey    = "fwRangeValues";
+    static constexpr const char* _fwRangeColorsKey    = "fwRangeColors";
+    static constexpr const char* _fwRangeIconsKey     = "fwRangeIcons";
+    static constexpr const char* _fwRangeOpacitiesKey = "fwRangeOpacities";
+
+    static constexpr const char* _mrRangeValuesKey    = "mrRangeValues";
+    static constexpr const char* _mrRangeColorsKey    = "mrRangeColors";
+    static constexpr const char* _mrRangeIconsKey     = "mrRangeIcons";
+    static constexpr const char* _mrRangeOpacitiesKey = "mrRangeOpacities";
 
     static constexpr const char* _deprecatedGroupKey =  "ValuesWidget";
 

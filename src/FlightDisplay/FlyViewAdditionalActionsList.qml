@@ -9,13 +9,48 @@
 
 import QtQml
 
+import QGroundControl
+
 QtObject {
     property var guidedController
 
-    property bool anyActionAvailable: guidedController.showStartMission || guidedController.showContinueMission || guidedController.showChangeAlt || 
+    property var  _flyViewSettings:     QGroundControl.settingsManager.flyViewSettings
+    property real _stepUp:              _flyViewSettings.guidedStepUpAltitude.rawValue
+    property real _stepDown:            _flyViewSettings.guidedStepDownAltitude.rawValue
+
+    function _stepAltTitle(deltaMeters, dir) {
+        return qsTr("Adjust ") + QGroundControl.unitsConversion.metersToAppSettingsVerticalDistanceUnits(deltaMeters).toFixed(1)
+                + " " + QGroundControl.unitsConversion.appSettingsVerticalDistanceUnitsString + " " + dir
+    }
+
+    property bool anyActionAvailable: guidedController.showStartMission || guidedController.showContinueMission || guidedController.showChangeAlt ||
                                       guidedController.showChangeLoiterRadius ||  guidedController.showLandAbort || guidedController.showChangeSpeed ||
                                       guidedController.showGripper
     property var model: [
+        {
+            // A29: larger (2x) up step
+            title:      _stepAltTitle(_stepUp * 2, qsTr("up")),
+            text:       guidedController.stepUpAltMessage,
+            action:     guidedController.actionStepAlt,
+            actionData: _stepUp * 2,
+            visible:    guidedController.showChangeAlt
+        },
+        {
+            // A25: fixed step up
+            title:      _stepAltTitle(_stepUp, qsTr("up")),
+            text:       guidedController.stepUpAltMessage,
+            action:     guidedController.actionStepAlt,
+            actionData: _stepUp,
+            visible:    guidedController.showChangeAlt
+        },
+        {
+            // A25: fixed step down
+            title:      _stepAltTitle(_stepDown, qsTr("down")),
+            text:       guidedController.stepDownAltMessage,
+            action:     guidedController.actionStepAlt,
+            actionData: -_stepDown,
+            visible:    guidedController.showChangeAlt
+        },
         {
             title:      guidedController.startMissionTitle,
             text:       guidedController.startMissionMessage,

@@ -145,6 +145,12 @@ void MAVLinkConsoleController::_sendSerialData(const QByteArray &data, bool clos
         return;
     }
 
+    // Force v2 so SERIAL_CONTROL extension fields (target_system, target_component) are sent.
+    // This is required to address a non-autopilot component such as the ATS.
+    mavlink_status_t* mavlinkStatus = mavlink_get_channel_status(sharedLink->mavlinkChannel());
+    const uint8_t savedFlags = mavlinkStatus->flags;
+    mavlinkStatus->flags &= ~MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
     // Send maximum sized chunks until the complete buffer is transmitted
     QByteArray output(data);
     while (output.size()) {
@@ -175,6 +181,8 @@ void MAVLinkConsoleController::_sendSerialData(const QByteArray &data, bool clos
         (void) _vehicle->sendMessageOnLinkThreadSafe(sharedLink.get(), msg);
         (void) output.remove(0, chunk.size());
     }
+
+    mavlinkStatus->flags = savedFlags;
 }
 
 bool MAVLinkConsoleController::_processANSItext(QByteArray &line)

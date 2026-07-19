@@ -28,6 +28,9 @@ RowLayout {
     property real   _margins:           ScreenTools.defaultFontPixelWidth
     property real   _spacing:           ScreenTools.defaultFontPixelWidth / 2
     property bool   _healthAndArmingChecksSupported: _activeVehicle ? _activeVehicle.healthAndArmingCheckReport.supported : false
+    property var    _planMasterController:  globals.planMasterControllerPlanView
+    property bool   _missionDirty:          _planMasterController ? _planMasterController.dirty : false
+    property bool   _missionSyncInProgress: _planMasterController ? _planMasterController.syncInProgress : false
 
     function dropMainStatusIndicator() {
         let overallStatusComponent = _activeVehicle ? overallStatusIndicatorPage : overallStatusOfflineIndicatorPage
@@ -49,6 +52,7 @@ RowLayout {
         property string _armedText:         qsTr("Armed")
         property string _flyingText:        qsTr("Flying")
         property string _landingText:       qsTr("Landing")
+        property string _terminatedText:    qsTr("Terminated")
 
         function mainStatusText() {
             var statusText
@@ -56,6 +60,10 @@ RowLayout {
                 if (_communicationLost) {
                     _mainStatusBGColor = "red"
                     return mainStatusLabel._commLostText
+                }
+                if (_activeVehicle.flightMode === _terminatedText) {
+                    _mainStatusBGColor = "red"
+                    return mainStatusLabel._terminatedText
                 }
                 if (_activeVehicle.armed) {
                     _mainStatusBGColor = "green"
@@ -78,6 +86,25 @@ RowLayout {
                         return mainStatusLabel._armedText
                     }
                 } else {
+                    // Client-side (QGC-local) mission sync state takes precedence over firmware
+                    // readiness while disarmed: firmware health checks are blind to whether the
+                    // locally-edited mission has actually been uploaded to the vehicle.
+                    if (_missionSyncInProgress) {
+                        _mainStatusBGColor = "yellow"
+                        return qsTr("Syncing mission...")
+                    } else if (_activeVehicle.missionManagerError !== "") {
+                        _mainStatusBGColor = "red"
+                        return qsTr("Error syncing mission: ") + _activeVehicle.missionManagerError
+                    } else if (_activeVehicle.geoFenceManagerError !== "") {
+                        _mainStatusBGColor = "red"
+                        return qsTr("Error syncing geofence: ") + _activeVehicle.geoFenceManagerError
+                    } else if (_activeVehicle.rallyPointManagerError !== "") {
+                        _mainStatusBGColor = "red"
+                        return qsTr("Error syncing rally points: ") + _activeVehicle.rallyPointManagerError
+                    } else if (_missionDirty) {
+                        _mainStatusBGColor = "yellow"
+                        return qsTr("Mission not uploaded to vehicle")
+                    }
                     if (_healthAndArmingChecksSupported) {
                         if (_activeVehicle.healthAndArmingCheckReport.canArm) {
                             if (_activeVehicle.healthAndArmingCheckReport.hasWarningsOrErrors) {

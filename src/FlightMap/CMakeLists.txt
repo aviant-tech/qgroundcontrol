@@ -18,6 +18,10 @@ qt_add_qml_module(FlightMapModule
         MapItems/QGCMapPolylineVisuals.qml
         MapItems/SplitIndicator.qml
         MapItems/VehicleMapItem.qml
+        Widgets/AltitudeWidget.qml
+        Widgets/BatteryPopup.qml
+        Widgets/BatteryVisual.qml
+        Widgets/BatteryWidget.qml
         Widgets/CenterMapDropButton.qml
         Widgets/CenterMapDropPanel.qml
         Widgets/CompassDial.qml
@@ -31,7 +35,9 @@ qt_add_qml_module(FlightMapModule
         Widgets/QGCAttitudeWidget.qml
         Widgets/QGCCompassWidget.qml
         Widgets/QGCPitchIndicator.qml
+        Widgets/VehicleWarningSideBar.qml
         Widgets/VerticalCompassAttitude.qml
+        Widgets/WinchControl.qml
         FlightMap.qml
         MapScale.qml
     NO_PLUGIN # Required by Qt 6.6.3. TODO: Remove when no longer supported.

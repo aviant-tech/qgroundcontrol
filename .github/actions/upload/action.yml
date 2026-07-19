@@ -24,7 +24,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.package_name }}
-        path: ${{ runner.temp }}/shadow_build_dir/${{ inputs.artifact_name }}
+        path: ${{ github.workspace }}/build/${{ inputs.artifact_name }}
 
     - name: Configure AWS Credentials
       if: ${{ github.event_name == 'push' && !github.event.pull_request.head.repo.fork && inputs.aws_key_id != '' && inputs.aws_secret_access_key != '' }}
@@ -36,13 +36,13 @@ runs:
 
     - name: Upload stable build to S3 Bucket
       if: ${{ github.event_name == 'push' && !github.event.pull_request.head.repo.fork && inputs.aws_key_id != '' && inputs.aws_secret_access_key != '' }}
-      working-directory: ${{ runner.temp }}/shadow_build_dir/${{ inputs.source }}
+      working-directory: ${{ github.workspace }}/build
       run: aws s3 cp ${{ inputs.artifact_name }} s3://qgroundcontrol/builds/${{ github.ref_name }}/${{ inputs.artifact_name }} --acl public-read
       shell: bash
 
     - name: Upload tagged stable build to S3 latest Bucket
       if: ${{ github.event_name == 'push' && github.ref_type == 'tag' && !github.event.pull_request.head.repo.fork && inputs.aws_key_id != '' && inputs.aws_secret_access_key != '' }}
-      working-directory: ${{ runner.temp }}/shadow_build_dir/${{ inputs.source }}
+      working-directory: ${{ github.workspace }}/build
       run: aws s3 cp ${{ inputs.artifact_name }} s3://qgroundcontrol/latest/${{ inputs.artifact_name }} --acl public-read
       shell: bash
 

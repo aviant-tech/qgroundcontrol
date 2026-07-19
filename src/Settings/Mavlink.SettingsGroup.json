@@ -15,7 +15,7 @@
     "shortDesc": "Save telemetry log even if vehicle was not armed",
     "longDesc":  "If this option is enabled a telemtry log will be saved even if vehicle was never armed.",
     "type":             "bool",
-    "default":     false
+    "default":     true
 },
 {
     "name":                 "apmStartMavlinkStreams",
@@ -70,6 +70,15 @@
     "shortDesc":    "GCS MAVLink System ID",
     "type":         "uint32",
     "default":      255,
+    "min":          1,
+    "max":          255
+},
+{
+    "name":         "targetComponentID",
+    "shortDesc":    "Target Component ID",
+    "longDesc":     "Component id of the vehicle component QGC connects to (e.g. the ATS). Requires application restart.",
+    "type":         "uint32",
+    "default":      1,
     "min":          1,
     "max":          255
 }

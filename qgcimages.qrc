@@ -47,6 +47,10 @@
         <file alias="AirframeSimulation.svg">src/AutoPilotPlugins/Common/Images/AirframeSimulation.svg</file>
         <file alias="AirframeStandardPlane.svg">src/AutoPilotPlugins/Common/Images/Plane.svg</file>
         <file alias="AlertAircraft.svg">src/FlightMap/Images/AlertAircraft.svg</file>
+        <file alias="AlertDrone.svg">src/FlightMap/Images/AlertDrone.svg</file>
+        <file alias="AlertHeli.svg">src/FlightMap/Images/AlertHeli.svg</file>
+        <file alias="AlertPara.svg">src/FlightMap/Images/AlertPara.svg</file>
+        <file alias="AlertUnknown.svg">src/FlightMap/Images/AlertUnknown.svg</file>
         <file alias="Analyze.svg">src/UI/toolbar/Images/Analyze.svg</file>
         <file alias="APM/BrandImage">src/FirmwarePlugin/APM/APMBrandImage.png</file>
         <file alias="APM/BrandImageSub">src/FirmwarePlugin/APM/APMBrandImageSub.png</file>
@@ -60,6 +64,10 @@
         <file alias="attitudeInstrument.svg">src/FlightMap/Images/attitudeInstrument.svg</file>
         <file alias="attitudePointer.svg">src/FlightMap/Images/attitudePointer.svg</file>
         <file alias="AwarenessAircraft.svg">src/FlightMap/Images/AwarenessAircraft.svg</file>
+        <file alias="AwarenessDrone.svg">src/FlightMap/Images/AwarenessDrone.svg</file>
+        <file alias="AwarenessHeli.svg">src/FlightMap/Images/AwarenessHeli.svg</file>
+        <file alias="AwarenessPara.svg">src/FlightMap/Images/AwarenessPara.svg</file>
+        <file alias="AwarenessUnknown.svg">src/FlightMap/Images/AwarenessUnknown.svg</file>
         <file alias="Battery.svg">src/UI/toolbar/Images/Battery.svg</file>
         <file alias="BatteryGreen.svg">src/UI/toolbar/Images/BatteryGreen.svg</file>
         <file alias="BatteryYellowGreen.svg">src/UI/toolbar/Images/BatteryYellowGreen.svg</file>
@@ -110,6 +118,7 @@
         <file alias="Joystick.png">src/UI/toolbar/Images/Joystick.png</file>
         <file alias="LandMode.svg">src/AutoPilotPlugins/PX4/Images/LandMode.svg</file>
         <file alias="LandModeCopter.svg">src/AutoPilotPlugins/PX4/Images/LandModeCopter.svg</file>
+        <file alias="Parachute.svg">src/AutoPilotPlugins/PX4/Images/Parachute.svg</file>
         <file alias="LightsComponentIcon.png">src/AutoPilotPlugins/APM/Images/LightsComponentIcon.png</file>
         <file alias="LogDownloadIcon.svg">src/AnalyzeView/LogDownloadIcon.svg</file>
         <file alias="LowBattery.svg">src/AutoPilotPlugins/PX4/Images/LowBattery.svg</file>
@@ -117,6 +126,8 @@
         <file alias="MapAddMission.svg">src/FlightMap/Images/MapAddMission.svg</file>
         <file alias="MapAddMissionBlack.svg">src/FlightMap/Images/MapAddMissionBlack.svg</file>
         <file alias="MapCenter.svg">src/FlightMap/Images/MapCenter.svg</file>
+        <file alias="MissionTools.svg">src/FlightMap/Images/MissionTools.svg</file>
+        <file alias="MissionValidation.svg">src/FlightMap/Images/MissionValidation.svg</file>
         <file alias="MapCenterBlack.svg">src/FlightMap/Images/MapCenterBlack.svg</file>
         <file alias="MapDrawShape.svg">src/FlightMap/Images/MapDrawShape.svg</file>
         <file alias="MapHome.svg">src/FlightMap/Images/MapHome.svg</file>

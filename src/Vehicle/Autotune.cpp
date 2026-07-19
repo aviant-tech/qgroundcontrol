@@ -165,7 +165,7 @@ void Autotune::sendMavlinkRequest()
 
     _vehicle->sendMavCommandWithHandler(
             &handlerInfo,
-            MAV_COMP_ID_AUTOPILOT1,           // the ID of the autopilot
+            _vehicle->defaultComponentId(),           // the ID of the autopilot
             MAV_CMD_DO_AUTOTUNE_ENABLE,       // the mavlink command
             1,                                // request autotune
             0,                                // unused parameter

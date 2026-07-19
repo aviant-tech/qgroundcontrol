@@ -22,6 +22,7 @@
 #include "VisualMissionItem.h"
 #include "RallyPointController.h"
 #include "PlanMasterController.h"
+#include "AviantMissionTools.h"
 
 #include <QtQml/qqml.h>
 
@@ -48,6 +49,7 @@ void MissionManager::registerQmlTypes()
     qmlRegisterUncreatableType<MissionManager>      ("QGroundControl.Vehicle",      1, 0, "MissionManager",       "Reference only");
     qmlRegisterUncreatableType<RallyPointController>("QGroundControl.Controllers",  1, 0, "RallyPointController", "Reference only");
     qmlRegisterUncreatableType<VisualMissionItem>   ("QGroundControl",              1, 0, "VisualMissionItem",    "Reference only");
+    qmlRegisterUncreatableType<AviantMissionTools>  ("QGroundControl.Controllers",  1, 0, "AviantMissionTools",   "Reference only");
     qmlRegisterType<PlanMasterController>           ("QGroundControl.Controllers",  1, 0, "PlanMasterController");
 }
 

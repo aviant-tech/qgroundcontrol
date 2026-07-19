@@ -42,6 +42,19 @@ SettingsPage {
             fact:               _mavlinkSettings.gcsMavlinkSystemID
         }
 
+        LabelledFactTextField {
+            Layout.fillWidth:   true
+            label:              qsTr("Target Component ID")
+            fact:               _mavlinkSettings.targetComponentID
+        }
+
+        QGCLabel {
+            Layout.fillWidth:   true
+            wrapMode:           Text.WordWrap
+            font.pointSize:     ScreenTools.smallFontPointSize
+            text:               qsTr("Changing target component ID requires restart of application.")
+        }
+
         FactCheckBoxSlider {
             Layout.fillWidth:   true
             text:               qsTr("Emit heartbeat")

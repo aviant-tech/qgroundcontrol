@@ -103,6 +103,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _gpsFactGroup                 (this)
     , _gps2FactGroup                (this)
     , _windFactGroup                (this)
+    , _winchStatusFactGroup         (this)
     , _vibrationFactGroup           (this)
     , _temperatureFactGroup         (this)
     , _clockFactGroup               (this)
@@ -113,6 +114,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _escStatusFactGroup           (this)
     , _estimatorStatusFactGroup     (this)
     , _hygrometerFactGroup          (this)
+    , _aviantFactGroup              (this)
     , _generatorFactGroup           (this)
     , _efiFactGroup                 (this)
     , _rpmFactGroup                 (this)
@@ -288,6 +290,14 @@ void Vehicle::_commonInit()
 
     _vehicleLinkManager             = new VehicleLinkManager            (this);
 
+    // Aviant: latch battery consumed as a persistent offset when the link to this vehicle is lost,
+    // so a subsequent flight on the same battery accumulates from the previous consumed value.
+    connect(_vehicleLinkManager, &VehicleLinkManager::communicationLostChanged, this, [this](bool isLost) {
+        if (isLost) {
+            VehicleBatteryFactGroup::persistConsumedForVehicle(this);
+        }
+    });
+
     connect(_standardModes, &StandardModes::modesUpdated, this, &Vehicle::flightModesChanged);
 
     _parameterManager = new ParameterManager(this);
@@ -324,6 +334,7 @@ void Vehicle::_commonInit()
     _addFactGroup(&_gpsFactGroup,               _gpsFactGroupName);
     _addFactGroup(&_gps2FactGroup,              _gps2FactGroupName);
     _addFactGroup(&_windFactGroup,              _windFactGroupName);
+    _addFactGroup(&_winchStatusFactGroup,       _winchStatusFactGroupName);
     _addFactGroup(&_vibrationFactGroup,         _vibrationFactGroupName);
     _addFactGroup(&_temperatureFactGroup,       _temperatureFactGroupName);
     _addFactGroup(&_clockFactGroup,             _clockFactGroupName);
@@ -334,6 +345,7 @@ void Vehicle::_commonInit()
     _addFactGroup(&_escStatusFactGroup,         _escStatusFactGroupName);
     _addFactGroup(&_estimatorStatusFactGroup,   _estimatorStatusFactGroupName);
     _addFactGroup(&_hygrometerFactGroup,        _hygrometerFactGroupName);
+    _addFactGroup(&_aviantFactGroup,            _aviantFactGroupName);
     _addFactGroup(&_generatorFactGroup,         _generatorFactGroupName);
     _addFactGroup(&_efiFactGroup,               _efiFactGroupName);
     _addFactGroup(&_rpmFactGroup,               _rpmFactGroupName);
@@ -566,6 +578,9 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
         _handleGlobalPositionInt(message);
         break;
+    case MAVLINK_MSG_ID_POSITION_TARGET_GLOBAL_INT:
+        _handlePositionTargetGlobalInt(message);
+        break;
     case MAVLINK_MSG_ID_CAMERA_IMAGE_CAPTURED:
         _handleCameraImageCaptured(message);
         break;
@@ -770,6 +785,29 @@ void Vehicle::_handleGlobalPositionInt(mavlink_message_t& message)
     if (newPosition != _coordinate) {
         _coordinate = newPosition;
         emit coordinateChanged(_coordinate);
+    }
+}
+
+void Vehicle::_handlePositionTargetGlobalInt(mavlink_message_t& message)
+{
+    mavlink_position_target_global_int_t positionTarget;
+    mavlink_msg_position_target_global_int_decode(&message, &positionTarget);
+
+    // Both values being zero typically corresponds to the current waypoint not
+    // being initialized. We make sure it gets invalid values so it is cleared
+    // from the UI.
+    if (positionTarget.lat_int == 0 && positionTarget.lon_int == 0) {
+        if (_positionSetpoint.isValid()) {
+            _positionSetpoint = QGeoCoordinate(qQNaN(), qQNaN(), qQNaN());
+            emit positionSetpointChanged(_positionSetpoint);
+        }
+        return;
+    }
+
+    QGeoCoordinate newPositionSetpoint(positionTarget.lat_int / (double)1E7, positionTarget.lon_int / (double)1E7, (double)positionTarget.alt);
+    if (newPositionSetpoint != _positionSetpoint) {
+        _positionSetpoint = newPositionSetpoint;
+        emit positionSetpointChanged(_positionSetpoint);
     }
 }
 
@@ -1265,11 +1303,17 @@ EventHandler& Vehicle::_eventHandler(uint8_t compid)
 
         // connect health and arming check updates
         connect(eventHandler.data(), &EventHandler::healthAndArmingChecksUpdated, this, [compid, this]() {
+            if (compid != _defaultComponentId) {
+                return;
+            }
             const QSharedPointer<EventHandler>& eventHandler = _events[compid];
             _healthAndArmingCheckReport.update(compid, eventHandler->healthAndArmingCheckResults(),
                     eventHandler->getModeGroup(_has_custom_mode_user_intention ? _custom_mode_user_intention : _custom_mode));
         });
         connect(this, &Vehicle::flightModeChanged, this, [compid, this]() {
+            if (compid != _defaultComponentId) {
+                return;
+            }
             const QSharedPointer<EventHandler>& eventHandler = _events[compid];
             if (eventHandler->healthAndArmingCheckResultsValid()) {
                 _healthAndArmingCheckReport.update(compid, eventHandler->healthAndArmingCheckResults(),
@@ -1770,18 +1814,54 @@ void Vehicle::_missionManagerError(int errorCode, const QString& errorMsg)
 {
     Q_UNUSED(errorCode);
     qgcApp()->showAppMessage(tr("Mission transfer failed. Error: %1").arg(errorMsg));
+    if (_missionManagerErrorMsg != errorMsg) {
+        _missionManagerErrorMsg = errorMsg;
+        emit missionManagerErrorChanged();
+    }
+}
+
+void Vehicle::clearMissionManagerError()
+{
+    if (!_missionManagerErrorMsg.isEmpty()) {
+        _missionManagerErrorMsg.clear();
+        emit missionManagerErrorChanged();
+    }
 }
 
 void Vehicle::_geoFenceManagerError(int errorCode, const QString& errorMsg)
 {
     Q_UNUSED(errorCode);
     qgcApp()->showAppMessage(tr("GeoFence transfer failed. Error: %1").arg(errorMsg));
+    if (_geoFenceManagerErrorMsg != errorMsg) {
+        _geoFenceManagerErrorMsg = errorMsg;
+        emit geoFenceManagerErrorChanged();
+    }
+}
+
+void Vehicle::clearGeoFenceManagerError()
+{
+    if (!_geoFenceManagerErrorMsg.isEmpty()) {
+        _geoFenceManagerErrorMsg.clear();
+        emit geoFenceManagerErrorChanged();
+    }
 }
 
 void Vehicle::_rallyPointManagerError(int errorCode, const QString& errorMsg)
 {
     Q_UNUSED(errorCode);
     qgcApp()->showAppMessage(tr("Rally Point transfer failed. Error: %1").arg(errorMsg));
+    if (_rallyPointManagerErrorMsg != errorMsg) {
+        _rallyPointManagerErrorMsg = errorMsg;
+        emit rallyPointManagerErrorChanged();
+    }
+}
+
+void Vehicle::clearRallyPointManagerError()
+{
+    if (!_rallyPointManagerErrorMsg.isEmpty()) {
+        _rallyPointManagerErrorMsg.clear();
+        emit rallyPointManagerErrorChanged();
+    }
 }
 
 void Vehicle::_clearCameraTriggerPoints()
@@ -2089,6 +2169,15 @@ void Vehicle::guidedModeRTL(bool smartRTL)
     _firmwarePlugin->guidedModeRTL(this, smartRTL);
 }
 
+void Vehicle::guidedModeMissionRTL()
+{
+    if (!guidedModeSupported()) {
+        qgcApp()->showAppMessage(guided_mode_not_supported_by_vehicle);
+        return;
+    }
+    _firmwarePlugin->guidedModeMissionRTL(this);
+}
+
 void Vehicle::guidedModeLand()
 {
     if (!guidedModeSupported()) {
@@ -2205,7 +2294,7 @@ void Vehicle::guidedModeOrbit(const QGeoCoordinate& centerCoord, double radius, 
                     true,                           // show error if fails
                     static_cast<float>(radius),
                     static_cast<float>(qQNaN()),    // Use default velocity
-                    static_cast<float>(ORBIT_YAW_BEHAVIOUR_UNCHANGED),       // Use current or vehicle default yaw behavior
+                    static_cast<float>(ORBIT_YAW_BEHAVIOUR_HOLD_FRONT_TANGENT_TO_CIRCLE),    // Vehicle points tangentially to circle
                     static_cast<float>(qQNaN()),    // Use vehicle default num of orbits behavior
                     centerCoord.latitude(), centerCoord.longitude(), static_cast<float>(amslAltitude));
     } else {
@@ -2215,7 +2304,7 @@ void Vehicle::guidedModeOrbit(const QGeoCoordinate& centerCoord, double radius, 
                     true,                           // show error if fails
                     static_cast<float>(radius),
                     static_cast<float>(qQNaN()),    // Use default velocity
-                    static_cast<float>(ORBIT_YAW_BEHAVIOUR_UNCHANGED),       // Use current or vehicle default yaw behavior
+                    static_cast<float>(ORBIT_YAW_BEHAVIOUR_HOLD_FRONT_TANGENT_TO_CIRCLE),    // Vehicle points tangentially to circle
                     static_cast<float>(qQNaN()),    // Use vehicle default num of orbits behavior
                     static_cast<float>(centerCoord.latitude()),
                     static_cast<float>(centerCoord.longitude()),
@@ -2350,10 +2439,9 @@ void Vehicle::emergencyStop()
 {
     sendMavCommand(
                 _defaultComponentId,
-                MAV_CMD_COMPONENT_ARM_DISARM,
+                MAV_CMD_DO_FLIGHTTERMINATION,
                 true,        // show error if fails
-                0.0f,
-                21196.0f);  // Magic number for emergency stop
+                1.0f);       // Do the termination
 }
 
 void Vehicle::landingGearDeploy()
@@ -3079,8 +3167,20 @@ void Vehicle::_rebootCommandResultHandler(void* resultHandlerData, int /*compId*
         }
         qgcApp()->showAppMessage(tr("Vehicle reboot failed."));
     } else {
+        // Vehicle is soft rebooting: latch battery consumed as a persistent offset before the link closes.
+        VehicleBatteryFactGroup::persistConsumedForVehicle(vehicle);
         vehicle->closeVehicle();
     }
+}
+
+void Vehicle::resetPersistedConsumedData()
+{
+    VehicleBatteryFactGroup::resetPersistedConsumedForVehicle(this);
+}
+
+bool Vehicle::hasPersistedConsumedData()
+{
+    return VehicleBatteryFactGroup::hasPersistedConsumedForVehicle(this);
 }
 
 void Vehicle::rebootVehicle()
@@ -3089,7 +3189,23 @@ void Vehicle::rebootVehicle()
     handlerInfo.resultHandler       = _rebootCommandResultHandler;
     handlerInfo.resultHandlerData   = this;
 
-    sendMavCommandWithHandler(&handlerInfo, _defaultComponentId, MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN, 1);
+    sendMavCommandWithHandler(
+        &handlerInfo,
+        _defaultComponentId,
+        MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN,
+        1,  // param1: reboot autopilot
+        0,  // param2: no onboard computer action
+        0,  // param3: no extra component action
+        0); // param4: no extra component id
+    // Also reboot the parachute (extra component) so it re-inits together with the FC
+    sendMavCommandWithHandler(
+        nullptr, // no result handler
+        161,     // parachute component id
+        MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN,
+        0,   // param1: no autopilot action
+        0,   // param2: no onboard computer action
+        1,   // param3: reboot extra component
+        161); // param4: extra component id (parachute)
 }
 
 void Vehicle::startCalibration(QGCMAVLink::CalibrationType calType)
@@ -3841,7 +3957,7 @@ void Vehicle::sendParamMapRC(const QString& paramName, double scale, double cent
                                        sharedLink->mavlinkChannel(),
                                        &message,
                                        _id,
-                                       MAV_COMP_ID_AUTOPILOT1,
+                                       _defaultComponentId,
                                        param_id_cstr,
                                        -1,                                                  // parameter name specified as string in previous argument
                                        static_cast<uint8_t>(tuningID),
@@ -3869,7 +3985,7 @@ void Vehicle::clearAllParamMapRC(void)
                                            sharedLink->mavlinkChannel(),
                                            &message,
                                            _id,
-                                           MAV_COMP_ID_AUTOPILOT1,
+                                           _defaultComponentId,
                                            param_id_cstr,
                                            -2,                                                  // Disable map for specified tuning id
                                            i,                                                   // tuning id
@@ -3941,10 +4057,10 @@ void Vehicle::sendGripperAction(QGCMAVLink::GRIPPER_OPTIONS gripperOption)
 {
     switch(gripperOption) {
         case QGCMAVLink::Gripper_release:
-            setGripperAction(GRIPPER_ACTION_RELEASE);
+            setGripperAction(GRIPPER_ACTION_OPEN); // MAVLink renamed GRIPPER_ACTION_RELEASE(0) -> GRIPPER_ACTION_OPEN(0)
             break;
         case QGCMAVLink::Gripper_grab:
-            setGripperAction(GRIPPER_ACTION_GRAB);
+            setGripperAction(GRIPPER_ACTION_CLOSE); // MAVLink renamed GRIPPER_ACTION_GRAB(1) -> GRIPPER_ACTION_CLOSE(1)
             break;
         case QGCMAVLink::Invalid_option:
             qDebug("unknown function");
@@ -4326,11 +4442,23 @@ void Vehicle::_textMessageReceived(MAV_COMPONENT componentid, MAV_SEVERITY sever
     m_statusTextHandler->handleHTMLEscapedTextMessage(componentid, severity, text.toHtmlEscaped(), description);
 }
 
+QString Vehicle::name() const
+{
+    // Aviant (A36): deduce name from id for now, until we can receive more complex information from the vehicle
+    return QString("%1%2").arg(_id > 199 ? "TEST" : _id > 99 ? "NX" : "NT").arg(_id % 100, 2, 10, QLatin1Char('0'));
+}
+
 void Vehicle::_errorMessageReceived(QString message)
 {
-    if (_isActiveVehicle) {
-        qgcApp()->showCriticalVehicleMessage(message);
+    if (!_isActiveVehicle) {
+        return;
     }
+    // Aviant (A44): PreArm messages are handled by Vehicle and shown in Map
+    if (message.startsWith(QStringLiteral("PreArm")) || message.startsWith(QStringLiteral("preflight"), Qt::CaseInsensitive)) {
+        return;
+    }
+    // Aviant (A44): route critical messages to the fly-view warning sidebar instead of the modal popup
+    emit newCriticalVehicleMessage(message);
 }
 
 /*---------------------------------------------------------------------------*/

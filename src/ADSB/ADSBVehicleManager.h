@@ -38,6 +38,9 @@ public:
 
     const QmlObjectListModel *adsbVehicles() const { return _adsbVehicles; }
 
+    Q_INVOKABLE void unhideAllVehicles();
+    Q_INVOKABLE void setHiddenForADSBVehicle(quint32 icaoAddress, bool hidden);
+
     void mavlinkMessageReceived(const mavlink_message_t &message);
 
 public slots:

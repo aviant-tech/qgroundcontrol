@@ -94,7 +94,7 @@ void InitialConnectStateMachine::_stateRequestAutopilotVersion(StateMachine* sta
             qCDebug(InitialConnectStateMachineLog) << "Sending REQUEST_MESSAGE:AUTOPILOT_VERSION";
             vehicle->requestMessage(_autopilotVersionRequestMessageHandler,
                                     connectMachine,
-                                    MAV_COMP_ID_AUTOPILOT1,
+                                    vehicle->defaultComponentId(),
                                     MAVLINK_MSG_ID_AUTOPILOT_VERSION);
         }
     }
@@ -209,7 +209,7 @@ void InitialConnectStateMachine::_stateRequestProtocolVersion(StateMachine* stat
             qCDebug(InitialConnectStateMachineLog) << "Sending REQUEST_MESSAGE:PROTOCOL_VERSION";
             vehicle->requestMessage(_protocolVersionRequestMessageHandler,
                                     connectMachine,
-                                    MAV_COMP_ID_AUTOPILOT1,
+                                    vehicle->defaultComponentId(),
                                     MAVLINK_MSG_ID_PROTOCOL_VERSION);
         }
     }
