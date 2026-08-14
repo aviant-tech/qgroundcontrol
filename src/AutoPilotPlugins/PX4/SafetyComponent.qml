@@ -56,12 +56,6 @@ SetupPage {
             property Fact _objectAvoidance:     controller.getParameterFact(-1, "COM_OBS_AVOID")
             property Fact _landSpeedMC:         controller.getParameterFact(-1, "MPC_LAND_SPEED", false)
             property Fact _parachuteRequired:   controller.getParameterFact(-1, "COM_PARACHUTE")
-            // Parachute altitude parameter changed name in PX4 1.15
-            property Fact _parachuteAltitude: (
-                controller.parameterExists(-1, "COM_FDTRM_MINAGL")
-                    ? controller.getParameterFact(-1, "COM_FDTRM_MINAGL")
-                    : controller.getParameterFact(-1, "FD_MIN_DIST_TRM")
-            )
             property bool _hitlAvailable:       controller.parameterExists(-1, hitlParam)
             property Fact _hitlEnabled:         controller.getParameterFact(-1, hitlParam, false)
 
@@ -586,8 +580,8 @@ SetupPage {
                 }
                 
                 Rectangle {
-                    width:              mainRow.width       + (_margins * 2)
-                    height:             landModeGrid.height + (_margins * 2)
+                    width:              mainRow.width        + (_margins * 2)
+                    height:             parachuteGrid.height + (_margins * 2)
                     color:              qgcPal.windowShade
                     Row {
                         id:                 parachuteGrid
@@ -609,17 +603,6 @@ SetupPage {
                             columns:                2
                             anchors.verticalCenter: parent.verticalCenter
 
-                            QGCLabel {
-                                id:                 parachuteAltitudeLabel
-                                text:               qsTr("Minimum Ground Distance\nFor Termination:")
-                                Layout.minimumWidth:_labelWidth
-                                Layout.fillWidth:   true
-                            }
-                            FactTextField {
-                                fact:               _parachuteAltitude
-                                Layout.minimumWidth:_editFieldWidth
-                                Layout.fillWidth:   true
-                            }
                             QGCLabel {
                                 id:                 parachuteRequiredLabel
                                 text:               qsTr("Parachute Required\nFor Arming:")
