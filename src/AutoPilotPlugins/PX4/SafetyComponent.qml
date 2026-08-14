@@ -49,6 +49,7 @@ SetupPage {
             property Fact _fenceAlt:            controller.getParameterFact(-1, "GF_MAX_VER_DIST")
             property Fact _rtlLandDelay:        controller.getParameterFact(-1, "RTL_LAND_DELAY")
             property Fact _lowBattAction:       controller.getParameterFact(-1, "COM_LOW_BAT_ACT")
+            property Fact _rcInMode:            controller.getParameterFact(-1, "COM_RC_IN_MODE")
             property Fact _rcLossAction:        controller.getParameterFact(-1, "NAV_RCL_ACT")
             property Fact _dlLossAction:        controller.getParameterFact(-1, "NAV_DLL_ACT")
             property Fact _disarmLandDelay:     controller.getParameterFact(-1, "COM_DISARM_LAND")
@@ -273,6 +274,18 @@ SetupPage {
                         GridLayout {
                             columns:                2
                             anchors.verticalCenter: parent.verticalCenter
+
+                            QGCLabel {
+                                text:               qsTr("RC Control Input Mode:")
+                                Layout.minimumWidth:_labelWidth
+                                Layout.fillWidth:   true
+                            }
+                            FactComboBox {
+                                fact:               _rcInMode
+                                indexModel:         false
+                                Layout.minimumWidth:_editFieldWidth
+                                Layout.fillWidth:   true
+                            }
 
                             QGCLabel {
                                 text:               qsTr("Failsafe Action:")
