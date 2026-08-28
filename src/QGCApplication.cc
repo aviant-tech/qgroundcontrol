@@ -238,6 +238,8 @@ QGCApplication::QGCApplication(int &argc, char* argv[], bool unitTesting)
     bool fClearCache = false;           // Clear parameter/airframe caches
     bool logging = false;               // Turn on logging
     QString loggingOptions;
+    bool modeSpecified = false;         // Mode option was specified
+    QString modeOption;                 // Application mode (prod/test)
 
     CmdLineOpt_t rgCmdLineOptions[] = {
         { "--clear-settings",   &fClearSettingsOptions, nullptr },
@@ -245,10 +247,24 @@ QGCApplication::QGCApplication(int &argc, char* argv[], bool unitTesting)
         { "--logging",          &logging,               &loggingOptions },
         { "--fake-mobile",      &_fakeMobile,           nullptr },
         { "--log-output",       &_logOutput,            nullptr },
+        { "--mode",             &modeSpecified,         &modeOption },
         // Add additional command line option flags here
     };
 
     ParseCmdLineOptions(argc, argv, rgCmdLineOptions, sizeof(rgCmdLineOptions)/sizeof(rgCmdLineOptions[0]), false);
+
+    // Process mode option
+    if (modeSpecified && !modeOption.isEmpty()) {
+        if (modeOption.compare("prod", Qt::CaseInsensitive) == 0) {
+            _productionMode = true;
+            qDebug() << "Running in PRODUCTION mode - some features will be disabled";
+        } else if (modeOption.compare("test", Qt::CaseInsensitive) == 0) {
+            _productionMode = false;
+            qDebug() << "Running in TEST mode - all features enabled";
+        } else {
+            qWarning() << "Invalid mode option:" << modeOption << "- Valid options are prod or test. Defaulting to test mode.";
+        }
+    }
 
     // Set up timer for delayed missing fact display
     _missingParamsDelayedDisplayTimer.setSingleShot(true);

@@ -93,6 +93,7 @@ public:
 
     Q_PROPERTY(QString qgcVersion       READ qgcVersion         CONSTANT)
     Q_PROPERTY(bool    skipSetupPage    READ skipSetupPage      WRITE setSkipSetupPage NOTIFY skipSetupPageChanged)
+    Q_PROPERTY(bool    isProductionMode READ isProductionMode   CONSTANT)
 
     Q_PROPERTY(qreal zOrderTopMost              READ zOrderTopMost              CONSTANT) ///< z order for top most items, toolbar, main window sub view
     Q_PROPERTY(qreal zOrderWidgets              READ zOrderWidgets              CONSTANT) ///< z order value to widgets, for example: zoom controls, hud widgetss
@@ -215,6 +216,8 @@ public:
     bool    apmFirmwareSupported    ();
     bool    skipSetupPage           () const{ return _skipSetupPage; }
     void    setSkipSetupPage        (bool skip);
+    
+    bool    isProductionMode        () const{ return _isProductionMode; }
 
     void    setIsVersionCheckEnabled    (bool enable);
     void    setMavlinkSystemID          (int  id);
@@ -270,6 +273,7 @@ private:
 #endif
 
     bool                    _skipSetupPage          = false;
+    bool                    _isProductionMode       = false;
     QStringList             _altitudeModeEnumString;
 
     static const char* _flightMapPositionSettingsGroup;
