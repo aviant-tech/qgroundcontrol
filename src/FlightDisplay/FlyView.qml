@@ -114,8 +114,9 @@ Item {
 
     GuidedActionList {
         id:                         guidedActionList
-        anchors.margins:            _margins
         anchors.bottom:             parent.bottom
+        // Sit on top of the telemetry values bar rather than covering it
+        anchors.bottomMargin:       _toolsMargin + widgetLayer.telemetryPanelBottomInset
         anchors.horizontalCenter:   parent.horizontalCenter
         z:                          QGroundControl.zOrderTopMost
         guidedController:           _guidedController

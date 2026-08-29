@@ -38,6 +38,10 @@ Item {
     property var    totalToolInsets:        _totalToolInsets
     property var    mapControl
 
+    // Height reserved by the telemetry values bar along the bottom edge, 0 when the bar is docked
+    // to the right or this layer is hidden
+    property real   telemetryPanelBottomInset: visible && telemetryPanel.bottomMode ? telemetryPanel.height + _toolsMargin : 0
+
     property var    _activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
     property var    _planMasterController:  globals.planMasterControllerFlyView
     property var    _missionController:     _planMasterController.missionController
