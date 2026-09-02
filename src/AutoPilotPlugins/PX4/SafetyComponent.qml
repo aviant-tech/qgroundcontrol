@@ -44,7 +44,6 @@ SetupPage {
             property Fact _fenceAction:         controller.getParameterFact(-1, "GF_ACTION")
             property Fact _fenceRadius:         controller.getParameterFact(-1, "GF_MAX_HOR_DIST")
             property Fact _fenceAlt:            controller.getParameterFact(-1, "GF_MAX_VER_DIST")
-            property Fact _rtlLandDelay:        controller.getParameterFact(-1, "RTL_LAND_DELAY")
             property Fact _lowBattAction:       controller.getParameterFact(-1, "COM_LOW_BAT_ACT")
             property Fact _rcInMode:            controller.getParameterFact(-1, "COM_RC_IN_MODE")
             property Fact _rcLossAction:        controller.getParameterFact(-1, "NAV_RCL_ACT")
@@ -354,47 +353,11 @@ SetupPage {
                             }
 
                             QGCLabel {
-                                text:                   qsTr("Return to launch, then:")
-                                Layout.columnSpan:      2
-                            }
-                            Row {
-                                Layout.columnSpan:      2
-                                Item { width: ScreenTools.defaultFontPixelWidth; height: 1 }
-                                QGCRadioButton {
-                                    id:                 homeLandRadio
-                                    checked:            _rtlLandDelay ? _rtlLandDelay.value === 0 : false
-                                    text:               qsTr("Land immediately")
-                                    onClicked:          _rtlLandDelay.value = 0
-                                }
-                            }
-                            Row {
-                                Layout.columnSpan:      2
-                                Item { width: ScreenTools.defaultFontPixelWidth; height: 1 }
-                                QGCRadioButton {
-                                    id:                 homeLoiterNoLandRadio
-                                    checked:            _rtlLandDelay ? _rtlLandDelay.value < 0 : false
-                                    text:               qsTr("Loiter and do not land")
-                                    onClicked:          _rtlLandDelay.value = -1
-                                }
-                            }
-                            Row {
-                                Layout.columnSpan:      2
-                                Item { width: ScreenTools.defaultFontPixelWidth; height: 1 }
-                                QGCRadioButton {
-                                    id:                 homeLoiterLandRadio
-                                    checked:            _rtlLandDelay ? _rtlLandDelay.value > 0 : false
-                                    text:               qsTr("Loiter and land after specified time")
-                                    onClicked:          _rtlLandDelay.value = 60
-                                }
-                            }
-
-                            QGCLabel {
                                 text:                   qsTr("Loiter Time")
                                 Layout.fillWidth:       true
                             }
                             FactTextField {
                                 fact:                   controller.getParameterFact(-1, "RTL_LAND_DELAY")
-                                enabled:                homeLoiterLandRadio.checked === true
                                 Layout.fillWidth:       true
                             }
 
@@ -404,7 +367,6 @@ SetupPage {
                             }
                             FactTextField {
                                 fact:                   controller.getParameterFact(-1, "RTL_DESCEND_ALT")
-                                enabled:                homeLoiterLandRadio.checked === true || homeLoiterNoLandRadio.checked === true
                                 Layout.fillWidth:       true
                             }
                         }
