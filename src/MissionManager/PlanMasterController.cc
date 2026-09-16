@@ -234,6 +234,8 @@ void PlanMasterController::loadFromVehicle(void)
         qCWarning(PlanMasterControllerLog) << "PlanMasterController::loadFromVehicle called while syncInProgress";
     } else {
         _loadGeoFence = true;
+        // A plan downloaded from a vehicle carries no Aviant metadata
+        _loadReservedAirspace(QJsonObject());
         qCDebug(PlanMasterControllerLog) << "PlanMasterController::loadFromVehicle calling _missionController.loadFromVehicle";
         _missionController.loadFromVehicle();
         setDirty(false);
@@ -352,6 +354,17 @@ void PlanMasterController::sendToVehicle(void)
     }
 }
 
+// Reads the reserved airspace radii from the Aviant metadata of a plan file.
+// The metadata is optional, radii are reset to 0 (meaning unknown) when it is missing.
+void PlanMasterController::_loadReservedAirspace(const QJsonObject& json)
+{
+    QJsonObject reservedAirspace = json["aviant_metadata"].toObject()["config"].toObject()["reserved_airspace"].toObject();
+
+    _takeoffNonSegregatedRadius = reservedAirspace["takeoff_non_segregated_radius_meters"].toDouble(0);
+    _deliveryNonSegregatedRadius = reservedAirspace["delivery_non_segregated_radius_meters"].toDouble(0);
+    emit reservedAirspaceChanged();
+}
+
 void PlanMasterController::loadFromFile(const QString& filename)
 {
     QString errorString;
@@ -360,6 +373,8 @@ void PlanMasterController::loadFromFile(const QString& filename)
     if (filename.isEmpty()) {
         return;
     }
+
+    _loadReservedAirspace(QJsonObject());
 
     QFileInfo fileInfo(filename);
     QFile file(filename);
@@ -419,6 +434,7 @@ void PlanMasterController::loadFromFile(const QString& filename)
         } else {
             //-- Allow plugins to post process the load
             qgcApp()->toolbox()->corePlugin()->postLoadFromJson(this, json);
+            _loadReservedAirspace(json);
             success = true;
         }
     }
@@ -469,6 +485,8 @@ bool  PlanMasterController::loadFromJson(QJsonDocument jsonDoc, QString &errorSt
     //-- Allow plugins to pre process the load
     qgcApp()->toolbox()->corePlugin()->preLoadFromJson(this, json);
 
+    _loadReservedAirspace(QJsonObject());
+
     int version;
     if (!JsonHelper::validateExternalQGCJsonFile(json, kPlanFileType, kPlanFileVersion, kPlanFileVersion, version, errorString)) {
         return false;
@@ -498,6 +516,7 @@ bool  PlanMasterController::loadFromJson(QJsonDocument jsonDoc, QString &errorSt
     } else {
         //-- Allow plugins to post process the load
         qgcApp()->toolbox()->corePlugin()->postLoadFromJson(this, json);
+        _loadReservedAirspace(json);
     }
 
     if (!offline()) setDirty(true);
@@ -570,6 +589,7 @@ void PlanMasterController::saveToKml(const QString& filename)
 
 void PlanMasterController::removeAll(void)
 {
+    _loadReservedAirspace(QJsonObject());
     _missionController.removeAll();
     _geoFenceController.removeAll();
     _rallyPointController.removeAll();
@@ -585,6 +605,7 @@ void PlanMasterController::removeAll(void)
 void PlanMasterController::removeAllFromVehicle(void)
 {
     if (!offline()) {
+        _loadReservedAirspace(QJsonObject());
         _missionController.removeAllFromVehicle();
         if (_geoFenceController.supported()) {
             _geoFenceController.removeAllFromVehicle();
