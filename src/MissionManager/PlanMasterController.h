@@ -53,6 +53,8 @@ public:
     Q_PROPERTY(QStringList              loadNameFilters         READ loadNameFilters                        CONSTANT)                       ///< File filter list loading plan files
     Q_PROPERTY(QStringList              saveNameFilters         READ saveNameFilters                        CONSTANT)                       ///< File filter list saving plan files
     Q_PROPERTY(QmlObjectListModel*      planCreators            MEMBER _planCreators                        NOTIFY planCreatorsChanged)
+    Q_PROPERTY(double                   takeoffExemptRadius         READ takeoffExemptRadius            NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
+    Q_PROPERTY(double                   deliveryNonSegregatedRadius READ deliveryNonSegregatedRadius    NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
 
     /// Should be called immediately upon Component.onCompleted.
     Q_INVOKABLE void start(void);
@@ -99,6 +101,8 @@ public:
     QStringList loadNameFilters (void) const;
     QStringList saveNameFilters (void) const;
     bool        isEmpty         (void) const;
+    double      takeoffExemptRadius         (void) const { return _takeoffExemptRadius; }
+    double      deliveryNonSegregatedRadius (void) const { return _deliveryNonSegregatedRadius; }
 
     void        setFlyView(bool flyView) { _flyView = flyView; }
 
@@ -125,6 +129,7 @@ signals:
     void planCreatorsChanged                (QmlObjectListModel* planCreators);
     void managerVehicleChanged              (Vehicle* managerVehicle);
     void promptForPlanUsageOnVehicleChange  (void);
+    void reservedAirspaceChanged            (void);
 
 private slots:
     void _activeVehicleChanged      (Vehicle* activeVehicle);
@@ -142,6 +147,7 @@ private slots:
 private:
     void _commonInit                (void);
     void _showPlanFromManagerVehicle(void);
+    static void _loadReservedAirspace(const QJsonObject& json);
 
     MultiVehicleManager*    _multiVehicleMgr =          nullptr;
     Vehicle*                _controllerVehicle =        nullptr;    ///< Offline controller vehicle
@@ -159,4 +165,8 @@ private:
     QString                 _currentPlanFile;
     bool                    _deleteWhenSendCompleted =  false;
     QmlObjectListModel*     _planCreators =             nullptr;
+    // The plan file metadata is shared by all controllers, so that the fly view sees the plan loaded by the plan view
+    static double                          _takeoffExemptRadius;
+    static double                          _deliveryNonSegregatedRadius;
+    static QList<PlanMasterController*>    _instances;
 };

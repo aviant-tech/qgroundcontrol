@@ -31,6 +31,7 @@ public:
     DEFINE_SETTINGFACT(multidroneConflictDistance)
     DEFINE_SETTINGFACT(showMultidroneConflictCircle)
     DEFINE_SETTINGFACT(showAcceptanceRadiusCircle)
+    DEFINE_SETTINGFACT(showReservedAirspaceCircles)
     DEFINE_SETTINGFACT(minVisibleRangeInMeters)
     DEFINE_SETTINGFACT(metersBetweenLines)
     DEFINE_SETTINGFACT(rssiWarning)

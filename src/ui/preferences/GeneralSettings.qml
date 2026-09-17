@@ -820,6 +820,10 @@ Rectangle {
                                 fact:       _aviantSettings.showAcceptanceRadiusCircle
                             }
                             FactCheckBox {
+                                text:       qsTr("Show reserved airspace circles")
+                                fact:       _aviantSettings.showReservedAirspaceCircles
+                            }
+                            FactCheckBox {
                                 id:         promptShowBatteryWidget
                                 text:       qsTr("Show battery widget")
                                 fact:       _aviantSettings.showBatteryWidget
