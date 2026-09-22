@@ -185,16 +185,16 @@ Item {
     }
 
     Component {
-        id: promptForBrowsingKyteOrders
+        id: promptForBrowsingScheduledFlights
 
         QGCPopupDialog {
-            id: ordersPopup
-            title: qsTr("Select mission from Kyte Orders")
+            id: flightsPopup
+            title: qsTr("Select mission from scheduled flights")
 
             width: Math.min(800, mainWindow.width - 2 * _margin)
             anchors.centerIn: parent
 
-            property var kyteOrders: []
+            property var scheduledFlights: []
 
             ColumnLayout {
                 id: contentColumn
@@ -205,9 +205,9 @@ Item {
                 spacing: _margin
 
                 Rectangle {
-                    id: ordersContainer
+                    id: flightsContainer
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Math.min(600, ordersList.contentHeight + headerRect.height + 2 * _margin)
+                    Layout.preferredHeight: Math.min(600, flightsList.contentHeight + headerRect.height + 2 * _margin)
                     color: "transparent"
 
                     ColumnLayout {
@@ -218,7 +218,7 @@ Item {
                             Layout.fillWidth: true
                             height: headerRow.height + 2 * _margin
                             color: qgcPal.windowShade
-                            visible:                ordersPopup.kyteOrders.length !== 0
+                            visible:                flightsPopup.scheduledFlights.length !== 0
 
                             RowLayout {
                                 id:                     headerRow
@@ -229,19 +229,29 @@ Item {
                                 spacing:                _margin
 
                                 QGCLabel {
-                                    Layout.preferredWidth: parent.width / 4
-                                    text:                  "Order ID"
+                                    Layout.fillWidth:      true
+                                    Layout.preferredWidth: 1
+                                    text:                  "Reference"
                                     font.bold:             true
                                 }
 
                                 QGCLabel {
-                                    Layout.preferredWidth: parent.width / 4
-                                    text:                  "Requested at"
+                                    Layout.fillWidth:      true
+                                    Layout.preferredWidth: 1
+                                    text:                  "Flight window"
                                     font.bold:             true
                                 }
 
                                 QGCLabel {
-                                    Layout.preferredWidth: parent.width / 4
+                                    Layout.fillWidth:      true
+                                    Layout.preferredWidth: 1
+                                    text:                  "Address"
+                                    font.bold:             true
+                                }
+
+                                QGCLabel {
+                                    Layout.fillWidth:      true
+                                    Layout.preferredWidth: 1
                                     text:                  "Mission"
                                     font.bold:             true
                                     horizontalAlignment:   Text.AlignHCenter
@@ -250,14 +260,14 @@ Item {
                         }
 
                         ListView {
-                            id:                ordersList
+                            id:                flightsList
                             Layout.fillWidth:  true
                             Layout.fillHeight: true
                             clip:              true
-                            model:             ordersPopup.kyteOrders
+                            model:             flightsPopup.scheduledFlights
 
                             delegate: Rectangle {
-                                width:  ordersList.width
+                                width:  flightsList.width
                                 height: contentLayout.implicitHeight + 2 * _margin
                                 color:  index % 2 === 0 ? qgcPal.windowShadeDark : qgcPal.windowShade
 
@@ -268,32 +278,42 @@ Item {
                                     spacing:         _margin
 
                                     QGCLabel {
-                                        Layout.preferredWidth: parent.width / 4
-                                        text:                  modelData && modelData.display_id !== undefined ? modelData.display_id : "Order ID not available"
+                                        Layout.fillWidth:      true
+                                        Layout.preferredWidth: 1
+                                        text:                  modelData && modelData.source_reference ? modelData.source_reference : "Reference not available"
                                         wrapMode:              Text.WordWrap
                                     }
 
                                     QGCLabel {
-                                        Layout.preferredWidth: parent.width / 4
-                                        text:                  modelData && modelData.requested_ts ? removeMilliseconds(modelData.requested_ts) : "Requested time not available"
+                                        Layout.fillWidth:      true
+                                        Layout.preferredWidth: 1
+                                        text:                  modelData && modelData.flight_window_start ? removeMilliseconds(modelData.flight_window_start) + " - " + removeMilliseconds(modelData.flight_window_end) : "Flight window not available"
                                         wrapMode:              Text.WordWrap
-                                        
+
                                         function removeMilliseconds(dateString) {
                                             if (!dateString) return "Date not available"
                                             const formattedDate = dateString.replace(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d+)?(.*)/, "$1$3")
                                             return formattedDate
                                         }
                                     }
+
+                                    QGCLabel {
+                                        Layout.fillWidth:      true
+                                        Layout.preferredWidth: 1
+                                        text:                  modelData && modelData.delivery_address && modelData.delivery_address.street_address ? modelData.delivery_address.street_address : "Address not available"
+                                        wrapMode:              Text.WordWrap
+                                    }
                                     
                                     Item {
                                         Layout.fillHeight:     true
-                                        Layout.preferredWidth: parent.width / 4
+                                        Layout.fillWidth:      true
+                                        Layout.preferredWidth: 1
 
                                         QGCButton {
                                             anchors.centerIn: parent
                                             id:               missionButton
                                             text:             qsTr("Select mission")
-                                            visible:          modelData && modelData.mms_mission_id
+                                            visible:          modelData && modelData.mission_plan_id
                                             onClicked: {
                                                 var currentActiveVehicle = QGroundControl.multiVehicleManager ? QGroundControl.multiVehicleManager.activeVehicle : null;
                                                 var aircraftName = currentActiveVehicle ? currentActiveVehicle.name : "";
@@ -305,7 +325,7 @@ Item {
                                                     )
                                                     return; 
                                                 }
-                                                _aviantMissionTools.downloadMissionFileFromOrder(modelData.mms_mission_id, aircraftName)
+                                                _aviantMissionTools.downloadMissionFileFromScheduledFlight(modelData.mission_plan_id, aircraftName)
                                                 hideDialog()
                                             }
                                         }
@@ -313,7 +333,7 @@ Item {
                                         QGCLabel {
                                             anchors.centerIn: parent
                                             id:               missionNotAvailableLabel
-                                            visible:          !modelData || !modelData.mms_mission_id
+                                            visible:          !modelData || !modelData.mission_plan_id
                                             text:             "Mission not available"
                                         }
                                     }
@@ -324,20 +344,20 @@ Item {
 
                     QGCLabel {
                         anchors.centerIn: parent
-                        visible:          ordersPopup.kyteOrders.length === 0
-                        text:             qsTr("No orders available")
+                        visible:          flightsPopup.scheduledFlights.length === 0
+                        text:             qsTr("No scheduled flights available")
                     }
                 }
             }
 
             Component.onCompleted: {
-                _aviantMissionTools.fetchKyteOrderMissions()
+                _aviantMissionTools.fetchScheduledFlights()
             }
 
             Connections {
                 target: _aviantMissionTools
-                function onKyteOrdersChanged(orders) {
-                    ordersPopup.kyteOrders = orders
+                function onScheduledFlightsChanged(scheduledFlights) {
+                    flightsPopup.scheduledFlights = scheduledFlights
                 }
             }
         }
@@ -1387,12 +1407,12 @@ Item {
                 visible:            downloadFromWebSection.visible
 
                 QGCButton {
-                    text:               qsTr("Kyte")
+                    text:               qsTr("Scheduled flights")
                     Layout.fillWidth:   true
-                    enabled:            !_planMasterController.syncInProgress && _aviantSettings.kyteBackendUrl.rawValue != ""
+                    enabled:            !_planMasterController.syncInProgress && _aviantSettings.missionToolsUrl.rawValue != ""
                     onClicked: {
                         dropPanel.hide()
-                        mainWindow.showPopupDialogFromComponent(promptForBrowsingKyteOrders)
+                        mainWindow.showPopupDialogFromComponent(promptForBrowsingScheduledFlights)
                     }
                 }
             }

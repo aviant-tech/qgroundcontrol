@@ -68,7 +68,8 @@ QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base)
             return QUrl(base + "/validate_mission");
         case RallyPointHeight:
             return QUrl(base + "/set_rally_points_height");
-            break;
+        case FetchScheduledFlights:
+            return QUrl(base + "/api/scheduled-flights/active/");
         case NoOperation:
         default:
             return QUrl();
@@ -83,17 +84,6 @@ QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base, int missi
     }
 }
 
-QUrl AviantMissionTools::_getKyteBackendUrl(Operation operation, QString base)
-{
-    switch (operation) {
-        case FetchKyteOrders:
-            return QUrl(base + "/orders/api/v2/orders/active/"); 
-        case NoOperation:
-        default:
-            return QUrl();
-    }
-}
-
 QString AviantMissionTools::_getOperationName(Operation operation)
 {
     switch (operation) {
@@ -103,6 +93,8 @@ QString AviantMissionTools::_getOperationName(Operation operation)
             return QString("RallyPointHeight");
         case NoOperation:
             return QString("NoOperation");
+        case FetchScheduledFlights:
+            return QString("FetchScheduledFlights");
         case FetchLandingPointAdjustedMission:
             return QString("FetchLandingPointAdjustedMission");
         default:
@@ -201,7 +193,8 @@ void AviantMissionTools::requestOperation(Operation operation)
         // but we will not notify the user (may change in the future, based on user testing).
         return;
     }
-    _networkRequest.setUrl(url);
+    QNetworkRequest networkRequest;
+    networkRequest.setUrl(url);
 
     QHttpMultiPart *missionPayload = nullptr;
 
@@ -249,28 +242,28 @@ void AviantMissionTools::requestOperation(Operation operation)
     }
 
     // Set API token
-    _networkRequest.setRawHeader(QByteArray("X-API-KEY"), aviantSettings->missionToolsToken()->rawValue().toString().toUtf8());
+    networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->missionToolsToken()->rawValue().toString().toUtf8());
         
     // Due to problems with qt 5.15 and Ubuntu 22.04 with ssl libraries (openssl 3 not supported by qt 5.15.2)
     // we need to disable certificate checking in order to get this to work.
     // Make it optionally so it can be enabled if needed.
     // Note: This can also be used to test against an "unsafe" (e.g. local) server.
-    QSslConfiguration sslConf = _networkRequest.sslConfiguration();
+    QSslConfiguration sslConf = networkRequest.sslConfiguration();
     sslConf.setPeerVerifyMode(aviantSettings->missionToolsInsecureHttps()->rawValue().toBool() ? QSslSocket::VerifyNone : QSslSocket::AutoVerifyPeer);
-    _networkRequest.setSslConfiguration(sslConf);
+    networkRequest.setSslConfiguration(sslConf);
 
     QNetworkReply *reply = nullptr;
     if (missionPayload) {
         // All currently supported operation used GET.
         // The QT framework does not support the payload we need to include by
         // using the standard ->get() call, so we need to use ->sendCustomRequest()
-        reply = _networkAccessManager->sendCustomRequest(_networkRequest, "GET", missionPayload);
+        reply = _networkAccessManager->sendCustomRequest(networkRequest, "GET", missionPayload);
         missionPayload->setParent(reply);  // missionPayload is deleted when reply is deleted
     } else {
         // Currently not used, included for future operation that do not
         // include mission file as payload.
         // May need to add other types than "GET"
-        reply = _networkAccessManager->get(_networkRequest);
+        reply = _networkAccessManager->get(networkRequest);
     }
 
     if (reply) {
@@ -339,8 +332,8 @@ void AviantMissionTools::_requestComplete(QNetworkReply *reply)
         case RallyPointHeight:
             _parseAndLoadMissionResponse(bytes);
             break;
-        case FetchKyteOrders:
-            _parseKyteOrdersResponse(bytes);
+        case FetchScheduledFlights:
+            _parseScheduledFlightsResponse(bytes);
             break;
         case FetchLandingPointAdjustedMission:
             _expectedHash = reply->rawHeader("X-File-Hash");
@@ -449,24 +442,19 @@ void AviantMissionTools::_initiateNetworkRequest(Operation operationType, const 
 
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
 
-    _networkRequest.setUrl(url);
+    QNetworkRequest networkRequest;
+    networkRequest.setUrl(url);
 
-    if (operationType == FetchLandingPointAdjustedMission) {
-        // Use X-API-KEY for MMS
-        _networkRequest.setRawHeader(QByteArray("X-API-KEY"), aviantSettings->missionToolsToken()->rawValue().toString().toUtf8());
-        // Add Request-Id header
-        QString requestId = QString::number(QDateTime::currentMSecsSinceEpoch()) + "-" + QString::number(++_requestIdCounter);
-        _networkRequest.setRawHeader(QByteArray("Request-Id"), requestId.toUtf8());
-    } else {
-        // Use Authorization Token for Kyte Backend
-        _networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->kyteBackendToken()->rawValue().toString().toUtf8());
-    }
+    networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->missionToolsToken()->rawValue().toString().toUtf8());
+    // Add Request-Id header
+    QString requestId = QString::number(QDateTime::currentMSecsSinceEpoch()) + "-" + QString::number(++_requestIdCounter);
+    networkRequest.setRawHeader(QByteArray("Request-Id"), requestId.toUtf8());
 
-    QSslConfiguration sslConf = _networkRequest.sslConfiguration();
+    QSslConfiguration sslConf = networkRequest.sslConfiguration();
     sslConf.setPeerVerifyMode(aviantSettings->missionToolsInsecureHttps()->rawValue().toBool() ? QSslSocket::VerifyNone : QSslSocket::AutoVerifyPeer);
-    _networkRequest.setSslConfiguration(sslConf);
+    networkRequest.setSslConfiguration(sslConf);
 
-    QNetworkReply *reply = _networkAccessManager->get(_networkRequest);
+    QNetworkReply *reply = _networkAccessManager->get(networkRequest);
 
     if (reply) {
         connect(this, &AviantMissionTools::cancelPendingRequest, reply, &QNetworkReply::abort);
@@ -477,43 +465,43 @@ void AviantMissionTools::_initiateNetworkRequest(Operation operationType, const 
     }
 }
 
-void AviantMissionTools::fetchKyteOrderMissions()
+void AviantMissionTools::fetchScheduledFlights()
 {
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
-    QUrl url = _getKyteBackendUrl(FetchKyteOrders, aviantSettings->kyteBackendUrl()->rawValue().toString());
-    _initiateNetworkRequest(FetchKyteOrders, url);
+    QUrl url = _getMmsUrl(FetchScheduledFlights, aviantSettings->missionToolsUrl()->rawValue().toString());
+    _initiateNetworkRequest(FetchScheduledFlights, url);
 }
 
-void AviantMissionTools::downloadMissionFileFromOrder(int missionPlanId, const QString& aircraftName)
+void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName)
 {
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
     QUrl url = _getMmsUrl(FetchLandingPointAdjustedMission, aviantSettings->missionToolsUrl()->rawValue().toString(), missionPlanId, aircraftName);
 
     if (!url.isValid()) {
-        qDebug() << "downloadMissionFileFromOrder" << missionPlanId << "Aircraft:" << aircraftName << "URL:" << url;
+        qDebug() << "downloadMissionFileFromScheduledFlight" << missionPlanId << "Aircraft:" << aircraftName << "URL:" << url;
         qgcApp()->showAppMessage(tr("Could not generate valid base URL for mission download."), tr("Mission Tools Error"));
         return;
     }
     _initiateNetworkRequest(FetchLandingPointAdjustedMission, url);
 }
 
-void AviantMissionTools::_parseKyteOrdersResponse(const QByteArray &bytes)
+void AviantMissionTools::_parseScheduledFlightsResponse(const QByteArray &bytes)
 {
     QJsonDocument jsonDoc;
     QString errorString;
     if (!JsonHelper::isJsonFile(bytes, jsonDoc, errorString)) {
-        qgcApp()->showAppMessage(tr("Error parsing Kyte orders response: ") + errorString, tr("Error"));
+        qgcApp()->showAppMessage(tr("Error parsing scheduled flights response: ") + errorString, tr("Error"));
         return;
     }
 
-    QJsonArray ordersArray = jsonDoc.array();
-    _kyteOrders.clear();
-    for (const QJsonValue &value : ordersArray) {
+    QJsonArray scheduledFlightsArray = jsonDoc.array();
+    _scheduledFlights.clear();
+    for (const QJsonValue &value : scheduledFlightsArray) {
         if (value.isObject()) {
-            _kyteOrders.append(value.toObject());
+            _scheduledFlights.append(value.toObject());
         }
     }
-    emit kyteOrdersChanged(_kyteOrders);
+    emit scheduledFlightsChanged(_scheduledFlights);
 }
 
 bool AviantMissionTools::_validateFileHash(const QByteArray &fileData, const QByteArray &expectedHash)
