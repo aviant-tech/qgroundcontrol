@@ -909,20 +909,6 @@ Rectangle {
                                 fact:              _aviantSettings.missionToolsToken
                                 Layout.fillWidth:  true
                             }
-                            QGCLabel {
-                                text:              _aviantSettings.kyteBackendUrl.shortDescription
-                            }
-                            FactTextField {
-                                fact:              _aviantSettings.kyteBackendUrl
-                                Layout.fillWidth:  true
-                            }
-                            QGCLabel {
-                                text:              _aviantSettings.kyteBackendToken.shortDescription
-                            }
-                            FactTextField {
-                                fact:              _aviantSettings.kyteBackendToken
-                                Layout.fillWidth:  true
-                            }
                             FactCheckBox {
                                 text:       qsTr("Editable telemetry bar")
                                 fact:       _aviantSettings.editableTelemetryBar
