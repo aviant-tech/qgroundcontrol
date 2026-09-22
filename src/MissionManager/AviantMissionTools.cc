@@ -65,9 +65,9 @@ QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base)
 {
     switch (operation) {
         case MissionValidation:
-            return QUrl(base + "/validate_mission");
+            return QUrl(base + "/api/validate_mission");
         case RallyPointHeight:
-            return QUrl(base + "/set_rally_points_height");
+            return QUrl(base + "/api/set_rally_point_heights");
         case FetchScheduledFlights:
             return QUrl(base + "/api/scheduled-flights/active/");
         case NoOperation:
@@ -78,7 +78,7 @@ QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base)
 
 QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base, int missionPlanId, QString aircraftName) {
     if (operation == FetchLandingPointAdjustedMission) {
-        return QUrl(base + "/mission_plan/" + QString::number(missionPlanId) + "/download_for_aircraft/" + aircraftName);
+        return QUrl(base + "/api/mission_plan/" + QString::number(missionPlanId) + "/download_for_aircraft/" + aircraftName);
     } else {
         return _getMmsUrl(operation, base);
     }
