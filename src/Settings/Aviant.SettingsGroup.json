@@ -111,7 +111,7 @@
     "type":             "uint32",
     "min":              0,
     "units":            "min",
-    "default":          60
+    "default":          30
 },
 {
     "name":             "showAcceptanceRadiusCircle",
