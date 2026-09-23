@@ -32,6 +32,8 @@ public:
     DEFINE_SETTINGFACT(showMultidroneConflictCircle)
     DEFINE_SETTINGFACT(showAcceptanceRadiusCircle)
     DEFINE_SETTINGFACT(showReservedAirspaceCircles)
+    DEFINE_SETTINGFACT(showScheduledFlights)
+    DEFINE_SETTINGFACT(scheduledFlightsLookaheadMinutes)
     DEFINE_SETTINGFACT(minVisibleRangeInMeters)
     DEFINE_SETTINGFACT(metersBetweenLines)
     DEFINE_SETTINGFACT(rssiWarning)
