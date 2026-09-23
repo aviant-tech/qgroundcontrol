@@ -68,7 +68,7 @@ public:
     Q_INVOKABLE void requestOperation(Operation operation);
     Q_INVOKABLE void cancelOperation(Operation operation);
     Q_INVOKABLE void fetchScheduledFlights();
-    Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName);
+    Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference);
 
     static QUrl            getMmsUrl        (Operation operation, QString base);
     static QUrl            getMmsUrl        (Operation operation, QString base, int missionPlanId, QString aircraftName);
@@ -116,5 +116,6 @@ private:
     QJsonDocument           _lastValidatedJson;
     QList<QJsonObject>      _scheduledFlights;
     QByteArray              _expectedHash;
+    QString                 _pendingSourceReference; ///< Set on the plan when `FetchLandingPointAdjustedMission` loads
     static qint64           _requestIdCounter; // Static counter for Request-Id
 };
