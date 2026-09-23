@@ -61,9 +61,35 @@ FlightMap {
     property var   _verticalConflictDistance:  _aviantSettings.verticalConflictDistance.value
     property var   _multidroneConflictDistance: _aviantSettings.multidroneConflictDistance.value
 
+    // Reserved airspace radii come from the plan file metadata, which only the plan view loads
+    property var    _planViewController:        globals.planMasterControllerPlanView
+    property real   _takeoffNonSegregatedRadius:  _planViewController ? _planViewController.takeoffNonSegregatedRadius : 0
+    property real   _deliveryNonSegregatedRadius: _planViewController ? _planViewController.deliveryNonSegregatedRadius : 0
+
+    property var    _visualItems:               _missionController ? _missionController.visualItems : null
+    property int    _visualItemCount:           _visualItems ? _visualItems.count : 0
+    property var    _launchCoordinate:          _missionController ? _missionController.plannedHomePosition : QtPositioning.coordinate()
+    property var    _winchWaypointCoordinate:   _findWinchWaypointCoordinate(_visualItems, _visualItemCount)
+
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
     property bool   _saveZoomLevelSetting:      true
+
+    // Coordinate at which the mission performs its winch action, invalid if the mission has none.
+    // MAV_CMD_DO_WINCH has no coordinate of its own, so the preceding coordinate item is used.
+    function _findWinchWaypointCoordinate(items, itemCount) {
+        for (var i = 0; i < itemCount; i++) {
+            if (items.get(i).command === 42600 /* MAV_CMD_DO_WINCH */) {
+                for (var j = i - 1; j >= 1; j--) {
+                    if (items.get(j).specifiesCoordinate) {
+                        return items.get(j).coordinate
+                    }
+                }
+                break
+            }
+        }
+        return QtPositioning.coordinate()
+    }
 
     function updateAirspace(reset) {
         if(_airspaceEnabled) {
@@ -419,6 +445,55 @@ FlightMap {
             return lastItem.coordinate
         }
         visible: _aviantSettings.showMultidroneConflictCircle.value && _aviantSettings.multidroneConflictDistance.value > 0
+    }
+
+    // Reserved airspace circle around the launch position of the mission
+    MapCircle {
+        color:          "transparent"
+        opacity:        1
+        border.color:   "magenta"
+        border.width:   2
+        radius:         _takeoffNonSegregatedRadius
+        center:         _launchCoordinate
+        visible:        _aviantSettings.showReservedAirspaceCircles.value && radius > 0 && _launchCoordinate.isValid
+    }
+
+    // Reserved airspace circle around the winch waypoint of the mission
+    MapCircle {
+        color:          "transparent"
+        opacity:        1
+        border.color:   "magenta"
+        border.width:   2
+        radius:         _deliveryNonSegregatedRadius
+        center:         _winchWaypointCoordinate
+        visible:        _aviantSettings.showReservedAirspaceCircles.value && radius > 0 && _winchWaypointCoordinate.isValid
+    }
+
+    // Labels placed just inside the top edge of the reserved airspace circles
+    MapQuickItem {
+        coordinate:     _launchCoordinate.atDistanceAndAzimuth(_takeoffNonSegregatedRadius, 0)
+        visible:        _aviantSettings.showReservedAirspaceCircles.value && _takeoffNonSegregatedRadius > 0 && _launchCoordinate.isValid
+        anchorPoint.x:  sourceItem.width / 2
+        anchorPoint.y:  0
+        z:              QGroundControl.zOrderMapItems
+        sourceItem:     QGCMapLabel {
+            map:        _root
+            color:      "magenta"
+            text:       qsTr("Not deconflicted")
+        }
+    }
+
+    MapQuickItem {
+        coordinate:     _winchWaypointCoordinate.atDistanceAndAzimuth(_deliveryNonSegregatedRadius, 0)
+        visible:        _aviantSettings.showReservedAirspaceCircles.value && _deliveryNonSegregatedRadius > 0 && _winchWaypointCoordinate.isValid
+        anchorPoint.x:  sourceItem.width / 2
+        anchorPoint.y:  0
+        z:              QGroundControl.zOrderMapItems
+        sourceItem:     QGCMapLabel {
+            map:        _root
+            color:      "magenta"
+            text:       qsTr("Not deconflicted")
+        }
     }
 
     GeoFenceMapVisuals {

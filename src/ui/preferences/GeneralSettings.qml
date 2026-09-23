@@ -820,6 +820,10 @@ Rectangle {
                                 fact:       _aviantSettings.showAcceptanceRadiusCircle
                             }
                             FactCheckBox {
+                                text:       qsTr("Show reserved airspace circles")
+                                fact:       _aviantSettings.showReservedAirspaceCircles
+                            }
+                            FactCheckBox {
                                 id:         promptShowBatteryWidget
                                 text:       qsTr("Show battery widget")
                                 fact:       _aviantSettings.showBatteryWidget
@@ -903,20 +907,6 @@ Rectangle {
                             }
                             FactTextField {
                                 fact:              _aviantSettings.missionToolsToken
-                                Layout.fillWidth:  true
-                            }
-                            QGCLabel {
-                                text:              _aviantSettings.kyteBackendUrl.shortDescription
-                            }
-                            FactTextField {
-                                fact:              _aviantSettings.kyteBackendUrl
-                                Layout.fillWidth:  true
-                            }
-                            QGCLabel {
-                                text:              _aviantSettings.kyteBackendToken.shortDescription
-                            }
-                            FactTextField {
-                                fact:              _aviantSettings.kyteBackendToken
                                 Layout.fillWidth:  true
                             }
                             FactCheckBox {

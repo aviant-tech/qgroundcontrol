@@ -33,7 +33,7 @@ public:
         NoOperation,
         MissionValidation,
         RallyPointHeight,
-        FetchKyteOrders,
+        FetchScheduledFlights,
         FetchLandingPointAdjustedMission
     };
 
@@ -67,8 +67,8 @@ public:
     
     Q_INVOKABLE void requestOperation(Operation operation);
     Q_INVOKABLE void cancelOperation(Operation operation);
-    Q_INVOKABLE void fetchKyteOrderMissions();
-    Q_INVOKABLE void downloadMissionFileFromOrder(int orderId, const QString& aircraftName);
+    Q_INVOKABLE void fetchScheduledFlights();
+    Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName);
 
     PlanMasterController* masterController       (void) const { return _masterController; }
     bool                  requestInProgress      (void) const { return _currentOperation != NoOperation; }
@@ -84,7 +84,7 @@ public:
 signals:
     void stateChanged          (void);
     void cancelPendingRequest  (void);
-    void kyteOrdersChanged     (QList<QJsonObject> orders);
+    void scheduledFlightsChanged (QList<QJsonObject> scheduledFlights);
 
 private slots:
     void _requestComplete (QNetworkReply *reply);
@@ -92,7 +92,6 @@ private slots:
 private:
     QUrl           _getMmsUrl                   (Operation operation, QString base);
     QUrl           _getMmsUrl                   (Operation operation, QString base, int missionPlanId, QString aircraftName);
-    QUrl           _getKyteBackendUrl           (Operation operation, QString base);
     void           _parseValidationResponse     (const QByteArray &bytes);
     void           _parseAndLoadMissionResponse (const QByteArray &bytes);
     static QString _getOperationName            (Operation operation);
@@ -100,7 +99,7 @@ private:
     static QString _getWinchTypeName            (WinchType winchType);
     static bool    _takeoffTypeRequired(Operation operation);
     static bool    _winchTypeRequired(Operation operation);
-    void           _parseKyteOrdersResponse(const QByteArray &bytes);
+    void           _parseScheduledFlightsResponse(const QByteArray &bytes);
     bool           _validateFileHash(const QByteArray &fileData, const QByteArray &expectedHash);
     void           _initiateNetworkRequest(Operation operationType, const QUrl& url);
 
@@ -109,11 +108,10 @@ private:
     TakeoffType             _takeoffType =          TakeoffTypeNotSet;
     WinchType               _winchType =            WinchTypeNotSet;
     QNetworkAccessManager*  _networkAccessManager = nullptr;
-    QNetworkRequest         _networkRequest;
     QString                 _validationResult =     "Not validated";
     bool                    _validationConcluded =  false;
     QJsonDocument           _lastValidatedJson;
-    QList<QJsonObject>      _kyteOrders;
+    QList<QJsonObject>      _scheduledFlights;
     QByteArray              _expectedHash;
     static qint64           _requestIdCounter; // Static counter for Request-Id
 };

@@ -91,6 +91,13 @@
     "default":          true
 },
 {
+    "name":             "showReservedAirspaceCircles",
+    "shortDesc":        "Show reserved airspace circles",
+    "longDesc":         "Show circles around the launch position and the winch waypoint of the mission, with the reserved airspace radii from the plan file metadata. Nothing is shown for plans without that metadata.",
+    "type":             "bool",
+    "default":          false
+},
+{
     "name":             "showAcceptanceRadiusCircle",
     "shortDesc":        "Show acceptance radius circle",
     "longDesc":         "Show a circle around the aircraft with the acceptance radius reported by the flight controller.",
@@ -168,18 +175,6 @@
     "shortDesc":           "Authentication token for mission tools",
     "type":                "string",
     "default":             ""
-},
-{
-    "name": "kyteBackendUrl",
-    "shortDesc": "URL of kyte orders endpoint",
-    "type": "string",
-    "default": ""
-},
-{
-    "name": "kyteBackendToken",
-    "shortDesc": "Authentication token for kyte backend",
-    "type": "string",
-    "default": ""
 },
 {
     "name":                "hideBreachReturnPoint",
