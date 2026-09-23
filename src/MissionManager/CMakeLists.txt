@@ -32,6 +32,8 @@ if(BUILD_TESTING)
 		QGCMapPolygonTest.h
 		QGCMapPolylineTest.cc
 		QGCMapPolylineTest.h
+		ScheduledFlightsManagerTest.cc
+		ScheduledFlightsManagerTest.h
 		SectionTest.cc
 		SectionTest.h
 		SimpleMissionItemTest.cc
@@ -116,6 +118,8 @@ add_library(MissionManager
 	RallyPoint.h
 	RallyPointManager.cc
 	RallyPointManager.h
+	ScheduledFlightsManager.cc
+	ScheduledFlightsManager.h
 	Section.h
 	SimpleMissionItem.cc
 	SimpleMissionItem.h
