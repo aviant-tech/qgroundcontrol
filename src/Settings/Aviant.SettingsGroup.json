@@ -98,6 +98,22 @@
     "default":          false
 },
 {
+    "name":             "showScheduledFlights",
+    "shortDesc":        "Show scheduled flights",
+    "longDesc":         "Show the flight paths of scheduled flights from the mission tools server in the fly view. Flights inside their flight window are drawn solid, flights whose window starts within the lookahead are drawn dashed.",
+    "type":             "bool",
+    "default":          true
+},
+{
+    "name":             "scheduledFlightsLookaheadMinutes",
+    "shortDesc":        "Scheduled flights lookahead",
+    "longDesc":         "Scheduled flights whose flight window starts within this many minutes are drawn dashed in the fly view.",
+    "type":             "uint32",
+    "min":              0,
+    "units":            "min",
+    "default":          60
+},
+{
     "name":             "showAcceptanceRadiusCircle",
     "shortDesc":        "Show acceptance radius circle",
     "longDesc":         "Show a circle around the aircraft with the acceptance radius reported by the flight controller.",
