@@ -70,6 +70,11 @@ public:
     Q_INVOKABLE void fetchScheduledFlights();
     Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName);
 
+    static QUrl            getMmsUrl        (Operation operation, QString base);
+    static QUrl            getMmsUrl        (Operation operation, QString base, int missionPlanId, QString aircraftName);
+    /// Request to `url` with the MMS token and SSL verification mode from `AviantSettings`
+    static QNetworkRequest createMmsRequest (const QUrl& url);
+
     PlanMasterController* masterController       (void) const { return _masterController; }
     bool                  requestInProgress      (void) const { return _currentOperation != NoOperation; }
     Operation             currentOperation       (void) const { return _currentOperation; }
@@ -90,8 +95,6 @@ private slots:
     void _requestComplete (QNetworkReply *reply);
 
 private:
-    QUrl           _getMmsUrl                   (Operation operation, QString base);
-    QUrl           _getMmsUrl                   (Operation operation, QString base, int missionPlanId, QString aircraftName);
     void           _parseValidationResponse     (const QByteArray &bytes);
     void           _parseAndLoadMissionResponse (const QByteArray &bytes);
     static QString _getOperationName            (Operation operation);
