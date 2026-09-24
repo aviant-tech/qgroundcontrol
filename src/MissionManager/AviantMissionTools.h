@@ -68,7 +68,12 @@ public:
     Q_INVOKABLE void requestOperation(Operation operation);
     Q_INVOKABLE void cancelOperation(Operation operation);
     Q_INVOKABLE void fetchScheduledFlights();
-    Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName);
+    Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference);
+
+    static QUrl            getMmsUrl        (Operation operation, QString base);
+    static QUrl            getMmsUrl        (Operation operation, QString base, int missionPlanId, QString aircraftName);
+    /// Request to `url` with the MMS token and SSL verification mode from `AviantSettings`
+    static QNetworkRequest createMmsRequest (const QUrl& url);
 
     PlanMasterController* masterController       (void) const { return _masterController; }
     bool                  requestInProgress      (void) const { return _currentOperation != NoOperation; }
@@ -90,8 +95,6 @@ private slots:
     void _requestComplete (QNetworkReply *reply);
 
 private:
-    QUrl           _getMmsUrl                   (Operation operation, QString base);
-    QUrl           _getMmsUrl                   (Operation operation, QString base, int missionPlanId, QString aircraftName);
     void           _parseValidationResponse     (const QByteArray &bytes);
     void           _parseAndLoadMissionResponse (const QByteArray &bytes);
     static QString _getOperationName            (Operation operation);
@@ -113,5 +116,6 @@ private:
     QJsonDocument           _lastValidatedJson;
     QList<QJsonObject>      _scheduledFlights;
     QByteArray              _expectedHash;
+    QString                 _pendingSourceReference; ///< Set on the plan when `FetchLandingPointAdjustedMission` loads
     static qint64           _requestIdCounter; // Static counter for Request-Id
 };

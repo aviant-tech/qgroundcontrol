@@ -824,6 +824,27 @@ Rectangle {
                                 fact:       _aviantSettings.showReservedAirspaceCircles
                             }
                             FactCheckBox {
+                                id:         promptShowScheduledFlights
+                                text:       qsTr("Show scheduled flights")
+                                fact:       _aviantSettings.showScheduledFlights
+                            }
+                            QGCLabel {
+                                text:       qsTr("Scheduled flights lookahead")
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _valueFieldWidth
+                                enabled:                promptShowScheduledFlights.checked
+                                fact:                   _aviantSettings.scheduledFlightsLookaheadMinutes
+                            }
+                            QGCLabel {
+                                text:       qsTr("Scheduled flights poll interval")
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _valueFieldWidth
+                                enabled:                promptShowScheduledFlights.checked
+                                fact:                   _aviantSettings.scheduledFlightsPollIntervalSecs
+                            }
+                            FactCheckBox {
                                 id:         promptShowBatteryWidget
                                 text:       qsTr("Show battery widget")
                                 fact:       _aviantSettings.showBatteryWidget

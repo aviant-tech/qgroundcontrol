@@ -484,6 +484,7 @@ DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { 
         src/MissionManager/PlanMasterControllerTest.h \
         src/MissionManager/QGCMapPolygonTest.h \
         src/MissionManager/QGCMapPolylineTest.h \
+        src/MissionManager/ScheduledFlightsManagerTest.h \
         src/MissionManager/SectionTest.h \
         src/MissionManager/SimpleMissionItemTest.h \
         src/MissionManager/SpeedSectionTest.h \
@@ -532,6 +533,7 @@ DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { 
         src/MissionManager/PlanMasterControllerTest.cc \
         src/MissionManager/QGCMapPolygonTest.cc \
         src/MissionManager/QGCMapPolylineTest.cc \
+        src/MissionManager/ScheduledFlightsManagerTest.cc \
         src/MissionManager/SectionTest.cc \
         src/MissionManager/SimpleMissionItemTest.cc \
         src/MissionManager/SpeedSectionTest.cc \
@@ -620,6 +622,7 @@ HEADERS += \
     src/MissionManager/RallyPoint.h \
     src/MissionManager/RallyPointController.h \
     src/MissionManager/RallyPointManager.h \
+    src/MissionManager/ScheduledFlightsManager.h \
     src/MissionManager/SimpleMissionItem.h \
     src/MissionManager/Section.h \
     src/MissionManager/SpeedSection.h \
@@ -878,6 +881,7 @@ SOURCES += \
     src/MissionManager/RallyPoint.cc \
     src/MissionManager/RallyPointController.cc \
     src/MissionManager/RallyPointManager.cc \
+    src/MissionManager/ScheduledFlightsManager.cc \
     src/MissionManager/SimpleMissionItem.cc \
     src/MissionManager/SpeedSection.cc \
     src/MissionManager/StructureScanComplexItem.cc \

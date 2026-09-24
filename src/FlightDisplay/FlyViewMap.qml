@@ -496,6 +496,21 @@ FlightMap {
         }
     }
 
+    // Flight paths of other scheduled flights, solid when inside their flight window, dashed when it starts soon
+    ScheduledFlightsManager {
+        id: scheduledFlightsManager
+    }
+
+    MapItemView {
+        model:      !pipMode && _aviantSettings.showScheduledFlights.value ? scheduledFlightsManager.paths : []
+        delegate:   MapPolyline {
+            path:       modelData
+            line.width: 3
+            line.color: "cyan"
+            z:          QGroundControl.zOrderWaypointLines - 1
+        }
+    }
+
     GeoFenceMapVisuals {
         map:                    _root
         myGeoFenceController:   _geoFenceController

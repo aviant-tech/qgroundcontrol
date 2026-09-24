@@ -61,7 +61,7 @@ void AviantMissionTools::setWinchType(WinchType winchType)
     emit stateChanged();
 }
 
-QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base)
+QUrl AviantMissionTools::getMmsUrl(Operation operation, QString base)
 {
     switch (operation) {
         case MissionValidation:
@@ -76,12 +76,33 @@ QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base)
     }
 }
 
-QUrl AviantMissionTools::_getMmsUrl(Operation operation, QString base, int missionPlanId, QString aircraftName) {
+QUrl AviantMissionTools::getMmsUrl(Operation operation, QString base, int missionPlanId, QString aircraftName) {
     if (operation == FetchLandingPointAdjustedMission) {
         return QUrl(base + "/api/mission_plan/" + QString::number(missionPlanId) + "/download_for_aircraft/" + aircraftName);
     } else {
-        return _getMmsUrl(operation, base);
+        return getMmsUrl(operation, base);
     }
+}
+
+QNetworkRequest AviantMissionTools::createMmsRequest(const QUrl& url)
+{
+    AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
+
+    QNetworkRequest networkRequest;
+    networkRequest.setUrl(url);
+
+    // Set API token
+    networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->missionToolsToken()->rawValue().toString().toUtf8());
+
+    // Due to problems with qt 5.15 and Ubuntu 22.04 with ssl libraries (openssl 3 not supported by qt 5.15.2)
+    // we need to disable certificate checking in order to get this to work.
+    // Make it optionally so it can be enabled if needed.
+    // Note: This can also be used to test against an "unsafe" (e.g. local) server.
+    QSslConfiguration sslConf = networkRequest.sslConfiguration();
+    sslConf.setPeerVerifyMode(aviantSettings->missionToolsInsecureHttps()->rawValue().toBool() ? QSslSocket::VerifyNone : QSslSocket::AutoVerifyPeer);
+    networkRequest.setSslConfiguration(sslConf);
+
+    return networkRequest;
 }
 
 QString AviantMissionTools::_getOperationName(Operation operation)
@@ -186,15 +207,14 @@ void AviantMissionTools::requestOperation(Operation operation)
     }
     
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
-    QUrl url = _getMmsUrl(operation, aviantSettings->missionToolsUrl()->rawValue().toString());
+    QUrl url = getMmsUrl(operation, aviantSettings->missionToolsUrl()->rawValue().toString());
     if (url.isEmpty()) {
         // The button is not active in UI if not the URL setting is set, so this should not happen
         // we will catch it, in case some unforeseen empty value parses to an empty URL,
         // but we will not notify the user (may change in the future, based on user testing).
         return;
     }
-    QNetworkRequest networkRequest;
-    networkRequest.setUrl(url);
+    QNetworkRequest networkRequest = createMmsRequest(url);
 
     QHttpMultiPart *missionPayload = nullptr;
 
@@ -240,17 +260,6 @@ void AviantMissionTools::requestOperation(Operation operation)
         typePart.setBody(_getWinchTypeName(_winchType).toUtf8());
         missionPayload->append(typePart);
     }
-
-    // Set API token
-    networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->missionToolsToken()->rawValue().toString().toUtf8());
-        
-    // Due to problems with qt 5.15 and Ubuntu 22.04 with ssl libraries (openssl 3 not supported by qt 5.15.2)
-    // we need to disable certificate checking in order to get this to work.
-    // Make it optionally so it can be enabled if needed.
-    // Note: This can also be used to test against an "unsafe" (e.g. local) server.
-    QSslConfiguration sslConf = networkRequest.sslConfiguration();
-    sslConf.setPeerVerifyMode(aviantSettings->missionToolsInsecureHttps()->rawValue().toBool() ? QSslSocket::VerifyNone : QSslSocket::AutoVerifyPeer);
-    networkRequest.setSslConfiguration(sslConf);
 
     QNetworkReply *reply = nullptr;
     if (missionPayload) {
@@ -423,6 +432,7 @@ void AviantMissionTools::_parseAndLoadMissionResponse(const QByteArray &bytes)
 
     if (_currentOperation == FetchLandingPointAdjustedMission) {
         _masterController->clearCurrentPlanFile();
+        _masterController->setSourceReference(_pendingSourceReference);
     }
 
     qgcApp()->showAppMessage(tr("Operation successful"), tr("Mission Tools - ") + _getOperationName(_currentOperation));
@@ -440,19 +450,10 @@ void AviantMissionTools::_initiateNetworkRequest(Operation operationType, const 
         return;
     }
 
-    AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
-
-    QNetworkRequest networkRequest;
-    networkRequest.setUrl(url);
-
-    networkRequest.setRawHeader(QByteArray("Authorization"), QByteArray("Token ") + aviantSettings->missionToolsToken()->rawValue().toString().toUtf8());
+    QNetworkRequest networkRequest = createMmsRequest(url);
     // Add Request-Id header
     QString requestId = QString::number(QDateTime::currentMSecsSinceEpoch()) + "-" + QString::number(++_requestIdCounter);
     networkRequest.setRawHeader(QByteArray("Request-Id"), requestId.toUtf8());
-
-    QSslConfiguration sslConf = networkRequest.sslConfiguration();
-    sslConf.setPeerVerifyMode(aviantSettings->missionToolsInsecureHttps()->rawValue().toBool() ? QSslSocket::VerifyNone : QSslSocket::AutoVerifyPeer);
-    networkRequest.setSslConfiguration(sslConf);
 
     QNetworkReply *reply = _networkAccessManager->get(networkRequest);
 
@@ -468,20 +469,21 @@ void AviantMissionTools::_initiateNetworkRequest(Operation operationType, const 
 void AviantMissionTools::fetchScheduledFlights()
 {
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
-    QUrl url = _getMmsUrl(FetchScheduledFlights, aviantSettings->missionToolsUrl()->rawValue().toString());
+    QUrl url = getMmsUrl(FetchScheduledFlights, aviantSettings->missionToolsUrl()->rawValue().toString());
     _initiateNetworkRequest(FetchScheduledFlights, url);
 }
 
-void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName)
+void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference)
 {
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
-    QUrl url = _getMmsUrl(FetchLandingPointAdjustedMission, aviantSettings->missionToolsUrl()->rawValue().toString(), missionPlanId, aircraftName);
+    QUrl url = getMmsUrl(FetchLandingPointAdjustedMission, aviantSettings->missionToolsUrl()->rawValue().toString(), missionPlanId, aircraftName);
 
     if (!url.isValid()) {
         qDebug() << "downloadMissionFileFromScheduledFlight" << missionPlanId << "Aircraft:" << aircraftName << "URL:" << url;
         qgcApp()->showAppMessage(tr("Could not generate valid base URL for mission download."), tr("Mission Tools Error"));
         return;
     }
+    _pendingSourceReference = sourceReference;
     _initiateNetworkRequest(FetchLandingPointAdjustedMission, url);
 }
 
