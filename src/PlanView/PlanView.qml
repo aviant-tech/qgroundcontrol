@@ -204,6 +204,16 @@ Item {
                 anchors.margins: _margin
                 spacing: _margin
 
+                QGCLabel {
+                    Layout.fillWidth: true
+                    text:             _aviantMissionTools.scheduledFlightsTimeZoneDescription()
+                    visible:          flightsPopup.scheduledFlights.length !== 0
+                    wrapMode:         Text.WordWrap
+                    color:            _aviantMissionTools.scheduledFlightsTimeZoneFallback() ? qgcPal.warningText : qgcPal.text
+                    font.bold:        _aviantMissionTools.scheduledFlightsTimeZoneFallback()
+                    font.pointSize:   _aviantMissionTools.scheduledFlightsTimeZoneFallback() ? ScreenTools.largeFontPointSize : ScreenTools.defaultFontPointSize
+                }
+
                 Rectangle {
                     id: flightsContainer
                     Layout.fillWidth: true

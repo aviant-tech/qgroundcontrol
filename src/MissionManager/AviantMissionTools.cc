@@ -14,6 +14,7 @@
 #include "AppSettings.h"
 #include "JsonHelper.h"
 #include <QDateTime>
+#include <QTimeZone>
 
 qint64 AviantMissionTools::_requestIdCounter = 0;
 
@@ -487,6 +488,37 @@ void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanI
     _initiateNetworkRequest(FetchLandingPointAdjustedMission, url);
 }
 
+QTimeZone AviantMissionTools::_scheduledFlightsTimeZone()
+{
+    QByteArray id = _scheduledFlightsTimeZoneId();
+    // An empty id would give the system time zone
+    if (id.isEmpty()) {
+        return QTimeZone::utc();
+    }
+    QTimeZone timeZone(id);
+    return timeZone.isValid() ? timeZone : QTimeZone::utc();
+}
+
+QByteArray AviantMissionTools::_scheduledFlightsTimeZoneId()
+{
+    AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
+    return aviantSettings->scheduledFlightsTimeZone()->rawValue().toString().trimmed().toUtf8();
+}
+
+QString AviantMissionTools::scheduledFlightsTimeZoneDescription()
+{
+    if (scheduledFlightsTimeZoneFallback()) {
+        return tr("WARNING: Time zone \"%1\" is not available on this system. All times are in UTC!").arg(QString::fromUtf8(_scheduledFlightsTimeZoneId()));
+    }
+    return tr("Timezone: %1").arg(QString::fromUtf8(_scheduledFlightsTimeZone().id()));
+}
+
+bool AviantMissionTools::scheduledFlightsTimeZoneFallback()
+{
+    QByteArray id = _scheduledFlightsTimeZoneId();
+    return !id.isEmpty() && !QTimeZone(id).isValid();
+}
+
 QString AviantMissionTools::formatScheduledFlightTime(const QString& isoTime)
 {
     if (isoTime.isEmpty()) {
@@ -497,11 +529,13 @@ QString AviantMissionTools::formatScheduledFlightTime(const QString& isoTime)
         return isoTime;
     }
 
-    time = time.toUTC();
+    QTimeZone timeZone = _scheduledFlightsTimeZone();
+    time = time.toTimeZone(timeZone);
 
-    qint64 dayOffset = QDateTime::currentDateTimeUtc().date().daysTo(time.date());
+    qint64 dayOffset = QDateTime::currentDateTime().toTimeZone(timeZone).date().daysTo(time.date());
     if (dayOffset == 0) {
-        return time.toString(QStringLiteral("HH:mm"));
+        // Mark each time, so the fallback to UTC can't be missed
+        return time.toString(QStringLiteral("HH:mm")) + (scheduledFlightsTimeZoneFallback() ? " UTC" : "");
     }
     QString days = QString::number(qAbs(dayOffset)) + (qAbs(dayOffset) == 1 ? " day" : " days");
     return dayOffset > 0 ? "in " + days : days + " ago";
