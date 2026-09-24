@@ -238,6 +238,13 @@ Item {
                                 QGCLabel {
                                     Layout.fillWidth:      true
                                     Layout.preferredWidth: 1
+                                    text:                  "Requested delivery"
+                                    font.bold:             true
+                                }
+
+                                QGCLabel {
+                                    Layout.fillWidth:      true
+                                    Layout.preferredWidth: 1
                                     text:                  "Flight window"
                                     font.bold:             true
                                 }
@@ -271,6 +278,10 @@ Item {
                                 height: contentLayout.implicitHeight + 2 * _margin
                                 color:  index % 2 === 0 ? qgcPal.windowShadeDark : qgcPal.windowShade
 
+                                function formatWindow(start, end) {
+                                    return start === end || !end ? start : start + " - " + end
+                                }
+
                                 RowLayout {
                                     id:              contentLayout
                                     anchors.fill:    parent
@@ -287,14 +298,15 @@ Item {
                                     QGCLabel {
                                         Layout.fillWidth:      true
                                         Layout.preferredWidth: 1
-                                        text:                  modelData && modelData.flight_window_start ? removeMilliseconds(modelData.flight_window_start) + " - " + removeMilliseconds(modelData.flight_window_end) : "Flight window not available"
+                                        text:                  modelData && modelData.requested_delivery_at ? _aviantMissionTools.formatScheduledFlightTime(modelData.requested_delivery_at) : "N/A"
                                         wrapMode:              Text.WordWrap
+                                    }
 
-                                        function removeMilliseconds(dateString) {
-                                            if (!dateString) return "Date not available"
-                                            const formattedDate = dateString.replace(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d+)?(.*)/, "$1$3")
-                                            return formattedDate
-                                        }
+                                    QGCLabel {
+                                        Layout.fillWidth:      true
+                                        Layout.preferredWidth: 1
+                                        text:                  modelData && modelData.flight_window_start ? formatWindow(_aviantMissionTools.formatScheduledFlightTime(modelData.flight_window_start), modelData.flight_window_end ? _aviantMissionTools.formatScheduledFlightTime(modelData.flight_window_end) : "") : "Flight window not available"
+                                        wrapMode:              Text.WordWrap
                                     }
 
                                     QGCLabel {

@@ -487,6 +487,26 @@ void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanI
     _initiateNetworkRequest(FetchLandingPointAdjustedMission, url);
 }
 
+QString AviantMissionTools::formatScheduledFlightTime(const QString& isoTime)
+{
+    if (isoTime.isEmpty()) {
+        return QStringLiteral("N/A");
+    }
+    QDateTime time = QDateTime::fromString(isoTime, Qt::ISODateWithMs);
+    if (!time.isValid()) {
+        return isoTime;
+    }
+
+    time = time.toUTC();
+
+    qint64 dayOffset = QDateTime::currentDateTimeUtc().date().daysTo(time.date());
+    if (dayOffset == 0) {
+        return time.toString(QStringLiteral("HH:mm"));
+    }
+    QString days = QString::number(qAbs(dayOffset)) + (qAbs(dayOffset) == 1 ? " day" : " days");
+    return dayOffset > 0 ? "in " + days : days + " ago";
+}
+
 void AviantMissionTools::_parseScheduledFlightsResponse(const QByteArray &bytes)
 {
     QJsonDocument jsonDoc;
