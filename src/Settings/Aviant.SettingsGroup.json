@@ -114,6 +114,15 @@
     "default":          30
 },
 {
+    "name":             "scheduledFlightsPollIntervalSecs",
+    "shortDesc":        "Scheduled flights poll interval",
+    "longDesc":         "How often, in seconds, scheduled flights are fetched from the mission tools server.",
+    "type":             "uint32",
+    "min":              1,
+    "units":            "s",
+    "default":          60
+},
+{
     "name":             "showAcceptanceRadiusCircle",
     "shortDesc":        "Show acceptance radius circle",
     "longDesc":         "Show a circle around the aircraft with the acceptance radius reported by the flight controller.",

@@ -18,7 +18,6 @@
 
 QGC_LOGGING_CATEGORY(ScheduledFlightsManagerLog, "ScheduledFlightsManagerLog")
 
-static constexpr int    kPollIntervalMs     = 30 * 1000;
 static constexpr int    kRequestTimeoutMs   = 20 * 1000;
 static constexpr double kDashMeters         = 100;
 static constexpr double kGapMeters          = 100;
@@ -31,9 +30,10 @@ ScheduledFlightsManager::ScheduledFlightsManager(QObject* parent)
     connect(aviantSettings->showScheduledFlights(),             &Fact::rawValueChanged, this, &ScheduledFlightsManager::_refresh);
     connect(aviantSettings->missionToolsUrl(),                  &Fact::rawValueChanged, this, &ScheduledFlightsManager::_missionToolsUrlChanged);
     connect(aviantSettings->scheduledFlightsLookaheadMinutes(), &Fact::rawValueChanged, this, &ScheduledFlightsManager::_updatePaths);
+    connect(aviantSettings->scheduledFlightsPollIntervalSecs(), &Fact::rawValueChanged, this, &ScheduledFlightsManager::_pollIntervalChanged);
 
     connect(&_pollTimer, &QTimer::timeout, this, &ScheduledFlightsManager::_refresh);
-    _pollTimer.start(kPollIntervalMs);
+    _pollIntervalChanged();
     _refresh();
 }
 
@@ -132,6 +132,12 @@ void ScheduledFlightsManager::_refresh(void)
     QNetworkReply* reply = _networkAccessManager.get(request);
     connect(reply, &QNetworkReply::finished, this, [this, reply]() { _requestComplete(reply); });
     _reply = reply;
+}
+
+void ScheduledFlightsManager::_pollIntervalChanged(void)
+{
+    uint pollIntervalSecs = qgcApp()->toolbox()->settingsManager()->aviantSettings()->scheduledFlightsPollIntervalSecs()->rawValue().toUInt();
+    _pollTimer.start(qMax(1u, pollIntervalSecs) * 1000);
 }
 
 void ScheduledFlightsManager::_missionToolsUrlChanged(void)

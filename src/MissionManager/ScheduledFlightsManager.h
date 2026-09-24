@@ -53,6 +53,7 @@ signals:
 private slots:
     void _refresh                   (void);
     void _missionToolsUrlChanged    (void);
+    void _pollIntervalChanged       (void);
     void _updatePaths               (void);
 
 private:
