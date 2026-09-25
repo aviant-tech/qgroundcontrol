@@ -844,6 +844,13 @@ Rectangle {
                                 enabled:                promptShowScheduledFlights.checked
                                 fact:                   _aviantSettings.scheduledFlightsPollIntervalSecs
                             }
+                            QGCLabel {
+                                text:       qsTr("Scheduled flights time zone")
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _valueFieldWidth * 2
+                                fact:                   _aviantSettings.scheduledFlightsTimeZone
+                            }
                             FactCheckBox {
                                 id:         promptShowBatteryWidget
                                 text:       qsTr("Show battery widget")

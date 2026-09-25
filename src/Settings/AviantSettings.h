@@ -35,6 +35,7 @@ public:
     DEFINE_SETTINGFACT(showScheduledFlights)
     DEFINE_SETTINGFACT(scheduledFlightsLookaheadMinutes)
     DEFINE_SETTINGFACT(scheduledFlightsPollIntervalSecs)
+    DEFINE_SETTINGFACT(scheduledFlightsTimeZone)
     DEFINE_SETTINGFACT(minVisibleRangeInMeters)
     DEFINE_SETTINGFACT(metersBetweenLines)
     DEFINE_SETTINGFACT(rssiWarning)

@@ -23,6 +23,7 @@ RUN apt-get update && apt-get upgrade -y && \
     pulseaudio-utils \
     rhvoice \
     rhvoice-english \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
 # Route speech-dispatcher through RHVoice's slt voice via the sd_generic
 # module — Ubuntu 22.04 ships no sd_rhvoice, so we shell out to RHVoice-test

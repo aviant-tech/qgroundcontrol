@@ -17,6 +17,7 @@
 #include <QHttpMultiPart>
 #include <QHttpPart>
 #include <QJsonDocument>
+#include <QTimeZone>
 
 class PlanMasterController;
 
@@ -69,6 +70,12 @@ public:
     Q_INVOKABLE void cancelOperation(Operation operation);
     Q_INVOKABLE void fetchScheduledFlights();
     Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference);
+    /// `isoTime` as HH:MM in the `scheduledFlightsTimeZone` setting's zone if today, otherwise e.g. "in 1 day"
+    Q_INVOKABLE static QString formatScheduledFlightTime(const QString& isoTime);
+    /// Which time zone `formatScheduledFlightTime` uses, or a warning if it fell back to UTC
+    Q_INVOKABLE static QString scheduledFlightsTimeZoneDescription();
+    /// True if the `scheduledFlightsTimeZone` setting is not an available time zone, so UTC is used instead
+    Q_INVOKABLE static bool    scheduledFlightsTimeZoneFallback();
 
     static QUrl            getMmsUrl        (Operation operation, QString base);
     static QUrl            getMmsUrl        (Operation operation, QString base, int missionPlanId, QString aircraftName);
@@ -103,6 +110,9 @@ private:
     static bool    _takeoffTypeRequired(Operation operation);
     static bool    _winchTypeRequired(Operation operation);
     void           _parseScheduledFlightsResponse(const QByteArray &bytes);
+    /// Zone from the `scheduledFlightsTimeZone` setting, or UTC if it is empty or invalid
+    static QTimeZone _scheduledFlightsTimeZone();
+    static QByteArray _scheduledFlightsTimeZoneId();
     bool           _validateFileHash(const QByteArray &fileData, const QByteArray &expectedHash);
     void           _initiateNetworkRequest(Operation operationType, const QUrl& url);
 

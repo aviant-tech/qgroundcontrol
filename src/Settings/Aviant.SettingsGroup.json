@@ -123,6 +123,13 @@
     "default":          60
 },
 {
+    "name":             "scheduledFlightsTimeZone",
+    "shortDesc":        "Scheduled flights time zone",
+    "longDesc":         "IANA time zone, e.g. Europe/Oslo, used for scheduled flight times. If empty or invalid, UTC is used.",
+    "type":             "string",
+    "default":          "Europe/Oslo"
+},
+{
     "name":             "showAcceptanceRadiusCircle",
     "shortDesc":        "Show acceptance radius circle",
     "longDesc":         "Show a circle around the aircraft with the acceptance radius reported by the flight controller.",
