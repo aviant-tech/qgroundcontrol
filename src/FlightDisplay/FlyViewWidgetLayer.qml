@@ -335,6 +335,27 @@ Item {
         z:                  QGroundControl.zOrderTopMost
     }
 
+    Rectangle {
+        anchors.top:                parent.top
+        anchors.topMargin:          _toolsMargin
+        anchors.horizontalCenter:   parent.horizontalCenter
+        width:                      flightWindowLabel.width + ScreenTools.defaultFontPixelWidth * 2
+        height:                     flightWindowLabel.height + ScreenTools.defaultFontPixelHeight
+        color:                      "red"
+        radius:                     ScreenTools.defaultFontPixelWidth / 2
+        z:                          QGroundControl.zOrderTopMost
+        visible:                    _activeVehicle && globals.outsideFlightWindow
+
+        QGCLabel {
+            id:                 flightWindowLabel
+            anchors.centerIn:   parent
+            color:              "white"
+            font.bold:          true
+            font.pointSize:     ScreenTools.largeFontPointSize
+            text:               qsTr("Outside scheduled flight window")
+        }
+    }
+
     MapScale {
         id:                 mapScale
         anchors.margins:    _toolsMargin

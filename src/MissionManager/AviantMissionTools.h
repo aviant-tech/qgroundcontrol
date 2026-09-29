@@ -69,7 +69,7 @@ public:
     Q_INVOKABLE void requestOperation(Operation operation);
     Q_INVOKABLE void cancelOperation(Operation operation);
     Q_INVOKABLE void fetchScheduledFlights();
-    Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference);
+    Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference, const QString& flightWindowStart, const QString& flightWindowEnd);
     /// `isoTime` as HH:MM in the `scheduledFlightsTimeZone` setting's zone if today, otherwise e.g. "in 1 day"
     Q_INVOKABLE static QString formatScheduledFlightTime(const QString& isoTime);
     /// Which time zone `formatScheduledFlightTime` uses, or a warning if it fell back to UTC
@@ -127,5 +127,7 @@ private:
     QList<QJsonObject>      _scheduledFlights;
     QByteArray              _expectedHash;
     QString                 _pendingSourceReference; ///< Set on the plan when `FetchLandingPointAdjustedMission` loads
+    QString                 _pendingFlightWindowStart;
+    QString                 _pendingFlightWindowEnd;
     static qint64           _requestIdCounter; // Static counter for Request-Id
 };

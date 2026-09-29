@@ -347,7 +347,7 @@ Item {
                                                     )
                                                     return; 
                                                 }
-                                                _aviantMissionTools.downloadMissionFileFromScheduledFlight(modelData.mission_plan_id, aircraftName, modelData.source_reference || "")
+                                                _aviantMissionTools.downloadMissionFileFromScheduledFlight(modelData.mission_plan_id, aircraftName, modelData.source_reference || "", modelData.flight_window_start || "", modelData.flight_window_end || "")
                                                 hideDialog()
                                             }
                                         }

@@ -433,7 +433,7 @@ void AviantMissionTools::_parseAndLoadMissionResponse(const QByteArray &bytes)
 
     if (_currentOperation == FetchLandingPointAdjustedMission) {
         _masterController->clearCurrentPlanFile();
-        _masterController->setSourceReference(_pendingSourceReference);
+        _masterController->setScheduledFlight(_pendingSourceReference, _pendingFlightWindowStart, _pendingFlightWindowEnd);
     }
 
     qgcApp()->showAppMessage(tr("Operation successful"), tr("Mission Tools - ") + _getOperationName(_currentOperation));
@@ -474,7 +474,7 @@ void AviantMissionTools::fetchScheduledFlights()
     _initiateNetworkRequest(FetchScheduledFlights, url);
 }
 
-void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference)
+void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference, const QString& flightWindowStart, const QString& flightWindowEnd)
 {
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
     QUrl url = getMmsUrl(FetchLandingPointAdjustedMission, aviantSettings->missionToolsUrl()->rawValue().toString(), missionPlanId, aircraftName);
@@ -485,6 +485,8 @@ void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanI
         return;
     }
     _pendingSourceReference = sourceReference;
+    _pendingFlightWindowStart = flightWindowStart;
+    _pendingFlightWindowEnd = flightWindowEnd;
     _initiateNetworkRequest(FetchLandingPointAdjustedMission, url);
 }
 

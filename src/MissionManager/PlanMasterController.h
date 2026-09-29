@@ -55,7 +55,9 @@ public:
     Q_PROPERTY(QmlObjectListModel*      planCreators            MEMBER _planCreators                        NOTIFY planCreatorsChanged)
     Q_PROPERTY(double                   takeoffNonSegregatedRadius  READ takeoffNonSegregatedRadius     NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
     Q_PROPERTY(double                   deliveryNonSegregatedRadius READ deliveryNonSegregatedRadius    NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
-    Q_PROPERTY(QString                  sourceReference             READ sourceReference                NOTIFY sourceReferenceChanged)  ///< Source reference of the scheduled flight the plan was loaded from, empty if none
+    Q_PROPERTY(QString                  sourceReference             READ sourceReference                NOTIFY scheduledFlightChanged)  ///< Source reference of the scheduled flight the plan was loaded from, empty if none
+    Q_PROPERTY(QString                  flightWindowStart           READ flightWindowStart              NOTIFY scheduledFlightChanged)  ///< ISO time, empty if none
+    Q_PROPERTY(QString                  flightWindowEnd             READ flightWindowEnd                NOTIFY scheduledFlightChanged)  ///< ISO time, empty if none
 
     /// Should be called immediately upon Component.onCompleted.
     Q_INVOKABLE void start(void);
@@ -105,7 +107,9 @@ public:
     double      takeoffNonSegregatedRadius  (void) const { return _takeoffNonSegregatedRadius; }
     double      deliveryNonSegregatedRadius (void) const { return _deliveryNonSegregatedRadius; }
     QString     sourceReference             (void) const { return _sourceReference; }
-    void        setSourceReference          (const QString& sourceReference);
+    QString     flightWindowStart           (void) const { return _flightWindowStart; }
+    QString     flightWindowEnd             (void) const { return _flightWindowEnd; }
+    void        setScheduledFlight          (const QString& sourceReference = {}, const QString& flightWindowStart = {}, const QString& flightWindowEnd = {});
 
     void        setFlyView(bool flyView) { _flyView = flyView; }
 
@@ -133,7 +137,7 @@ signals:
     void managerVehicleChanged              (Vehicle* managerVehicle);
     void promptForPlanUsageOnVehicleChange  (void);
     void reservedAirspaceChanged            (void);
-    void sourceReferenceChanged             (void);
+    void scheduledFlightChanged             (void);
 
 private slots:
     void _activeVehicleChanged      (Vehicle* activeVehicle);
@@ -172,4 +176,6 @@ private:
     double                  _takeoffNonSegregatedRadius =   0;
     double                  _deliveryNonSegregatedRadius =  0;
     QString                 _sourceReference;
+    QString                 _flightWindowStart;
+    QString                 _flightWindowEnd;
 };

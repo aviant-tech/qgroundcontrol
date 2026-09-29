@@ -98,7 +98,7 @@ Rectangle {
         anchors.bottomMargin:   1
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
-        anchors.right:          sourceReferenceLabel.visible ? sourceReferenceLabel.left : parent.right
+        anchors.right:          scheduledFlightInfo.visible ? scheduledFlightInfo.left : parent.right
         contentWidth:           indicatorLoader.x + indicatorLoader.width
         flickableDirection:     Flickable.HorizontalFlick
 
@@ -113,14 +113,26 @@ Rectangle {
         }
     }
 
-    QGCLabel {
-        id:                     sourceReferenceLabel
+    Column {
+        id:                     scheduledFlightInfo
         anchors.right:          brandLogo.visible ? brandLogo.left : parent.right
         anchors.rightMargin:    ScreenTools.defaultFontPixelWidth
         anchors.verticalCenter: parent.verticalCenter
-        text:                   _sourceReference
-        font.pointSize:         ScreenTools.mediumFontPointSize
         visible:                _sourceReference !== "" && currentToolbar !== simpleToolbar
+
+        QGCLabel {
+            anchors.right:  parent.right
+            text:           _sourceReference
+        }
+
+        QGCLabel {
+            property string _start: _controllerValid ? _planMasterController.flightWindowStart : ""
+            property string _end:   _controllerValid ? _planMasterController.flightWindowEnd : ""
+            anchors.right:  parent.right
+            text:           _start ? _planMasterController.aviantMissionTools.formatScheduledFlightTime(_start) + (_end ? " - " + _planMasterController.aviantMissionTools.formatScheduledFlightTime(_end) : "") : ""
+            visible:        _start !== ""
+            color:          globals.outsideFlightWindow ? qgcPal.colorRed : qgcPal.text
+        }
     }
 
     //-------------------------------------------------------------------------
@@ -131,7 +143,7 @@ Rectangle {
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
         anchors.margins:        ScreenTools.defaultFontPixelHeight * 0.66
-        visible:                currentToolbar !== planViewToolbar && _activeVehicle && !_communicationLost && x > (toolsFlickable.x + toolsFlickable.contentWidth + ScreenTools.defaultFontPixelWidth + (sourceReferenceLabel.visible ? sourceReferenceLabel.width + ScreenTools.defaultFontPixelWidth : 0))
+        visible:                currentToolbar !== planViewToolbar && _activeVehicle && !_communicationLost && x > (toolsFlickable.x + toolsFlickable.contentWidth + ScreenTools.defaultFontPixelWidth + (scheduledFlightInfo.visible ? scheduledFlightInfo.width + ScreenTools.defaultFontPixelWidth : 0))
         fillMode:               Image.PreserveAspectFit
         source:                 _outdoorPalette ? _brandImageOutdoor : _brandImageIndoor
         mipmap:                 true

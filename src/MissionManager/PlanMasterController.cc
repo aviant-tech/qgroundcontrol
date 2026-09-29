@@ -236,7 +236,7 @@ void PlanMasterController::loadFromVehicle(void)
         _loadGeoFence = true;
         // A plan downloaded from a vehicle carries no Aviant metadata
         _loadReservedAirspace(QJsonObject());
-        setSourceReference(QString());
+        setScheduledFlight();
         qCDebug(PlanMasterControllerLog) << "PlanMasterController::loadFromVehicle calling _missionController.loadFromVehicle";
         _missionController.loadFromVehicle();
         setDirty(false);
@@ -366,12 +366,12 @@ void PlanMasterController::_loadReservedAirspace(const QJsonObject& json)
     emit reservedAirspaceChanged();
 }
 
-void PlanMasterController::setSourceReference(const QString& sourceReference)
+void PlanMasterController::setScheduledFlight(const QString& sourceReference, const QString& flightWindowStart, const QString& flightWindowEnd)
 {
-    if (sourceReference != _sourceReference) {
-        _sourceReference = sourceReference;
-        emit sourceReferenceChanged();
-    }
+    _sourceReference = sourceReference;
+    _flightWindowStart = flightWindowStart;
+    _flightWindowEnd = flightWindowEnd;
+    emit scheduledFlightChanged();
 }
 
 void PlanMasterController::loadFromFile(const QString& filename)
@@ -384,7 +384,7 @@ void PlanMasterController::loadFromFile(const QString& filename)
     }
 
     _loadReservedAirspace(QJsonObject());
-    setSourceReference(QString());
+    setScheduledFlight();
 
     QFileInfo fileInfo(filename);
     QFile file(filename);
@@ -600,7 +600,7 @@ void PlanMasterController::saveToKml(const QString& filename)
 void PlanMasterController::removeAll(void)
 {
     _loadReservedAirspace(QJsonObject());
-    setSourceReference(QString());
+    setScheduledFlight();
     _missionController.removeAll();
     _geoFenceController.removeAll();
     _rallyPointController.removeAll();
@@ -617,7 +617,7 @@ void PlanMasterController::removeAllFromVehicle(void)
 {
     if (!offline()) {
         _loadReservedAirspace(QJsonObject());
-        setSourceReference(QString());
+        setScheduledFlight();
         _missionController.removeAllFromVehicle();
         if (_geoFenceController.supported()) {
             _geoFenceController.removeAllFromVehicle();

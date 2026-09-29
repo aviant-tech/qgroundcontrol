@@ -86,6 +86,18 @@ ApplicationWindow {
 
         property var                planMasterControllerPlanView:   null
         property var                currentPlanMissionItem:         planMasterControllerPlanView ? planMasterControllerPlanView.missionController.currentPlanViewItem : null
+
+        property var                now:                            new Date()
+        readonly property bool      outsideFlightWindow:            !!planMasterControllerPlanView && planMasterControllerPlanView.flightWindowStart !== "" &&
+                                                                    (now < new Date(planMasterControllerPlanView.flightWindowStart) ||
+                                                                     (planMasterControllerPlanView.flightWindowEnd !== "" && now >= new Date(planMasterControllerPlanView.flightWindowEnd)))
+    }
+
+    Timer {
+        interval:   1000
+        running:    true
+        repeat:     true
+        onTriggered: globals.now = new Date()
     }
 
     /// Default color palette used throughout the UI
