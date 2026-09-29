@@ -62,7 +62,6 @@ FlightMap {
     property var    _ownDroneHorizontalConflictDistance:    _aviantSettings.ownDroneHorizontalConflictDistance.value
     property var    _ownDroneVerticalConflictDistance:      _aviantSettings.ownDroneVerticalConflictDistance.value
     property var    _ownDroneCallsignRegex:                 _makeCallsignRegex(_aviantSettings.ownDroneCallsignRegex.value)
-    property var    _multidroneConflictDistance:            _aviantSettings.multidroneConflictDistance.value
 
     // Reserved airspace radii come from the plan file metadata, which only the plan view loads
     property var    _planViewController:        globals.planMasterControllerPlanView
@@ -445,23 +444,6 @@ FlightMap {
                 border.width:   1
             }
         }
-    }
-
-    // Multidrone conflict circle indicating the area that a drone should avoid if another drone is landing
-    MapCircle {
-        color:          "transparent"
-        opacity:        1
-        border.color:   "blue"
-        border.width:   3
-        radius:         _multidroneConflictDistance
-        center: {
-            var items = _missionController.visualItems
-            if (!items || items.count === 0) return QtPositioning.coordinate()
-            var lastItem = items.get(items.count - 1)
-            // wanted to use landingCoordinate but it was not working
-            return lastItem.coordinate
-        }
-        visible: _aviantSettings.showMultidroneConflictCircle.value && _aviantSettings.multidroneConflictDistance.value > 0
     }
 
     // Reserved airspace circle around the launch position of the mission

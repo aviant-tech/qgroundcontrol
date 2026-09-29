@@ -100,22 +100,6 @@
     "default":          "NT\\d\\d|SIM\\d\\d"
 },
 {
-    "name":             "multidroneConflictDistance",
-    "shortDesc":        "Multidrone conflict distance",
-    "longDesc":         "The radius in meters for the multidrone conflict circle drawn around the landing point.",
-    "type":             "uint32",
-    "min":              0,
-    "units":            "m",
-    "default":          1200
-},
-{
-    "name":             "showMultidroneConflictCircle",
-    "shortDesc":        "Show multidrone conflict circle",
-    "longDesc":         "Show a circle around the landing point with the multidrone conflict distance as radius.",
-    "type":             "bool",
-    "default":          true
-},
-{
     "name":             "showReservedAirspaceCircles",
     "shortDesc":        "Show reserved airspace circles",
     "longDesc":         "Show circles around the launch position and the winch waypoint of the mission, with the reserved airspace radii from the plan file metadata. Nothing is shown for plans without that metadata.",
