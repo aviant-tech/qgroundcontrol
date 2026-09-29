@@ -57,9 +57,12 @@ FlightMap {
     property bool   _showPositionSetpointLine:  _flyViewSettings.showPositionSetpointLine.rawValue
     property var    _aviantSettings:            QGroundControl.settingsManager.aviantSettings
     property bool   _showTrafficIndicators:     _aviantSettings.showTrafficIndicators.rawValue
-    property var   _horizontalConflictDistance: _aviantSettings.horizontalConflictDistance.value
-    property var   _verticalConflictDistance:  _aviantSettings.verticalConflictDistance.value
-    property var   _multidroneConflictDistance: _aviantSettings.multidroneConflictDistance.value
+    property var    _horizontalConflictDistance:            _aviantSettings.horizontalConflictDistance.value
+    property var    _verticalConflictDistance:              _aviantSettings.verticalConflictDistance.value
+    property var    _ownDroneHorizontalConflictDistance:    _aviantSettings.ownDroneHorizontalConflictDistance.value
+    property var    _ownDroneVerticalConflictDistance:      _aviantSettings.ownDroneVerticalConflictDistance.value
+    property var    _ownDroneCallsignRegex:                 _makeCallsignRegex(_aviantSettings.ownDroneCallsignRegex.value)
+    property var    _multidroneConflictDistance:            _aviantSettings.multidroneConflictDistance.value
 
     // Reserved airspace radii come from the plan file metadata, which only the plan view loads
     property var    _planViewController:        globals.planMasterControllerPlanView
@@ -74,6 +77,16 @@ FlightMap {
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
     property bool   _saveZoomLevelSetting:      true
+
+    // Returns a full-match RegExp for `pattern`, or null if empty or invalid
+    function _makeCallsignRegex(pattern) {
+        try {
+            return pattern ? new RegExp("^(?:" + pattern + ")$") : null
+        } catch (e) {
+            console.warn("Invalid own drone callsign regex:", pattern, e)
+            return null
+        }
+    }
 
     // Coordinate at which the mission performs its winch action, invalid if the mission has none.
     // MAV_CMD_DO_WINCH has no coordinate of its own, so the preceding coordinate item is used.
@@ -322,9 +335,13 @@ FlightMap {
     MapItemView {
         model: QGroundControl.adsbVehicleManager.adsbVehicles
         delegate: MapPolyline {
-            visible:    _showTrafficIndicators && object ? !object.hidden && get_proximity(object, _activeVehicle, _horizontalConflictDistance*2, _verticalConflictDistance*2) : false
-            line.width: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? 4 : 2
-            line.color: get_proximity(object, _activeVehicle, _horizontalConflictDistance, _verticalConflictDistance) ? "red" : "yellow"
+            property bool _isOwnDrone:  object && _ownDroneCallsignRegex ? _ownDroneCallsignRegex.test(object.callsign.trim()) : false
+            property real _horizontal:  _isOwnDrone ? _ownDroneHorizontalConflictDistance : _horizontalConflictDistance
+            property real _vertical:    _isOwnDrone ? _ownDroneVerticalConflictDistance : _verticalConflictDistance
+
+            visible:    _showTrafficIndicators && object ? !object.hidden && get_proximity(object, _activeVehicle, _horizontal*2, _vertical*2) : false
+            line.width: get_proximity(object, _activeVehicle, _horizontal, _vertical) ? 4 : 2
+            line.color: get_proximity(object, _activeVehicle, _horizontal, _vertical) ? "red" : "yellow"
             z:          QGroundControl.zOrderVehicles+1
             path:       visible ? [ object.coordinate, _activeVehicle.coordinate ] : []
 

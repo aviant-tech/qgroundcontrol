@@ -802,6 +802,30 @@ Rectangle {
                                 enabled:                promptShowTrafficIndicators.checked
                                 fact:                   _aviantSettings.verticalConflictDistance
                             }
+                            QGCLabel {
+                                text:       qsTr("Own drone callsign regex")
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _comboFieldWidth
+                                enabled:                promptShowTrafficIndicators.checked
+                                fact:                   _aviantSettings.ownDroneCallsignRegex
+                            }
+                            QGCLabel {
+                                text:       qsTr("Own drone horizontal conflict distance")
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _valueFieldWidth
+                                enabled:                promptShowTrafficIndicators.checked
+                                fact:                   _aviantSettings.ownDroneHorizontalConflictDistance
+                            }
+                            QGCLabel {
+                                text:       qsTr("Own drone vertical conflict distance")
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _valueFieldWidth
+                                enabled:                promptShowTrafficIndicators.checked
+                                fact:                   _aviantSettings.ownDroneVerticalConflictDistance
+                            }
                             FactCheckBox {
                                 id:         promptShowMultidroneConflictCircle
                                 text:       qsTr("Show multidrone conflict circle")
