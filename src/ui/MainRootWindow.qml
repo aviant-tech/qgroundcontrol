@@ -91,6 +91,8 @@ ApplicationWindow {
         readonly property bool      outsideFlightWindow:            !!planMasterControllerPlanView && planMasterControllerPlanView.flightWindowStart !== "" &&
                                                                     (now < new Date(planMasterControllerPlanView.flightWindowStart) ||
                                                                      (planMasterControllerPlanView.flightWindowEnd !== "" && now >= new Date(planMasterControllerPlanView.flightWindowEnd)))
+        readonly property bool      flightWindowEndingSoon:         !!planMasterControllerPlanView && planMasterControllerPlanView.flightWindowStart !== "" && planMasterControllerPlanView.flightWindowEnd !== "" &&
+                                                                    !outsideFlightWindow && new Date(planMasterControllerPlanView.flightWindowEnd) - now < 10 * 60 * 1000
     }
 
     Timer {

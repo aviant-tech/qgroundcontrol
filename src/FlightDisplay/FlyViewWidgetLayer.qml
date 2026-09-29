@@ -341,18 +341,18 @@ Item {
         anchors.horizontalCenter:   parent.horizontalCenter
         width:                      flightWindowLabel.width + ScreenTools.defaultFontPixelWidth * 2
         height:                     flightWindowLabel.height + ScreenTools.defaultFontPixelHeight
-        color:                      "red"
+        color:                      globals.outsideFlightWindow ? "red" : "orange"
         radius:                     ScreenTools.defaultFontPixelWidth / 2
         z:                          QGroundControl.zOrderTopMost
-        visible:                    _activeVehicle && globals.outsideFlightWindow
+        visible:                    _activeVehicle && (globals.outsideFlightWindow || globals.flightWindowEndingSoon)
 
         QGCLabel {
             id:                 flightWindowLabel
             anchors.centerIn:   parent
-            color:              "white"
+            color:              globals.outsideFlightWindow ? "white" : "black"
             font.bold:          true
             font.pointSize:     ScreenTools.largeFontPointSize
-            text:               qsTr("Outside scheduled flight window")
+            text:               globals.outsideFlightWindow ? qsTr("Outside scheduled timeslot") : qsTr("Timeslot ends soon")
         }
     }
 

@@ -131,7 +131,7 @@ Rectangle {
             anchors.right:  parent.right
             text:           _start ? _planMasterController.aviantMissionTools.formatScheduledFlightTime(_start) + (_end ? " - " + _planMasterController.aviantMissionTools.formatScheduledFlightTime(_end) : "") : ""
             visible:        _start !== ""
-            color:          globals.outsideFlightWindow ? qgcPal.colorRed : qgcPal.text
+            color:          globals.outsideFlightWindow ? qgcPal.colorRed : (globals.flightWindowEndingSoon ? qgcPal.colorOrange : qgcPal.text)
         }
     }
 
