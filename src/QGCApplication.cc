@@ -509,6 +509,7 @@ void QGCApplication::_initCommon()
     qmlRegisterType<AviantMissionTools>             (kQGCControllers,                       1, 0, "AviantMissionTools");
     qmlRegisterType<ScheduledFlightsManager>        (kQGCControllers,                       1, 0, "ScheduledFlightsManager");
     qmlRegisterType<LoadedScheduledFlight>          (kQGCControllers,                       1, 0, "LoadedScheduledFlight");
+    qRegisterMetaType<ScheduledFlight>();
     qmlRegisterType<PlanMasterController>           (kQGCControllers,                       1, 0, "PlanMasterController");
     qmlRegisterType<QGCFileDialogController>        (kQGCControllers,                       1, 0, "QGCFileDialogController");
     qmlRegisterType<RCChannelMonitorController>     (kQGCControllers,                       1, 0, "RCChannelMonitorController");

@@ -34,7 +34,8 @@ Rectangle {
     property color  _mainStatusBGColor:               qgcPal.brandingPurple
     property var    _planMasterController:            globals.planMasterControllerPlanView
     property bool   _controllerValid:                 _planMasterController !== undefined && _planMasterController !== null
-    property string _sourceReference:                 globals.scheduledFlight.source_reference || ""
+    property var    _scheduledFlight:                 globals.scheduledFlight
+    property string _sourceReference:                 _scheduledFlight ? _scheduledFlight.sourceReference : ""
     property real   _missionControllerProgressPct:    (_controllerValid && _planMasterController) ? _planMasterController.missionController.progressPct : 0
     property real   _rallyPointControllerProgressPct: (_controllerValid && _planMasterController) ? _planMasterController.rallyPointController.progressPct : 0
     property real   _geoFenceControllerProgressPct:   (_controllerValid && _planMasterController) ? _planMasterController.geoFenceController.progressPct : 0
@@ -126,11 +127,10 @@ Rectangle {
         }
 
         QGCLabel {
-            property string _start: globals.scheduledFlight.flight_window_start || ""
-            property string _end:   globals.scheduledFlight.flight_window_end || ""
+            property bool _hasWindow: !!_scheduledFlight && !isNaN(_scheduledFlight.start)
             anchors.right:  parent.right
-            text:           _start ? _planMasterController.aviantMissionTools.formatScheduledFlightTime(_start) + (_end ? " - " + _planMasterController.aviantMissionTools.formatScheduledFlightTime(_end) : "") : ""
-            visible:        _start !== ""
+            text:           _hasWindow ? _planMasterController.aviantMissionTools.formatScheduledFlightTime(_scheduledFlight.start) + (isNaN(_scheduledFlight.end) ? "" : " - " + _planMasterController.aviantMissionTools.formatScheduledFlightTime(_scheduledFlight.end)) : ""
+            visible:        _hasWindow
             color:          globals.outsideFlightWindow ? qgcPal.colorRed : (globals.flightWindowEndingSoon ? qgcPal.colorOrange : qgcPal.text)
         }
     }

@@ -10,11 +10,13 @@
 #pragma once
 
 #include "QGCLoggingCategory.h"
+#include "PlanMasterController.h"
 #include "ScheduledFlight.h"
 
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QPointer>
 #include <QStringList>
 #include <QTimer>
 
@@ -28,13 +30,14 @@ class LoadedScheduledFlight : public QObject
 public:
     LoadedScheduledFlight(QObject* parent = nullptr);
 
-    /// MMS scheduled flight object the plan was loaded from, empty if none
-    Q_PROPERTY(QJsonObject flight        MEMBER _flightJson WRITE setFlight)
+    /// Controller whose `scheduledFlight` is watched
+    Q_PROPERTY(PlanMasterController* planMasterController READ planMasterController WRITE setPlanMasterController)
     /// `agcIdentifier` of each other instance that has loaded the same flight
     Q_PROPERTY(QStringList otherClaimants READ otherClaimants                   NOTIFY otherClaimantsChanged)
 
     QStringList otherClaimants  (void) const { return _otherClaimants; }
-    void        setFlight       (const QJsonObject& flightJson);
+    PlanMasterController* planMasterController      (void) const { return _planMasterController; }
+    void                  setPlanMasterController   (PlanMasterController* planMasterController);
 
     /// `agc_identifier` of each claim in the heartbeat response `bytes` that is not from `ownInstanceId`
     static QStringList parseOtherClaimants (const QByteArray& bytes, const QString& ownInstanceId);
@@ -43,11 +46,12 @@ signals:
     void otherClaimantsChanged  (void);
 
 private slots:
-    void _sendHeartbeat (void);
+    void _scheduledFlightChanged    (void);
+    void _sendHeartbeat             (void);
 
 private:
     void _releaseClaim      (const QString& reference);
-    void _heartbeatComplete     (QNetworkReply* reply);
+    void _heartbeatComplete (QNetworkReply* reply);
     void _setOtherClaimants (const QStringList& otherClaimants);
     /// `path` under the flight's MMS URL, empty if `reference` or the MMS URL is empty
     static QUrl _flightUrl  (const QString& reference, const QString& path);
@@ -55,7 +59,7 @@ private:
     QNetworkAccessManager   _networkAccessManager;
     QTimer                  _heartbeatTimer;
     QNetworkReply*          _reply = nullptr;
-    QJsonObject             _flightJson;
+    QPointer<PlanMasterController> _planMasterController;
     ScheduledFlight         _flight;
     QStringList             _otherClaimants;
 };

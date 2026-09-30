@@ -366,7 +366,7 @@ void PlanMasterController::_loadReservedAirspace(const QJsonObject& json)
     emit reservedAirspaceChanged();
 }
 
-void PlanMasterController::setScheduledFlight(const QJsonObject& scheduledFlight)
+void PlanMasterController::setScheduledFlight(const ScheduledFlight& scheduledFlight)
 {
     _scheduledFlight = scheduledFlight;
     emit scheduledFlightChanged();

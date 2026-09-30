@@ -55,7 +55,7 @@ public:
     Q_PROPERTY(QmlObjectListModel*      planCreators            MEMBER _planCreators                        NOTIFY planCreatorsChanged)
     Q_PROPERTY(double                   takeoffNonSegregatedRadius  READ takeoffNonSegregatedRadius     NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
     Q_PROPERTY(double                   deliveryNonSegregatedRadius READ deliveryNonSegregatedRadius    NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
-    Q_PROPERTY(QJsonObject              scheduledFlight             READ scheduledFlight                NOTIFY scheduledFlightChanged)  ///< MMS scheduled flight the plan was loaded from, as fetched at load time. Empty if none
+    Q_PROPERTY(ScheduledFlight          scheduledFlight             READ scheduledFlight                NOTIFY scheduledFlightChanged)  ///< MMS scheduled flight the plan was loaded from, as fetched at load time. Empty `reference` if none
 
     /// Should be called immediately upon Component.onCompleted.
     Q_INVOKABLE void start(void);
@@ -104,8 +104,8 @@ public:
     bool        isEmpty         (void) const;
     double      takeoffNonSegregatedRadius  (void) const { return _takeoffNonSegregatedRadius; }
     double      deliveryNonSegregatedRadius (void) const { return _deliveryNonSegregatedRadius; }
-    QJsonObject scheduledFlight             (void) const { return _scheduledFlight; }
-    void        setScheduledFlight          (const QJsonObject& scheduledFlight = {});
+    ScheduledFlight scheduledFlight         (void) const { return _scheduledFlight; }
+    void        setScheduledFlight          (const ScheduledFlight& scheduledFlight = {});
 
     void        setFlyView(bool flyView) { _flyView = flyView; }
 
@@ -171,5 +171,5 @@ private:
     QmlObjectListModel*     _planCreators =             nullptr;
     double                  _takeoffNonSegregatedRadius =   0;
     double                  _deliveryNonSegregatedRadius =  0;
-    QJsonObject             _scheduledFlight;
+    ScheduledFlight         _scheduledFlight;
 };

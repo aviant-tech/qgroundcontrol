@@ -58,14 +58,27 @@ QStringList LoadedScheduledFlight::parseOtherClaimants(const QByteArray& bytes, 
     return otherClaimants;
 }
 
-void LoadedScheduledFlight::setFlight(const QJsonObject& flightJson)
+void LoadedScheduledFlight::setPlanMasterController(PlanMasterController* planMasterController)
 {
-    ScheduledFlight flight = ScheduledFlight::fromJson(flightJson);
+    if (_planMasterController) {
+        disconnect(_planMasterController, nullptr, this, nullptr);
+    }
+    _planMasterController = planMasterController;
+    if (_planMasterController) {
+        connect(_planMasterController, &PlanMasterController::scheduledFlightChanged, this, &LoadedScheduledFlight::_scheduledFlightChanged);
+        // `_planMasterController` is already null when this fires, which releases the claim
+        connect(_planMasterController, &QObject::destroyed, this, &LoadedScheduledFlight::_scheduledFlightChanged);
+    }
+    _scheduledFlightChanged();
+}
+
+void LoadedScheduledFlight::_scheduledFlightChanged(void)
+{
+    ScheduledFlight flight = _planMasterController ? _planMasterController->scheduledFlight() : ScheduledFlight();
     if (flight.reference != _flight.reference) {
         _releaseClaim(_flight.reference);
         _setOtherClaimants({});
     }
-    _flightJson = flightJson;
     _flight = flight;
     _sendHeartbeat();
 }

@@ -88,22 +88,21 @@ ApplicationWindow {
         property var                planMasterControllerPlanView:   null
         property var                currentPlanMissionItem:         planMasterControllerPlanView ? planMasterControllerPlanView.missionController.currentPlanViewItem : null
 
-        /// MMS scheduled flight the plan was loaded from, empty object if none
-        readonly property var       scheduledFlight:                planMasterControllerPlanView ? planMasterControllerPlanView.scheduledFlight : ({})
+        /// `ScheduledFlight` the plan was loaded from, null before the plan view exists. Its times are invalid dates if missing
+        readonly property var       scheduledFlight:                planMasterControllerPlanView ? planMasterControllerPlanView.scheduledFlight : null
 
         property var                now:                            new Date()
-        readonly property bool      outsideFlightWindow:            !!scheduledFlight.flight_window_start &&
-                                                                    (now < new Date(scheduledFlight.flight_window_start) ||
-                                                                     (!!scheduledFlight.flight_window_end && now >= new Date(scheduledFlight.flight_window_end)))
-        readonly property bool      flightWindowEndingSoon:         !!scheduledFlight.flight_window_start && !!scheduledFlight.flight_window_end &&
-                                                                    !outsideFlightWindow && new Date(scheduledFlight.flight_window_end) - now < 10 * 60 * 1000
+        readonly property bool      outsideFlightWindow:            !!scheduledFlight && !isNaN(scheduledFlight.start) &&
+                                                                    (now < scheduledFlight.start || (!isNaN(scheduledFlight.end) && now >= scheduledFlight.end))
+        readonly property bool      flightWindowEndingSoon:         !!scheduledFlight && !isNaN(scheduledFlight.start) && !isNaN(scheduledFlight.end) &&
+                                                                    !outsideFlightWindow && scheduledFlight.end - now < 10 * 60 * 1000
         /// `agcIdentifier` of other QGC instances that have loaded the same scheduled flight
         readonly property var       scheduledFlightOtherClaimants:  loadedScheduledFlight.otherClaimants
     }
 
     LoadedScheduledFlight {
-        id:         loadedScheduledFlight
-        flight:     globals.scheduledFlight
+        id:                   loadedScheduledFlight
+        planMasterController: globals.planMasterControllerPlanView
     }
 
     Timer {
