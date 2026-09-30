@@ -100,6 +100,8 @@ ApplicationWindow {
         readonly property var       scheduledFlightOtherClaimants:  loadedScheduledFlight.otherClaimants
         /// MMS has another mission plan, or none, for the loaded scheduled flight
         readonly property bool      scheduledFlightMissionPlanOutdated: loadedScheduledFlight.missionPlanOutdated
+        /// MMS status of the loaded scheduled flight if it is not READY, otherwise empty
+        readonly property string    scheduledFlightNotReadyStatus:  loadedScheduledFlight.notReadyStatus
     }
 
     LoadedScheduledFlight {

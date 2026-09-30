@@ -26,7 +26,7 @@ static double dashLength(const QVariantList& dash)
 void ScheduledFlightsManagerTest::_testParseFlight(void)
 {
     QJsonObject json = QJsonDocument::fromJson(R"({
-        "reference": "8fbe201b", "source_reference": "source-reference-1", "mission_plan_id": 695, "cancelled": null,
+        "reference": "8fbe201b", "source_reference": "source-reference-1", "status": "READY", "mission_plan_id": 695, "cancelled": null,
         "flight_window_start": "2026-09-22T09:30:00Z", "flight_window_end": "2026-09-22T10:30:00Z",
         "requested_delivery_at": "2026-09-22T10:00:00.074034Z",
         "delivery_address": {"street_address": "Solliveien 2", "postal_code": "1825"},
@@ -36,6 +36,7 @@ void ScheduledFlightsManagerTest::_testParseFlight(void)
     ScheduledFlight flight = ScheduledFlight::fromJson(json);
     QCOMPARE(flight.reference, QString("8fbe201b"));
     QCOMPARE(flight.sourceReference, QString("source-reference-1"));
+    QCOMPARE(flight.status, QString("READY"));
     QCOMPARE(flight.missionPlanId, 695);
     QCOMPARE(flight.start, QDateTime(QDate(2026, 9, 22), QTime(9, 30), Qt::UTC));
     QCOMPARE(flight.end, QDateTime(QDate(2026, 9, 22), QTime(10, 30), Qt::UTC));

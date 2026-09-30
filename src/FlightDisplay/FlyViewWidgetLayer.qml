@@ -395,6 +395,24 @@ Item {
                 text:               qsTr("Mission plan changed in MMS, reload the scheduled flight")
             }
         }
+
+        Rectangle {
+            anchors.horizontalCenter:   parent.horizontalCenter
+            width:                      notReadyLabel.width + ScreenTools.defaultFontPixelWidth * 2
+            height:                     notReadyLabel.height + ScreenTools.defaultFontPixelHeight
+            color:                      "red"
+            radius:                     ScreenTools.defaultFontPixelWidth / 2
+            visible:                    globals.scheduledFlightNotReadyStatus !== ""
+
+            QGCLabel {
+                id:                 notReadyLabel
+                anchors.centerIn:   parent
+                color:              "white"
+                font.bold:          true
+                font.pointSize:     ScreenTools.largeFontPointSize
+                text:               qsTr("Scheduled flight is %1").arg(globals.scheduledFlightNotReadyStatus)
+            }
+        }
     }
 
     MapScale {

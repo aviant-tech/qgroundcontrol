@@ -32,3 +32,16 @@ void LoadedScheduledFlightTest::_testParseOtherClaimants(void)
     // No claims
     QCOMPARE(LoadedScheduledFlight::parseOtherClaimants(QJsonObject(), "own"), QStringList());
 }
+
+void LoadedScheduledFlightTest::_testStatusIfNotReady(void)
+{
+    QCOMPARE(LoadedScheduledFlight::statusIfNotReady("READY"), QString());
+    QCOMPARE(LoadedScheduledFlight::statusIfNotReady("ready"), QString());
+    QCOMPARE(LoadedScheduledFlight::statusIfNotReady("CANCELLED"), QString("CANCELLED"));
+    QCOMPARE(LoadedScheduledFlight::statusIfNotReady("pending"), QString("pending"));
+    QCOMPARE(LoadedScheduledFlight::statusIfNotReady(" READY\n"), QString());
+    QCOMPARE(LoadedScheduledFlight::statusIfNotReady(" FAILED "), QString("FAILED"));
+    QCOMPARE(LoadedScheduledFlight::statusIfNotReady("  "), QString());
+    // MMS without `status`
+    QCOMPARE(LoadedScheduledFlight::statusIfNotReady(""), QString());
+}

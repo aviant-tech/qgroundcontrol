@@ -17,4 +17,5 @@ class LoadedScheduledFlightTest : public UnitTest
 
 private slots:
     void _testParseOtherClaimants   (void);
+    void _testStatusIfNotReady      (void);
 };

@@ -16,6 +16,7 @@ ScheduledFlight ScheduledFlight::fromJson(const QJsonObject& json)
     ScheduledFlight flight;
     flight.reference            = json["reference"].toString();
     flight.sourceReference      = json["source_reference"].toString();
+    flight.status               = json["status"].toString();
     flight.missionPlanId        = json["mission_plan_id"].toInt();
     flight.start                = QDateTime::fromString(json["flight_window_start"].toString(), Qt::ISODateWithMs);
     flight.end                  = QDateTime::fromString(json["flight_window_end"].toString(), Qt::ISODateWithMs);

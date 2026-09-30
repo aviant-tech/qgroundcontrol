@@ -51,6 +51,12 @@ QStringList LoadedScheduledFlight::parseOtherClaimants(const QJsonObject& json, 
     return otherClaimants;
 }
 
+QString LoadedScheduledFlight::statusIfNotReady(const QString& status)
+{
+    QString trimmed = status.trimmed();
+    return trimmed.compare(QStringLiteral("READY"), Qt::CaseInsensitive) == 0 ? QString() : trimmed;
+}
+
 void LoadedScheduledFlight::setPlanMasterController(PlanMasterController* planMasterController)
 {
     if (_planMasterController) {
@@ -74,6 +80,7 @@ void LoadedScheduledFlight::_scheduledFlightChanged(void)
     }
     // A new mission may have been loaded for the same flight, the heartbeat below checks again
     _setMissionPlanOutdated(false);
+    _setNotReadyStatus(QString());
     _flight = flight;
     _sendHeartbeat();
 }
@@ -100,6 +107,7 @@ void LoadedScheduledFlight::_sendHeartbeat(void)
     if (url.isEmpty()) {
         _setOtherClaimants({});
         _setMissionPlanOutdated(false);
+        _setNotReadyStatus(QString());
         return;
     }
 
@@ -149,6 +157,10 @@ void LoadedScheduledFlight::_heartbeatComplete(QNetworkReply* reply)
 
     if (reply->error() != QNetworkReply::NoError) {
         qCWarning(LoadedScheduledFlightLog) << "Scheduled flight heartbeat failed:" << reply->errorString();
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 404) {
+            // The flight no longer exists in MMS
+            _setNotReadyStatus(QStringLiteral("DELETED"));
+        }
         return;
     }
 
@@ -160,8 +172,10 @@ void LoadedScheduledFlight::_heartbeatComplete(QNetworkReply* reply)
     }
 
     _setOtherClaimants(parseOtherClaimants(jsonDoc.object(), instanceId()));
+    ScheduledFlight current = ScheduledFlight::fromJson(jsonDoc.object());
     // A null mission plan, e.g. during a replan, is 0 and counts as outdated too
-    _setMissionPlanOutdated(ScheduledFlight::fromJson(jsonDoc.object()).missionPlanId != _flight.missionPlanId);
+    _setMissionPlanOutdated(current.missionPlanId != _flight.missionPlanId);
+    _setNotReadyStatus(statusIfNotReady(current.status));
 }
 
 void LoadedScheduledFlight::_setOtherClaimants(const QStringList& otherClaimants)
@@ -180,4 +194,13 @@ void LoadedScheduledFlight::_setMissionPlanOutdated(bool missionPlanOutdated)
     }
     _missionPlanOutdated = missionPlanOutdated;
     emit missionPlanOutdatedChanged();
+}
+
+void LoadedScheduledFlight::_setNotReadyStatus(const QString& notReadyStatus)
+{
+    if (notReadyStatus == _notReadyStatus) {
+        return;
+    }
+    _notReadyStatus = notReadyStatus;
+    emit notReadyStatusChanged();
 }

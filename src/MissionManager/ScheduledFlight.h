@@ -22,6 +22,7 @@ struct ScheduledFlight {
 
     Q_PROPERTY(QString   reference           MEMBER reference)
     Q_PROPERTY(QString   sourceReference     MEMBER sourceReference)
+    Q_PROPERTY(QString   status              MEMBER status)                 ///< e.g. READY, empty if missing
     Q_PROPERTY(int       missionPlanId       MEMBER missionPlanId)          ///< 0 if none
     Q_PROPERTY(QDateTime start               MEMBER start)
     Q_PROPERTY(QDateTime end                 MEMBER end)
@@ -31,6 +32,7 @@ struct ScheduledFlight {
 public:
     QString                 reference;
     QString                 sourceReference;
+    QString                 status;
     int                     missionPlanId = 0;
     QDateTime               start;                  ///< Invalid if missing
     QDateTime               end;                    ///< Invalid if missing
