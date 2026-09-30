@@ -4,7 +4,6 @@ FROM ubuntu:22.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 ENV QT_VERSION=5.15.2
 ENV SOURCE_DIR=/src
-ENV BUILD_TYPE=DailyBuild
 
 WORKDIR ${SOURCE_DIR}
 
@@ -25,15 +24,19 @@ ENV PATH="/opt/qt/${QT_VERSION}/gcc_64/bin:${PATH}"
 # Copy source tree
 COPY . .
 
+# DailyBuild or StableBuild. Declared here, so changing it doesn't invalidate the layers above
+ARG BUILD_TYPE=DailyBuild
+
 # Build QGroundControl (using qmake, with cache for build artifacts)
-RUN --mount=type=cache,target=/build_cache \ 
-    mkdir -p /build_cache/qgc && cd /build_cache/qgc && \
+# Separate cache per build type: make doesn't rebuild objects when only the DAILY_BUILD define changes
+RUN --mount=type=cache,target=/build_cache \
+    mkdir -p /build_cache/qgc-${BUILD_TYPE} && cd /build_cache/qgc-${BUILD_TYPE} && \
     qmake -r ${SOURCE_DIR}/qgroundcontrol.pro CONFIG+=installer CONFIG+=${BUILD_TYPE} && \
     make -j$(nproc)
 
 # Package AppImage
 RUN --mount=type=cache,target=/build_cache \
-    cd /build_cache/qgc && \
+    cd /build_cache/qgc-${BUILD_TYPE} && \
     mkdir -p staging package && \
     bash ${SOURCE_DIR}/deploy/create_linux_appimage.sh ${SOURCE_DIR} ./staging ./package && \
     cp -r ./package/QGroundControl.AppImage /tmp/
