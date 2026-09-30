@@ -10,6 +10,7 @@
 #pragma once
 
 #include "QGCLoggingCategory.h"
+#include "ScheduledFlight.h"
 
 #include <QObject>
 #include <QDateTime>
@@ -57,19 +58,13 @@ private slots:
     void _updatePaths               (void);
 
 private:
-    struct Flight {
-        QDateTime               start;
-        QDateTime               end;
-        QList<QGeoCoordinate>   path;
-    };
-
     void _requestComplete           (QNetworkReply* reply);
     void _parseResponse             (const QByteArray& bytes);
 
     QNetworkAccessManager   _networkAccessManager;
     QTimer                  _pollTimer;
     QNetworkReply*          _reply = nullptr;
-    QList<Flight>           _flights;
+    QList<ScheduledFlight>  _flights;
     QList<QPair<FlightState, QList<QGeoCoordinate>>> _visibleFlights;
     QVariantList            _paths;
 };

@@ -622,6 +622,7 @@ HEADERS += \
     src/MissionManager/RallyPoint.h \
     src/MissionManager/RallyPointController.h \
     src/MissionManager/RallyPointManager.h \
+    src/MissionManager/ScheduledFlight.h \
     src/MissionManager/ScheduledFlightsManager.h \
     src/MissionManager/SimpleMissionItem.h \
     src/MissionManager/Section.h \
@@ -881,6 +882,7 @@ SOURCES += \
     src/MissionManager/RallyPoint.cc \
     src/MissionManager/RallyPointController.cc \
     src/MissionManager/RallyPointManager.cc \
+    src/MissionManager/ScheduledFlight.cc \
     src/MissionManager/ScheduledFlightsManager.cc \
     src/MissionManager/SimpleMissionItem.cc \
     src/MissionManager/SpeedSection.cc \

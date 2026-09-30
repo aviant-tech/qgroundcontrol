@@ -16,6 +16,7 @@ class ScheduledFlightsManagerTest : public UnitTest
     Q_OBJECT
 
 private slots:
+    void _testParseFlight       (void);
     void _testClassify          (void);
     void _testTrimReturnTrack   (void);
     void _testDashPath          (void);

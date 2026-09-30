@@ -118,6 +118,8 @@ add_library(MissionManager
 	RallyPoint.h
 	RallyPointManager.cc
 	RallyPointManager.h
+	ScheduledFlight.cc
+	ScheduledFlight.h
 	ScheduledFlightsManager.cc
 	ScheduledFlightsManager.h
 	Section.h

@@ -10,6 +10,8 @@
 #include "ScheduledFlightsManagerTest.h"
 #include "ScheduledFlightsManager.h"
 
+#include <QJsonDocument>
+
 static const QGeoCoordinate kStart(59.708188, 10.884887);
 
 static double dashLength(const QVariantList& dash)
@@ -19,6 +21,33 @@ static double dashLength(const QVariantList& dash)
         length += dash[i - 1].value<QGeoCoordinate>().distanceTo(dash[i].value<QGeoCoordinate>());
     }
     return length;
+}
+
+void ScheduledFlightsManagerTest::_testParseFlight(void)
+{
+    QJsonObject json = QJsonDocument::fromJson(R"({
+        "reference": "8fbe201b", "mission_plan_id": 695, "cancelled": null,
+        "flight_window_start": "2026-09-22T09:30:00Z", "flight_window_end": "2026-09-22T10:30:00Z",
+        "flight_path": [[10.88, 59.70], [11.01, 59.66]]
+    })").object();
+
+    ScheduledFlight flight = ScheduledFlight::fromJson(json);
+    QCOMPARE(flight.reference, QString("8fbe201b"));
+    QCOMPARE(flight.missionPlanId, 695);
+    QCOMPARE(flight.start, QDateTime(QDate(2026, 9, 22), QTime(9, 30), Qt::UTC));
+    QCOMPARE(flight.end, QDateTime(QDate(2026, 9, 22), QTime(10, 30), Qt::UTC));
+    QCOMPARE(flight.cancelled, false);
+    QCOMPARE(flight.path, QList<QGeoCoordinate>({ QGeoCoordinate(59.70, 10.88), QGeoCoordinate(59.66, 11.01) }));
+
+    json["cancelled"] = "2026-09-22T09:00:00Z";
+    QCOMPARE(ScheduledFlight::fromJson(json).cancelled, true);
+
+    // Missing fields
+    ScheduledFlight empty = ScheduledFlight::fromJson(QJsonObject());
+    QVERIFY(empty.reference.isEmpty());
+    QVERIFY(!empty.start.isValid());
+    QVERIFY(!empty.end.isValid());
+    QVERIFY(empty.path.isEmpty());
 }
 
 void ScheduledFlightsManagerTest::_testClassify(void)
