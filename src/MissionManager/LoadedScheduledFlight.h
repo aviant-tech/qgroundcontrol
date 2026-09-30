@@ -63,6 +63,8 @@ private slots:
 private:
     void _releaseClaim      (const QString& reference);
     void _heartbeatComplete (QNetworkReply* reply);
+    /// Clears everything learned from heartbeat responses
+    void _clearWarnings         (void);
     void _setOtherClaimants     (const QStringList& otherClaimants);
     void _setMissionPlanOutdated(bool missionPlanOutdated);
     void _setNotReadyStatus     (const QString& notReadyStatus);

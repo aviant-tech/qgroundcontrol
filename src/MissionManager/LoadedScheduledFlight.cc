@@ -76,11 +76,9 @@ void LoadedScheduledFlight::_scheduledFlightChanged(void)
     ScheduledFlight flight = _planMasterController ? _planMasterController->scheduledFlight() : ScheduledFlight();
     if (flight.reference != _flight.reference) {
         _releaseClaim(_flight.reference);
-        _setOtherClaimants({});
     }
-    // A new mission may have been loaded for the same flight, the heartbeat below checks again
-    _setMissionPlanOutdated(false);
-    _setNotReadyStatus(QString());
+    // Even for the same flight a new mission may have been loaded, the heartbeat below checks again
+    _clearWarnings();
     _flight = flight;
     _sendHeartbeat();
 }
@@ -105,9 +103,7 @@ void LoadedScheduledFlight::_sendHeartbeat(void)
 
     QUrl url = _flightUrl(_flight.reference, "claim/");
     if (url.isEmpty()) {
-        _setOtherClaimants({});
-        _setMissionPlanOutdated(false);
-        _setNotReadyStatus(QString());
+        _clearWarnings();
         return;
     }
 
@@ -176,6 +172,13 @@ void LoadedScheduledFlight::_heartbeatComplete(QNetworkReply* reply)
     // A null mission plan, e.g. during a replan, is 0 and counts as outdated too
     _setMissionPlanOutdated(current.missionPlanId != _flight.missionPlanId);
     _setNotReadyStatus(statusIfNotReady(current.status));
+}
+
+void LoadedScheduledFlight::_clearWarnings(void)
+{
+    _setOtherClaimants({});
+    _setMissionPlanOutdated(false);
+    _setNotReadyStatus(QString());
 }
 
 void LoadedScheduledFlight::_setOtherClaimants(const QStringList& otherClaimants)

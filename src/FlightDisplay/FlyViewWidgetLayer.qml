@@ -342,76 +342,26 @@ Item {
         spacing:                    _toolsMargin
         z:                          QGroundControl.zOrderTopMost
 
-        Rectangle {
-            anchors.horizontalCenter:   parent.horizontalCenter
-            width:                      flightWindowLabel.width + ScreenTools.defaultFontPixelWidth * 2
-            height:                     flightWindowLabel.height + ScreenTools.defaultFontPixelHeight
-            color:                      globals.outsideFlightWindow ? "red" : "orange"
-            radius:                     ScreenTools.defaultFontPixelWidth / 2
-            visible:                    _activeVehicle && (globals.outsideFlightWindow || globals.flightWindowEndingSoon)
-
-            QGCLabel {
-                id:                 flightWindowLabel
-                anchors.centerIn:   parent
-                color:              globals.outsideFlightWindow ? "white" : "black"
-                font.bold:          true
-                font.pointSize:     ScreenTools.largeFontPointSize
-                text:               globals.outsideFlightWindow ? qsTr("Outside scheduled timeslot") : qsTr("Timeslot ends soon")
-            }
+        FlyViewWarningBanner {
+            color:      globals.outsideFlightWindow ? "red" : "orange"
+            textColor:  globals.outsideFlightWindow ? "white" : "black"
+            text:       globals.outsideFlightWindow ? qsTr("Outside scheduled timeslot") : qsTr("Timeslot ends soon")
+            visible:    _activeVehicle && (globals.outsideFlightWindow || globals.flightWindowEndingSoon)
         }
 
-        Rectangle {
-            anchors.horizontalCenter:   parent.horizontalCenter
-            width:                      otherClaimantsLabel.width + ScreenTools.defaultFontPixelWidth * 2
-            height:                     otherClaimantsLabel.height + ScreenTools.defaultFontPixelHeight
-            color:                      "red"
-            radius:                     ScreenTools.defaultFontPixelWidth / 2
-            visible:                    globals.scheduledFlightOtherClaimants.length > 0
-
-            QGCLabel {
-                id:                 otherClaimantsLabel
-                anchors.centerIn:   parent
-                color:              "white"
-                font.bold:          true
-                font.pointSize:     ScreenTools.largeFontPointSize
-                text:               qsTr("Scheduled flight also loaded on %1").arg(globals.scheduledFlightOtherClaimants.join(", "))
-            }
+        FlyViewWarningBanner {
+            text:       qsTr("Scheduled flight also loaded on %1").arg(globals.scheduledFlightOtherClaimants.join(", "))
+            visible:    globals.scheduledFlightOtherClaimants.length > 0
         }
 
-        Rectangle {
-            anchors.horizontalCenter:   parent.horizontalCenter
-            width:                      missionPlanLabel.width + ScreenTools.defaultFontPixelWidth * 2
-            height:                     missionPlanLabel.height + ScreenTools.defaultFontPixelHeight
-            color:                      "red"
-            radius:                     ScreenTools.defaultFontPixelWidth / 2
-            visible:                    globals.scheduledFlightMissionPlanOutdated
-
-            QGCLabel {
-                id:                 missionPlanLabel
-                anchors.centerIn:   parent
-                color:              "white"
-                font.bold:          true
-                font.pointSize:     ScreenTools.largeFontPointSize
-                text:               qsTr("Mission plan changed in MMS, reload the scheduled flight")
-            }
+        FlyViewWarningBanner {
+            text:       qsTr("Mission plan changed in MMS, reload the scheduled flight")
+            visible:    globals.scheduledFlightMissionPlanOutdated
         }
 
-        Rectangle {
-            anchors.horizontalCenter:   parent.horizontalCenter
-            width:                      notReadyLabel.width + ScreenTools.defaultFontPixelWidth * 2
-            height:                     notReadyLabel.height + ScreenTools.defaultFontPixelHeight
-            color:                      "red"
-            radius:                     ScreenTools.defaultFontPixelWidth / 2
-            visible:                    globals.scheduledFlightNotReadyStatus !== ""
-
-            QGCLabel {
-                id:                 notReadyLabel
-                anchors.centerIn:   parent
-                color:              "white"
-                font.bold:          true
-                font.pointSize:     ScreenTools.largeFontPointSize
-                text:               qsTr("Scheduled flight is %1").arg(globals.scheduledFlightNotReadyStatus)
-            }
+        FlyViewWarningBanner {
+            text:       qsTr("Scheduled flight is %1").arg(globals.scheduledFlightNotReadyStatus)
+            visible:    globals.scheduledFlightNotReadyStatus.length > 0
         }
     }
 
