@@ -102,6 +102,10 @@ ApplicationWindow {
         readonly property bool      scheduledFlightMissionPlanOutdated: loadedScheduledFlight.missionPlanOutdated
         /// MMS status of the loaded scheduled flight if it is not READY, otherwise empty
         readonly property string    scheduledFlightNotReadyStatus:  loadedScheduledFlight.notReadyStatus
+        /// No valid MMS heartbeat response for the loaded scheduled flight for a while, so changes to it are not detected
+        readonly property bool      scheduledFlightMmsUnreachable:  loadedScheduledFlight.mmsUnreachable
+        /// Whole minutes since the last valid MMS heartbeat response for the loaded scheduled flight
+        readonly property int       scheduledFlightMinutesSinceMmsResponse: Math.floor((now - loadedScheduledFlight.lastMmsResponse) / 60000)
     }
 
     LoadedScheduledFlight {

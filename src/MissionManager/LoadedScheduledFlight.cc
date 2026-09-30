@@ -21,12 +21,19 @@ QGC_LOGGING_CATEGORY(LoadedScheduledFlightLog, "LoadedScheduledFlightLog")
 
 static constexpr int kHeartbeatMs       = 30 * 1000;    // MMS drops claims not renewed within 90 s
 static constexpr int kRequestTimeoutMs  = 20 * 1000;
+static constexpr int kWatchdogMs        = 2 * kHeartbeatMs + kRequestTimeoutMs;    // A single failed heartbeat may be a blip
 
 LoadedScheduledFlight::LoadedScheduledFlight(QObject* parent)
     : QObject(parent)
 {
     connect(&_heartbeatTimer, &QTimer::timeout, this, &LoadedScheduledFlight::_sendHeartbeat);
     _heartbeatTimer.start(kHeartbeatMs);
+
+    _watchdogTimer.setSingleShot(true);
+    // A coarse timer may fire up to 5 % early
+    _watchdogTimer.setTimerType(Qt::PreciseTimer);
+    _watchdogTimer.setInterval(kWatchdogMs);
+    connect(&_watchdogTimer, &QTimer::timeout, this, [this]() { _setMmsUnreachable(true); });
 }
 
 /// Random id, unique for each running QGC process
@@ -80,6 +87,14 @@ void LoadedScheduledFlight::_scheduledFlightChanged(void)
     // Even for the same flight a new mission may have been loaded, the heartbeat below checks again
     _clearWarnings();
     _flight = flight;
+    // Not in `_clearWarnings`, which also runs when the heartbeat is not sent
+    if (_flight.reference.isEmpty()) {
+        _watchdogTimer.stop();
+        _setMmsUnreachable(false);
+    } else {
+        // The flight was just fetched from MMS
+        _mmsReached();
+    }
     _sendHeartbeat();
 }
 
@@ -155,6 +170,7 @@ void LoadedScheduledFlight::_heartbeatComplete(QNetworkReply* reply)
         qCWarning(LoadedScheduledFlightLog) << "Scheduled flight heartbeat failed:" << reply->errorString();
         if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 404) {
             // The flight no longer exists in MMS
+            _mmsReached();
             _setNotReadyStatus(QStringLiteral("DELETED"));
         }
         return;
@@ -166,6 +182,8 @@ void LoadedScheduledFlight::_heartbeatComplete(QNetworkReply* reply)
         qCWarning(LoadedScheduledFlightLog) << "Heartbeat response is not a JSON object:" << parseError.errorString();
         return;
     }
+
+    _mmsReached();
 
     _setOtherClaimants(parseOtherClaimants(jsonDoc.object(), instanceId()));
     ScheduledFlight current = ScheduledFlight::fromJson(jsonDoc.object());
@@ -206,4 +224,21 @@ void LoadedScheduledFlight::_setNotReadyStatus(const QString& notReadyStatus)
     }
     _notReadyStatus = notReadyStatus;
     emit notReadyStatusChanged();
+}
+
+void LoadedScheduledFlight::_mmsReached(void)
+{
+    _watchdogTimer.start();
+    _lastMmsResponse = QDateTime::currentDateTime();
+    emit lastMmsResponseChanged();
+    _setMmsUnreachable(false);
+}
+
+void LoadedScheduledFlight::_setMmsUnreachable(bool mmsUnreachable)
+{
+    if (mmsUnreachable == _mmsUnreachable) {
+        return;
+    }
+    _mmsUnreachable = mmsUnreachable;
+    emit mmsUnreachableChanged();
 }

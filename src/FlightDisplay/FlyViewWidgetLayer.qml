@@ -363,6 +363,13 @@ Item {
             text:       qsTr("Scheduled flight is %1").arg(globals.scheduledFlightNotReadyStatus)
             visible:    globals.scheduledFlightNotReadyStatus.length > 0
         }
+
+        FlyViewWarningBanner {
+            color:      "orange"
+            textColor:  "black"
+            text:       qsTr("No connection to MMS for %1 min, changes to the scheduled flight are not detected").arg(globals.scheduledFlightMinutesSinceMmsResponse)
+            visible:    globals.scheduledFlightMmsUnreachable
+        }
     }
 
     MapScale {
