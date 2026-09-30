@@ -43,6 +43,7 @@
 #include "CorridorScanComplexItemTest.h"
 #include "TransectStyleComplexItemTest.h"
 #include "CameraCalcTest.h"
+#include "LoadedScheduledFlightTest.h"
 #include "ScheduledFlightsManagerTest.h"
 #include "FWLandingPatternTest.h"
 #include "RequestMessageTest.h"
@@ -85,6 +86,7 @@ UT_REGISTER_TEST(CorridorScanComplexItemTest)
 UT_REGISTER_TEST(TransectStyleComplexItemTest)
 UT_REGISTER_TEST(QGCMapPolylineTest)
 UT_REGISTER_TEST(CameraCalcTest)
+UT_REGISTER_TEST(LoadedScheduledFlightTest)
 UT_REGISTER_TEST(ScheduledFlightsManagerTest)
 UT_REGISTER_TEST(FWLandingPatternTest)
 UT_REGISTER_TEST(LandingComplexItemTest)

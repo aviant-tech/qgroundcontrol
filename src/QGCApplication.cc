@@ -63,6 +63,7 @@
 #include "FlightMapSettings.h"
 #include "FlightPathSegment.h"
 #include "AviantMissionTools.h"
+#include "LoadedScheduledFlight.h"
 #include "ScheduledFlightsManager.h"
 #include "PlanMasterController.h"
 #include "VideoManager.h"
@@ -507,6 +508,7 @@ void QGCApplication::_initCommon()
     qmlRegisterType<ScreenToolsController>          (kQGCControllers,                       1, 0, "ScreenToolsController");
     qmlRegisterType<AviantMissionTools>             (kQGCControllers,                       1, 0, "AviantMissionTools");
     qmlRegisterType<ScheduledFlightsManager>        (kQGCControllers,                       1, 0, "ScheduledFlightsManager");
+    qmlRegisterType<LoadedScheduledFlight>          (kQGCControllers,                       1, 0, "LoadedScheduledFlight");
     qmlRegisterType<PlanMasterController>           (kQGCControllers,                       1, 0, "PlanMasterController");
     qmlRegisterType<QGCFileDialogController>        (kQGCControllers,                       1, 0, "QGCFileDialogController");
     qmlRegisterType<RCChannelMonitorController>     (kQGCControllers,                       1, 0, "RCChannelMonitorController");

@@ -212,6 +212,13 @@
     "default":             ""
 },
 {
+    "name":                "agcIdentifier",
+    "shortDesc":           "AGC identifier",
+    "longDesc":            "Name of this QGC instance, shown to other instances that load the same scheduled flight.",
+    "type":                "string",
+    "default":             ""
+},
+{
     "name":                "missionToolsToken",
     "shortDesc":           "Authentication token for mission tools",
     "type":                "string",

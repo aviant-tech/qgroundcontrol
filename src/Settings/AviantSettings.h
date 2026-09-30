@@ -48,6 +48,7 @@ public:
     DEFINE_SETTINGFACT(missionToolsInsecureHttps)
     DEFINE_SETTINGFACT(missionToolsUrl)
     DEFINE_SETTINGFACT(missionToolsToken)
+    DEFINE_SETTINGFACT(agcIdentifier)
     DEFINE_SETTINGFACT(editableTelemetryBar)
     DEFINE_SETTINGFACT(factTimeoutSecs)
     DEFINE_SETTINGFACT(minSeenTraffic)

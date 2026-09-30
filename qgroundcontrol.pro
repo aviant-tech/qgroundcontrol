@@ -474,6 +474,7 @@ DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { 
         src/MissionManager/CorridorScanComplexItemTest.h \
         src/MissionManager/FWLandingPatternTest.h \
         src/MissionManager/LandingComplexItemTest.h \
+        src/MissionManager/LoadedScheduledFlightTest.h \
         src/MissionManager/MissionCommandTreeEditorTest.h \
         src/MissionManager/MissionCommandTreeTest.h \
         src/MissionManager/MissionControllerManagerTest.h \
@@ -523,6 +524,7 @@ DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { 
         src/MissionManager/CorridorScanComplexItemTest.cc \
         src/MissionManager/FWLandingPatternTest.cc \
         src/MissionManager/LandingComplexItemTest.cc \
+        src/MissionManager/LoadedScheduledFlightTest.cc \
         src/MissionManager/MissionCommandTreeEditorTest.cc \
         src/MissionManager/MissionCommandTreeTest.cc \
         src/MissionManager/MissionControllerManagerTest.cc \
@@ -603,6 +605,7 @@ HEADERS += \
     src/MissionManager/GeoFenceManager.h \
     src/MissionManager/KMLPlanDomDocument.h \
     src/MissionManager/LandingComplexItem.h \
+    src/MissionManager/LoadedScheduledFlight.h \
     src/MissionManager/MissionCommandList.h \
     src/MissionManager/MissionCommandTree.h \
     src/MissionManager/MissionCommandUIInfo.h \
@@ -863,6 +866,7 @@ SOURCES += \
     src/MissionManager/GeoFenceManager.cc \
     src/MissionManager/KMLPlanDomDocument.cc \
     src/MissionManager/LandingComplexItem.cc \
+    src/MissionManager/LoadedScheduledFlight.cc \
     src/MissionManager/MissionCommandList.cc \
     src/MissionManager/MissionCommandTree.cc \
     src/MissionManager/MissionCommandUIInfo.cc \

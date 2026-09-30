@@ -16,6 +16,7 @@ import QtQuick.Window   2.11
 import QGroundControl               1.0
 import QGroundControl.Palette       1.0
 import QGroundControl.Controls      1.0
+import QGroundControl.Controllers   1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.FlightDisplay 1.0
 import QGroundControl.FlightMap     1.0
@@ -96,6 +97,13 @@ ApplicationWindow {
                                                                      (!!scheduledFlight.flight_window_end && now >= new Date(scheduledFlight.flight_window_end)))
         readonly property bool      flightWindowEndingSoon:         !!scheduledFlight.flight_window_start && !!scheduledFlight.flight_window_end &&
                                                                     !outsideFlightWindow && new Date(scheduledFlight.flight_window_end) - now < 10 * 60 * 1000
+        /// `agcIdentifier` of other QGC instances that have loaded the same scheduled flight
+        readonly property var       scheduledFlightOtherClaimants:  loadedScheduledFlight.otherClaimants
+    }
+
+    LoadedScheduledFlight {
+        id:         loadedScheduledFlight
+        flight:     globals.scheduledFlight
     }
 
     Timer {
