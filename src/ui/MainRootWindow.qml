@@ -87,12 +87,15 @@ ApplicationWindow {
         property var                planMasterControllerPlanView:   null
         property var                currentPlanMissionItem:         planMasterControllerPlanView ? planMasterControllerPlanView.missionController.currentPlanViewItem : null
 
+        /// MMS scheduled flight the plan was loaded from, empty object if none
+        readonly property var       scheduledFlight:                planMasterControllerPlanView ? planMasterControllerPlanView.scheduledFlight : ({})
+
         property var                now:                            new Date()
-        readonly property bool      outsideFlightWindow:            !!planMasterControllerPlanView && planMasterControllerPlanView.flightWindowStart !== "" &&
-                                                                    (now < new Date(planMasterControllerPlanView.flightWindowStart) ||
-                                                                     (planMasterControllerPlanView.flightWindowEnd !== "" && now >= new Date(planMasterControllerPlanView.flightWindowEnd)))
-        readonly property bool      flightWindowEndingSoon:         !!planMasterControllerPlanView && planMasterControllerPlanView.flightWindowStart !== "" && planMasterControllerPlanView.flightWindowEnd !== "" &&
-                                                                    !outsideFlightWindow && new Date(planMasterControllerPlanView.flightWindowEnd) - now < 10 * 60 * 1000
+        readonly property bool      outsideFlightWindow:            !!scheduledFlight.flight_window_start &&
+                                                                    (now < new Date(scheduledFlight.flight_window_start) ||
+                                                                     (!!scheduledFlight.flight_window_end && now >= new Date(scheduledFlight.flight_window_end)))
+        readonly property bool      flightWindowEndingSoon:         !!scheduledFlight.flight_window_start && !!scheduledFlight.flight_window_end &&
+                                                                    !outsideFlightWindow && new Date(scheduledFlight.flight_window_end) - now < 10 * 60 * 1000
     }
 
     Timer {

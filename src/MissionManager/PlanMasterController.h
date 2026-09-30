@@ -55,9 +55,7 @@ public:
     Q_PROPERTY(QmlObjectListModel*      planCreators            MEMBER _planCreators                        NOTIFY planCreatorsChanged)
     Q_PROPERTY(double                   takeoffNonSegregatedRadius  READ takeoffNonSegregatedRadius     NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
     Q_PROPERTY(double                   deliveryNonSegregatedRadius READ deliveryNonSegregatedRadius    NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
-    Q_PROPERTY(QString                  sourceReference             READ sourceReference                NOTIFY scheduledFlightChanged)  ///< Source reference of the scheduled flight the plan was loaded from, empty if none
-    Q_PROPERTY(QString                  flightWindowStart           READ flightWindowStart              NOTIFY scheduledFlightChanged)  ///< ISO time, empty if none
-    Q_PROPERTY(QString                  flightWindowEnd             READ flightWindowEnd                NOTIFY scheduledFlightChanged)  ///< ISO time, empty if none
+    Q_PROPERTY(QJsonObject              scheduledFlight             READ scheduledFlight                NOTIFY scheduledFlightChanged)  ///< MMS scheduled flight the plan was loaded from, as fetched at load time. Empty if none
 
     /// Should be called immediately upon Component.onCompleted.
     Q_INVOKABLE void start(void);
@@ -106,10 +104,8 @@ public:
     bool        isEmpty         (void) const;
     double      takeoffNonSegregatedRadius  (void) const { return _takeoffNonSegregatedRadius; }
     double      deliveryNonSegregatedRadius (void) const { return _deliveryNonSegregatedRadius; }
-    QString     sourceReference             (void) const { return _sourceReference; }
-    QString     flightWindowStart           (void) const { return _flightWindowStart; }
-    QString     flightWindowEnd             (void) const { return _flightWindowEnd; }
-    void        setScheduledFlight          (const QString& sourceReference = {}, const QString& flightWindowStart = {}, const QString& flightWindowEnd = {});
+    QJsonObject scheduledFlight             (void) const { return _scheduledFlight; }
+    void        setScheduledFlight          (const QJsonObject& scheduledFlight = {});
 
     void        setFlyView(bool flyView) { _flyView = flyView; }
 
@@ -175,7 +171,5 @@ private:
     QmlObjectListModel*     _planCreators =             nullptr;
     double                  _takeoffNonSegregatedRadius =   0;
     double                  _deliveryNonSegregatedRadius =  0;
-    QString                 _sourceReference;
-    QString                 _flightWindowStart;
-    QString                 _flightWindowEnd;
+    QJsonObject             _scheduledFlight;
 };

@@ -366,11 +366,9 @@ void PlanMasterController::_loadReservedAirspace(const QJsonObject& json)
     emit reservedAirspaceChanged();
 }
 
-void PlanMasterController::setScheduledFlight(const QString& sourceReference, const QString& flightWindowStart, const QString& flightWindowEnd)
+void PlanMasterController::setScheduledFlight(const QJsonObject& scheduledFlight)
 {
-    _sourceReference = sourceReference;
-    _flightWindowStart = flightWindowStart;
-    _flightWindowEnd = flightWindowEnd;
+    _scheduledFlight = scheduledFlight;
     emit scheduledFlightChanged();
 }
 

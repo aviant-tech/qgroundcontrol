@@ -34,7 +34,7 @@ Rectangle {
     property color  _mainStatusBGColor:               qgcPal.brandingPurple
     property var    _planMasterController:            globals.planMasterControllerPlanView
     property bool   _controllerValid:                 _planMasterController !== undefined && _planMasterController !== null
-    property string _sourceReference:                 _controllerValid ? _planMasterController.sourceReference : ""
+    property string _sourceReference:                 globals.scheduledFlight.source_reference || ""
     property real   _missionControllerProgressPct:    (_controllerValid && _planMasterController) ? _planMasterController.missionController.progressPct : 0
     property real   _rallyPointControllerProgressPct: (_controllerValid && _planMasterController) ? _planMasterController.rallyPointController.progressPct : 0
     property real   _geoFenceControllerProgressPct:   (_controllerValid && _planMasterController) ? _planMasterController.geoFenceController.progressPct : 0
@@ -126,8 +126,8 @@ Rectangle {
         }
 
         QGCLabel {
-            property string _start: _controllerValid ? _planMasterController.flightWindowStart : ""
-            property string _end:   _controllerValid ? _planMasterController.flightWindowEnd : ""
+            property string _start: globals.scheduledFlight.flight_window_start || ""
+            property string _end:   globals.scheduledFlight.flight_window_end || ""
             anchors.right:  parent.right
             text:           _start ? _planMasterController.aviantMissionTools.formatScheduledFlightTime(_start) + (_end ? " - " + _planMasterController.aviantMissionTools.formatScheduledFlightTime(_end) : "") : ""
             visible:        _start !== ""
