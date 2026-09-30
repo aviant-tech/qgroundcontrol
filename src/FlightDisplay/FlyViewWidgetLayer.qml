@@ -335,46 +335,65 @@ Item {
         z:                  QGroundControl.zOrderTopMost
     }
 
-    Rectangle {
-        id:                         flightWindowWarning
+    Column {
         anchors.top:                parent.top
         anchors.topMargin:          _toolsMargin
         anchors.horizontalCenter:   parent.horizontalCenter
-        width:                      flightWindowLabel.width + ScreenTools.defaultFontPixelWidth * 2
-        height:                     flightWindowLabel.height + ScreenTools.defaultFontPixelHeight
-        color:                      globals.outsideFlightWindow ? "red" : "orange"
-        radius:                     ScreenTools.defaultFontPixelWidth / 2
+        spacing:                    _toolsMargin
         z:                          QGroundControl.zOrderTopMost
-        visible:                    _activeVehicle && (globals.outsideFlightWindow || globals.flightWindowEndingSoon)
 
-        QGCLabel {
-            id:                 flightWindowLabel
-            anchors.centerIn:   parent
-            color:              globals.outsideFlightWindow ? "white" : "black"
-            font.bold:          true
-            font.pointSize:     ScreenTools.largeFontPointSize
-            text:               globals.outsideFlightWindow ? qsTr("Outside scheduled timeslot") : qsTr("Timeslot ends soon")
+        Rectangle {
+            anchors.horizontalCenter:   parent.horizontalCenter
+            width:                      flightWindowLabel.width + ScreenTools.defaultFontPixelWidth * 2
+            height:                     flightWindowLabel.height + ScreenTools.defaultFontPixelHeight
+            color:                      globals.outsideFlightWindow ? "red" : "orange"
+            radius:                     ScreenTools.defaultFontPixelWidth / 2
+            visible:                    _activeVehicle && (globals.outsideFlightWindow || globals.flightWindowEndingSoon)
+
+            QGCLabel {
+                id:                 flightWindowLabel
+                anchors.centerIn:   parent
+                color:              globals.outsideFlightWindow ? "white" : "black"
+                font.bold:          true
+                font.pointSize:     ScreenTools.largeFontPointSize
+                text:               globals.outsideFlightWindow ? qsTr("Outside scheduled timeslot") : qsTr("Timeslot ends soon")
+            }
         }
-    }
 
-    Rectangle {
-        anchors.top:                flightWindowWarning.visible ? flightWindowWarning.bottom : parent.top
-        anchors.topMargin:          _toolsMargin
-        anchors.horizontalCenter:   parent.horizontalCenter
-        width:                      otherClaimantsLabel.width + ScreenTools.defaultFontPixelWidth * 2
-        height:                     otherClaimantsLabel.height + ScreenTools.defaultFontPixelHeight
-        color:                      "red"
-        radius:                     ScreenTools.defaultFontPixelWidth / 2
-        z:                          QGroundControl.zOrderTopMost
-        visible:                    globals.scheduledFlightOtherClaimants.length > 0
+        Rectangle {
+            anchors.horizontalCenter:   parent.horizontalCenter
+            width:                      otherClaimantsLabel.width + ScreenTools.defaultFontPixelWidth * 2
+            height:                     otherClaimantsLabel.height + ScreenTools.defaultFontPixelHeight
+            color:                      "red"
+            radius:                     ScreenTools.defaultFontPixelWidth / 2
+            visible:                    globals.scheduledFlightOtherClaimants.length > 0
 
-        QGCLabel {
-            id:                 otherClaimantsLabel
-            anchors.centerIn:   parent
-            color:              "white"
-            font.bold:          true
-            font.pointSize:     ScreenTools.largeFontPointSize
-            text:               qsTr("Scheduled flight also loaded on %1").arg(globals.scheduledFlightOtherClaimants.join(", "))
+            QGCLabel {
+                id:                 otherClaimantsLabel
+                anchors.centerIn:   parent
+                color:              "white"
+                font.bold:          true
+                font.pointSize:     ScreenTools.largeFontPointSize
+                text:               qsTr("Scheduled flight also loaded on %1").arg(globals.scheduledFlightOtherClaimants.join(", "))
+            }
+        }
+
+        Rectangle {
+            anchors.horizontalCenter:   parent.horizontalCenter
+            width:                      missionPlanLabel.width + ScreenTools.defaultFontPixelWidth * 2
+            height:                     missionPlanLabel.height + ScreenTools.defaultFontPixelHeight
+            color:                      "red"
+            radius:                     ScreenTools.defaultFontPixelWidth / 2
+            visible:                    globals.scheduledFlightMissionPlanOutdated
+
+            QGCLabel {
+                id:                 missionPlanLabel
+                anchors.centerIn:   parent
+                color:              "white"
+                font.bold:          true
+                font.pointSize:     ScreenTools.largeFontPointSize
+                text:               qsTr("Mission plan changed in MMS, reload the scheduled flight")
+            }
         }
     }
 

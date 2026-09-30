@@ -22,7 +22,8 @@
 
 Q_DECLARE_LOGGING_CATEGORY(LoadedScheduledFlightLog)
 
-/// Watches the scheduled flight the plan was loaded from. Claims it in MMS, and reports other QGC instances that have loaded it too
+/// Watches the scheduled flight the plan was loaded from. Claims it in MMS, and reports other QGC instances that have loaded it
+/// too, and whether MMS still has the mission plan that was loaded
 class LoadedScheduledFlight : public QObject
 {
     Q_OBJECT
@@ -34,16 +35,20 @@ public:
     Q_PROPERTY(PlanMasterController* planMasterController READ planMasterController WRITE setPlanMasterController)
     /// `agcIdentifier` of each other instance that has loaded the same flight
     Q_PROPERTY(QStringList otherClaimants READ otherClaimants                   NOTIFY otherClaimantsChanged)
+    /// MMS has another mission plan, or none, for the flight than the one loaded
+    Q_PROPERTY(bool        missionPlanOutdated READ missionPlanOutdated         NOTIFY missionPlanOutdatedChanged)
 
-    QStringList otherClaimants  (void) const { return _otherClaimants; }
+    QStringList otherClaimants      (void) const { return _otherClaimants; }
+    bool        missionPlanOutdated (void) const { return _missionPlanOutdated; }
     PlanMasterController* planMasterController      (void) const { return _planMasterController; }
     void                  setPlanMasterController   (PlanMasterController* planMasterController);
 
-    /// `agc_identifier` of each claim in the heartbeat response `bytes` that is not from `ownInstanceId`
-    static QStringList parseOtherClaimants (const QByteArray& bytes, const QString& ownInstanceId);
+    /// `agc_identifier` of each claim in the heartbeat response `json` that is not from `ownInstanceId`
+    static QStringList parseOtherClaimants  (const QJsonObject& json, const QString& ownInstanceId);
 
 signals:
-    void otherClaimantsChanged  (void);
+    void otherClaimantsChanged      (void);
+    void missionPlanOutdatedChanged (void);
 
 private slots:
     void _scheduledFlightChanged    (void);
@@ -52,7 +57,8 @@ private slots:
 private:
     void _releaseClaim      (const QString& reference);
     void _heartbeatComplete (QNetworkReply* reply);
-    void _setOtherClaimants (const QStringList& otherClaimants);
+    void _setOtherClaimants     (const QStringList& otherClaimants);
+    void _setMissionPlanOutdated(bool missionPlanOutdated);
     /// `path` under the flight's MMS URL, empty if `reference` or the MMS URL is empty
     static QUrl _flightUrl  (const QString& reference, const QString& path);
 
@@ -62,4 +68,5 @@ private:
     QPointer<PlanMasterController> _planMasterController;
     ScheduledFlight         _flight;
     QStringList             _otherClaimants;
+    bool                    _missionPlanOutdated = false;
 };

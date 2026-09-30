@@ -36,17 +36,10 @@ static QString instanceId(void)
     return id;
 }
 
-QStringList LoadedScheduledFlight::parseOtherClaimants(const QByteArray& bytes, const QString& ownInstanceId)
+QStringList LoadedScheduledFlight::parseOtherClaimants(const QJsonObject& json, const QString& ownInstanceId)
 {
-    QJsonParseError parseError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(bytes, &parseError);
-    if (!jsonDoc.isObject()) {
-        qCWarning(LoadedScheduledFlightLog) << "Heartbeat response is not a JSON object:" << parseError.errorString();
-        return {};
-    }
-
     QStringList otherClaimants;
-    for (const QJsonValue& value : jsonDoc.object()["claims"].toArray()) {
+    for (const QJsonValue& value : json["claims"].toArray()) {
         const QJsonObject claim = value.toObject();
         QString claimInstanceId = claim["instance_id"].toString();
         if (claimInstanceId == ownInstanceId) {
@@ -79,6 +72,8 @@ void LoadedScheduledFlight::_scheduledFlightChanged(void)
         _releaseClaim(_flight.reference);
         _setOtherClaimants({});
     }
+    // A new mission may have been loaded for the same flight, the heartbeat below checks again
+    _setMissionPlanOutdated(false);
     _flight = flight;
     _sendHeartbeat();
 }
@@ -104,6 +99,7 @@ void LoadedScheduledFlight::_sendHeartbeat(void)
     QUrl url = _flightUrl(_flight.reference, "claim/");
     if (url.isEmpty()) {
         _setOtherClaimants({});
+        _setMissionPlanOutdated(false);
         return;
     }
 
@@ -156,7 +152,16 @@ void LoadedScheduledFlight::_heartbeatComplete(QNetworkReply* reply)
         return;
     }
 
-    _setOtherClaimants(parseOtherClaimants(reply->readAll(), instanceId()));
+    QJsonParseError parseError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll(), &parseError);
+    if (!jsonDoc.isObject()) {
+        qCWarning(LoadedScheduledFlightLog) << "Heartbeat response is not a JSON object:" << parseError.errorString();
+        return;
+    }
+
+    _setOtherClaimants(parseOtherClaimants(jsonDoc.object(), instanceId()));
+    // A null mission plan, e.g. during a replan, is 0 and counts as outdated too
+    _setMissionPlanOutdated(ScheduledFlight::fromJson(jsonDoc.object()).missionPlanId != _flight.missionPlanId);
 }
 
 void LoadedScheduledFlight::_setOtherClaimants(const QStringList& otherClaimants)
@@ -166,4 +171,13 @@ void LoadedScheduledFlight::_setOtherClaimants(const QStringList& otherClaimants
     }
     _otherClaimants = otherClaimants;
     emit otherClaimantsChanged();
+}
+
+void LoadedScheduledFlight::_setMissionPlanOutdated(bool missionPlanOutdated)
+{
+    if (missionPlanOutdated == _missionPlanOutdated) {
+        return;
+    }
+    _missionPlanOutdated = missionPlanOutdated;
+    emit missionPlanOutdatedChanged();
 }

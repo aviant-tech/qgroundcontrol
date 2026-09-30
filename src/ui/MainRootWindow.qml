@@ -98,6 +98,8 @@ ApplicationWindow {
                                                                     !outsideFlightWindow && scheduledFlight.end - now < 10 * 60 * 1000
         /// `agcIdentifier` of other QGC instances that have loaded the same scheduled flight
         readonly property var       scheduledFlightOtherClaimants:  loadedScheduledFlight.otherClaimants
+        /// MMS has another mission plan, or none, for the loaded scheduled flight
+        readonly property bool      scheduledFlightMissionPlanOutdated: loadedScheduledFlight.missionPlanOutdated
     }
 
     LoadedScheduledFlight {
