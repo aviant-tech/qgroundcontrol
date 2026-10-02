@@ -34,7 +34,8 @@ Rectangle {
     property color  _mainStatusBGColor:               qgcPal.brandingPurple
     property var    _planMasterController:            globals.planMasterControllerPlanView
     property bool   _controllerValid:                 _planMasterController !== undefined && _planMasterController !== null
-    property string _sourceReference:                 _controllerValid ? _planMasterController.sourceReference : ""
+    property var    _scheduledFlight:                 globals.scheduledFlight
+    property string _sourceReference:                 _scheduledFlight ? _scheduledFlight.sourceReference : ""
     property real   _missionControllerProgressPct:    (_controllerValid && _planMasterController) ? _planMasterController.missionController.progressPct : 0
     property real   _rallyPointControllerProgressPct: (_controllerValid && _planMasterController) ? _planMasterController.rallyPointController.progressPct : 0
     property real   _geoFenceControllerProgressPct:   (_controllerValid && _planMasterController) ? _planMasterController.geoFenceController.progressPct : 0
@@ -98,7 +99,7 @@ Rectangle {
         anchors.bottomMargin:   1
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
-        anchors.right:          sourceReferenceLabel.visible ? sourceReferenceLabel.left : parent.right
+        anchors.right:          scheduledFlightInfo.visible ? scheduledFlightInfo.left : parent.right
         contentWidth:           indicatorLoader.x + indicatorLoader.width
         flickableDirection:     Flickable.HorizontalFlick
 
@@ -113,14 +114,25 @@ Rectangle {
         }
     }
 
-    QGCLabel {
-        id:                     sourceReferenceLabel
+    Column {
+        id:                     scheduledFlightInfo
         anchors.right:          brandLogo.visible ? brandLogo.left : parent.right
         anchors.rightMargin:    ScreenTools.defaultFontPixelWidth
         anchors.verticalCenter: parent.verticalCenter
-        text:                   _sourceReference
-        font.pointSize:         ScreenTools.mediumFontPointSize
         visible:                _sourceReference !== "" && currentToolbar !== simpleToolbar
+
+        QGCLabel {
+            anchors.right:  parent.right
+            text:           _sourceReference
+        }
+
+        QGCLabel {
+            property bool _hasWindow: !!_scheduledFlight && !isNaN(_scheduledFlight.start)
+            anchors.right:  parent.right
+            text:           _hasWindow ? _planMasterController.aviantMissionTools.formatScheduledFlightTime(_scheduledFlight.start) + (isNaN(_scheduledFlight.end) ? "" : " - " + _planMasterController.aviantMissionTools.formatScheduledFlightTime(_scheduledFlight.end)) : ""
+            visible:        _hasWindow
+            color:          globals.outsideFlightWindow ? qgcPal.colorRed : (globals.flightWindowEndingSoon ? qgcPal.colorOrange : qgcPal.text)
+        }
     }
 
     //-------------------------------------------------------------------------
@@ -131,7 +143,7 @@ Rectangle {
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
         anchors.margins:        ScreenTools.defaultFontPixelHeight * 0.66
-        visible:                currentToolbar !== planViewToolbar && _activeVehicle && !_communicationLost && x > (toolsFlickable.x + toolsFlickable.contentWidth + ScreenTools.defaultFontPixelWidth + (sourceReferenceLabel.visible ? sourceReferenceLabel.width + ScreenTools.defaultFontPixelWidth : 0))
+        visible:                currentToolbar !== planViewToolbar && _activeVehicle && !_communicationLost && x > (toolsFlickable.x + toolsFlickable.contentWidth + ScreenTools.defaultFontPixelWidth + (scheduledFlightInfo.visible ? scheduledFlightInfo.width + ScreenTools.defaultFontPixelWidth : 0))
         fillMode:               Image.PreserveAspectFit
         source:                 _outdoorPalette ? _brandImageOutdoor : _brandImageIndoor
         mipmap:                 true

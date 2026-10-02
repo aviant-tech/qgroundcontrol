@@ -335,6 +335,43 @@ Item {
         z:                  QGroundControl.zOrderTopMost
     }
 
+    Column {
+        anchors.top:                parent.top
+        anchors.topMargin:          _toolsMargin
+        anchors.horizontalCenter:   parent.horizontalCenter
+        spacing:                    _toolsMargin
+        z:                          QGroundControl.zOrderTopMost
+
+        FlyViewWarningBanner {
+            color:      globals.outsideFlightWindow ? "red" : "orange"
+            textColor:  globals.outsideFlightWindow ? "white" : "black"
+            text:       globals.outsideFlightWindow ? qsTr("Outside scheduled timeslot") : qsTr("Timeslot ends soon")
+            visible:    _activeVehicle && (globals.outsideFlightWindow || globals.flightWindowEndingSoon)
+        }
+
+        FlyViewWarningBanner {
+            text:       qsTr("Scheduled flight also loaded on %1").arg(globals.scheduledFlightOtherClaimants.join(", "))
+            visible:    globals.scheduledFlightOtherClaimants.length > 0
+        }
+
+        FlyViewWarningBanner {
+            text:       qsTr("Mission plan changed in MMS, reload the scheduled flight")
+            visible:    globals.scheduledFlightMissionPlanOutdated
+        }
+
+        FlyViewWarningBanner {
+            text:       qsTr("Scheduled flight is %1").arg(globals.scheduledFlightNotReadyStatus)
+            visible:    globals.scheduledFlightNotReadyStatus.length > 0
+        }
+
+        FlyViewWarningBanner {
+            color:      "orange"
+            textColor:  "black"
+            text:       qsTr("No connection to MMS for %1 min, changes to the scheduled flight are not detected").arg(globals.scheduledFlightMinutesSinceMmsResponse)
+            visible:    globals.scheduledFlightMmsUnreachable
+        }
+    }
+
     MapScale {
         id:                 mapScale
         anchors.margins:    _toolsMargin

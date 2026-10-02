@@ -12,6 +12,8 @@ if(BUILD_TESTING)
 		FWLandingPatternTest.h
 		LandingComplexItemTest.cc
 		LandingComplexItemTest.h
+		LoadedScheduledFlightTest.cc
+		LoadedScheduledFlightTest.h
 		MissionCommandTreeEditorTest.cc
 		MissionCommandTreeEditorTest.h
 		MissionCommandTreeTest.cc
@@ -80,6 +82,8 @@ add_library(MissionManager
 	KMLPlanDomDocument.h
 	LandingComplexItem.cc
 	LandingComplexItem.h
+	LoadedScheduledFlight.cc
+	LoadedScheduledFlight.h
 	MissionCommandList.cc
 	MissionCommandList.h
 	MissionCommandTree.cc
@@ -118,6 +122,8 @@ add_library(MissionManager
 	RallyPoint.h
 	RallyPointManager.cc
 	RallyPointManager.h
+	ScheduledFlight.cc
+	ScheduledFlight.h
 	ScheduledFlightsManager.cc
 	ScheduledFlightsManager.h
 	Section.h

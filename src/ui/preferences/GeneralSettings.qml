@@ -802,18 +802,29 @@ Rectangle {
                                 enabled:                promptShowTrafficIndicators.checked
                                 fact:                   _aviantSettings.verticalConflictDistance
                             }
-                            FactCheckBox {
-                                id:         promptShowMultidroneConflictCircle
-                                text:       qsTr("Show multidrone conflict circle")
-                                fact:       _aviantSettings.showMultidroneConflictCircle
+                            QGCLabel {
+                                text:       qsTr("Own drone callsign regex")
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _comboFieldWidth
+                                enabled:                promptShowTrafficIndicators.checked
+                                fact:                   _aviantSettings.ownDroneCallsignRegex
                             }
                             QGCLabel {
-                                text:       qsTr("Multidrone conflict distance")
+                                text:       qsTr("Own drone horizontal conflict distance")
                             }
                             FactTextField {
                                 Layout.preferredWidth:  _valueFieldWidth
-                                enabled:                promptShowMultidroneConflictCircle.checked
-                                fact:                   _aviantSettings.multidroneConflictDistance
+                                enabled:                promptShowTrafficIndicators.checked
+                                fact:                   _aviantSettings.ownDroneHorizontalConflictDistance
+                            }
+                            QGCLabel {
+                                text:       qsTr("Own drone vertical conflict distance")
+                            }
+                            FactTextField {
+                                Layout.preferredWidth:  _valueFieldWidth
+                                enabled:                promptShowTrafficIndicators.checked
+                                fact:                   _aviantSettings.ownDroneVerticalConflictDistance
                             }
                             FactCheckBox {
                                 text:       qsTr("Show acceptance radius circle")
@@ -935,6 +946,13 @@ Rectangle {
                             }
                             FactTextField {
                                 fact:              _aviantSettings.missionToolsToken
+                                Layout.fillWidth:  true
+                            }
+                            QGCLabel {
+                                text:              _aviantSettings.agcIdentifier.shortDescription
+                            }
+                            FactTextField {
+                                fact:              _aviantSettings.agcIdentifier
                                 Layout.fillWidth:  true
                             }
                             FactCheckBox {

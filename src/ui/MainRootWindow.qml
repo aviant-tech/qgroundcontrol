@@ -16,6 +16,7 @@ import QtQuick.Window   2.11
 import QGroundControl               1.0
 import QGroundControl.Palette       1.0
 import QGroundControl.Controls      1.0
+import QGroundControl.Controllers   1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.FlightDisplay 1.0
 import QGroundControl.FlightMap     1.0
@@ -86,6 +87,37 @@ ApplicationWindow {
 
         property var                planMasterControllerPlanView:   null
         property var                currentPlanMissionItem:         planMasterControllerPlanView ? planMasterControllerPlanView.missionController.currentPlanViewItem : null
+
+        /// `ScheduledFlight` the plan was loaded from, null before the plan view exists. Its times are invalid dates if missing
+        readonly property var       scheduledFlight:                planMasterControllerPlanView ? planMasterControllerPlanView.scheduledFlight : null
+
+        property var                now:                            new Date()
+        readonly property bool      outsideFlightWindow:            !!scheduledFlight && !isNaN(scheduledFlight.start) &&
+                                                                    (now < scheduledFlight.start || (!isNaN(scheduledFlight.end) && now >= scheduledFlight.end))
+        readonly property bool      flightWindowEndingSoon:         !!scheduledFlight && !isNaN(scheduledFlight.start) && !isNaN(scheduledFlight.end) &&
+                                                                    !outsideFlightWindow && scheduledFlight.end - now < 10 * 60 * 1000
+        /// `agcIdentifier` of other QGC instances that have loaded the same scheduled flight
+        readonly property var       scheduledFlightOtherClaimants:  loadedScheduledFlight.otherClaimants
+        /// MMS has another mission plan, or none, for the loaded scheduled flight
+        readonly property bool      scheduledFlightMissionPlanOutdated: loadedScheduledFlight.missionPlanOutdated
+        /// MMS status of the loaded scheduled flight if it is not READY, otherwise empty
+        readonly property string    scheduledFlightNotReadyStatus:  loadedScheduledFlight.notReadyStatus
+        /// No valid MMS heartbeat response for the loaded scheduled flight for a while, so changes to it are not detected
+        readonly property bool      scheduledFlightMmsUnreachable:  loadedScheduledFlight.mmsUnreachable
+        /// Whole minutes since the last valid MMS heartbeat response for the loaded scheduled flight
+        readonly property int       scheduledFlightMinutesSinceMmsResponse: Math.floor((now - loadedScheduledFlight.lastMmsResponse) / 60000)
+    }
+
+    LoadedScheduledFlight {
+        id:                   loadedScheduledFlight
+        planMasterController: globals.planMasterControllerPlanView
+    }
+
+    Timer {
+        interval:   1000
+        running:    true
+        repeat:     true
+        onTriggered: globals.now = new Date()
     }
 
     /// Default color palette used throughout the UI

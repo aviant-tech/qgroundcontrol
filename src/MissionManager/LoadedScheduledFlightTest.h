@@ -11,13 +11,11 @@
 
 #include "UnitTest.h"
 
-class ScheduledFlightsManagerTest : public UnitTest
+class LoadedScheduledFlightTest : public UnitTest
 {
     Q_OBJECT
 
 private slots:
-    void _testParseFlight       (void);
-    void _testClassify          (void);
-    void _testTrimReturnTrack   (void);
-    void _testDashPath          (void);
+    void _testParseOtherClaimants   (void);
+    void _testStatusIfNotReady      (void);
 };

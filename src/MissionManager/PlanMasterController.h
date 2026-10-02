@@ -55,7 +55,7 @@ public:
     Q_PROPERTY(QmlObjectListModel*      planCreators            MEMBER _planCreators                        NOTIFY planCreatorsChanged)
     Q_PROPERTY(double                   takeoffNonSegregatedRadius  READ takeoffNonSegregatedRadius     NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
     Q_PROPERTY(double                   deliveryNonSegregatedRadius READ deliveryNonSegregatedRadius    NOTIFY reservedAirspaceChanged) ///< From plan file metadata, 0 if not specified
-    Q_PROPERTY(QString                  sourceReference             READ sourceReference                NOTIFY sourceReferenceChanged)  ///< Source reference of the scheduled flight the plan was loaded from, empty if none
+    Q_PROPERTY(ScheduledFlight          scheduledFlight             READ scheduledFlight                NOTIFY scheduledFlightChanged)  ///< MMS scheduled flight the plan was loaded from, as fetched at load time. Empty `reference` if none
 
     /// Should be called immediately upon Component.onCompleted.
     Q_INVOKABLE void start(void);
@@ -104,8 +104,8 @@ public:
     bool        isEmpty         (void) const;
     double      takeoffNonSegregatedRadius  (void) const { return _takeoffNonSegregatedRadius; }
     double      deliveryNonSegregatedRadius (void) const { return _deliveryNonSegregatedRadius; }
-    QString     sourceReference             (void) const { return _sourceReference; }
-    void        setSourceReference          (const QString& sourceReference);
+    ScheduledFlight scheduledFlight         (void) const { return _scheduledFlight; }
+    void        setScheduledFlight          (const ScheduledFlight& scheduledFlight = {});
 
     void        setFlyView(bool flyView) { _flyView = flyView; }
 
@@ -133,7 +133,7 @@ signals:
     void managerVehicleChanged              (Vehicle* managerVehicle);
     void promptForPlanUsageOnVehicleChange  (void);
     void reservedAirspaceChanged            (void);
-    void sourceReferenceChanged             (void);
+    void scheduledFlightChanged             (void);
 
 private slots:
     void _activeVehicleChanged      (Vehicle* activeVehicle);
@@ -171,5 +171,5 @@ private:
     QmlObjectListModel*     _planCreators =             nullptr;
     double                  _takeoffNonSegregatedRadius =   0;
     double                  _deliveryNonSegregatedRadius =  0;
-    QString                 _sourceReference;
+    ScheduledFlight         _scheduledFlight;
 };

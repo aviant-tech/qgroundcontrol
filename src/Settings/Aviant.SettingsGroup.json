@@ -75,20 +75,29 @@
     "default":          600
 },
 {
-    "name":             "multidroneConflictDistance",
-    "shortDesc":        "Multidrone conflict distance",
-    "longDesc":         "The radius in meters for the multidrone conflict circle drawn around the landing point.",
+    "name":             "ownDroneHorizontalConflictDistance",
+    "shortDesc":        "Own drone horizontal conflict distance",
+    "longDesc":         "Same as horizontal conflict distance, but used for our own drones (callsign matching the own drone callsign regex).",
     "type":             "uint32",
     "min":              0,
     "units":            "m",
-    "default":          1200
+    "default":          250
 },
 {
-    "name":             "showMultidroneConflictCircle",
-    "shortDesc":        "Show multidrone conflict circle",
-    "longDesc":         "Show a circle around the landing point with the multidrone conflict distance as radius.",
-    "type":             "bool",
-    "default":          true
+    "name":             "ownDroneVerticalConflictDistance",
+    "shortDesc":        "Own drone vertical conflict distance",
+    "longDesc":         "Same as vertical conflict distance, but used for our own drones (callsign matching the own drone callsign regex).",
+    "type":             "uint32",
+    "min":              0,
+    "units":            "m",
+    "default":          40
+},
+{
+    "name":             "ownDroneCallsignRegex",
+    "shortDesc":        "Own drone callsign regex",
+    "longDesc":         "Traffic whose callsign fully matches this regular expression is considered one of our own drones. Empty disables own drone detection.",
+    "type":             "string",
+    "default":          "NT\\d\\d|SIM\\d\\d"
 },
 {
     "name":             "showReservedAirspaceCircles",
@@ -199,6 +208,13 @@
 {
     "name":                "missionToolsUrl",
     "shortDesc":           "URL of mission tools",
+    "type":                "string",
+    "default":             ""
+},
+{
+    "name":                "agcIdentifier",
+    "shortDesc":           "AGC identifier",
+    "longDesc":            "Name of this QGC instance, shown to other instances that load the same scheduled flight.",
     "type":                "string",
     "default":             ""
 },

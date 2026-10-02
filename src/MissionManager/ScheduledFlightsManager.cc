@@ -181,21 +181,12 @@ void ScheduledFlightsManager::_parseResponse(const QByteArray& bytes)
 
     _flights.clear();
     for (const QJsonValue& value : jsonDoc.array()) {
-        const QJsonObject json = value.toObject();
-        if (json["cancelled"].isString()) {
+        ScheduledFlight flight = ScheduledFlight::fromJson(value.toObject());
+        if (flight.cancelled) {
             continue;
         }
-
-        Flight flight;
-        flight.start = QDateTime::fromString(json["flight_window_start"].toString(), Qt::ISODate);
-        flight.end = QDateTime::fromString(json["flight_window_end"].toString(), Qt::ISODate);
-        for (const QJsonValue& point : json["flight_path"].toArray()) {
-            const QJsonArray lngLat = point.toArray();
-            flight.path.append(QGeoCoordinate(lngLat[1].toDouble(), lngLat[0].toDouble()));
-        }
-
         if (!flight.start.isValid() || !flight.end.isValid() || flight.path.count() < 2) {
-            qCWarning(ScheduledFlightsManagerLog) << "Skipping invalid scheduled flight" << json["reference"].toString();
+            qCWarning(ScheduledFlightsManagerLog) << "Skipping invalid scheduled flight" << flight.reference;
             continue;
         }
         flight.path = trimReturnTrack(flight.path);
@@ -209,7 +200,7 @@ void ScheduledFlightsManager::_updatePaths(void)
     int lookaheadMinutes = qgcApp()->toolbox()->settingsManager()->aviantSettings()->scheduledFlightsLookaheadMinutes()->rawValue().toInt();
 
     QList<QPair<FlightState, QList<QGeoCoordinate>>> visibleFlights;
-    for (const Flight& flight : _flights) {
+    for (const ScheduledFlight& flight : _flights) {
         FlightState state = classify(flight.start, flight.end, now, lookaheadMinutes);
         if (state != Hidden) {
             visibleFlights.append(qMakePair(state, flight.path));

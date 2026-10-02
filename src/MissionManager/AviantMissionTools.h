@@ -19,6 +19,8 @@
 #include <QJsonDocument>
 #include <QTimeZone>
 
+#include "ScheduledFlight.h"
+
 class PlanMasterController;
 
 class AviantMissionTools : public QObject
@@ -69,9 +71,10 @@ public:
     Q_INVOKABLE void requestOperation(Operation operation);
     Q_INVOKABLE void cancelOperation(Operation operation);
     Q_INVOKABLE void fetchScheduledFlights();
-    Q_INVOKABLE void downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference);
-    /// `isoTime` as HH:MM in the `scheduledFlightsTimeZone` setting's zone if today, otherwise e.g. "in 1 day"
-    Q_INVOKABLE static QString formatScheduledFlightTime(const QString& isoTime);
+    /// Downloads the mission of the flight with `reference` from the last `fetchScheduledFlights`
+    Q_INVOKABLE void downloadMissionFileFromScheduledFlight(const QString& reference, const QString& aircraftName);
+    /// `dateTime` as HH:MM in the `scheduledFlightsTimeZone` setting's zone if today, otherwise e.g. "in 1 day". "N/A" if invalid
+    Q_INVOKABLE static QString formatScheduledFlightTime(const QDateTime& dateTime);
     /// Which time zone `formatScheduledFlightTime` uses, or a warning if it fell back to UTC
     Q_INVOKABLE static QString scheduledFlightsTimeZoneDescription();
     /// True if the `scheduledFlightsTimeZone` setting is not an available time zone, so UTC is used instead
@@ -96,7 +99,7 @@ public:
 signals:
     void stateChanged          (void);
     void cancelPendingRequest  (void);
-    void scheduledFlightsChanged (QList<QJsonObject> scheduledFlights);
+    void scheduledFlightsChanged (QVariantList scheduledFlights);   ///< `ScheduledFlight`s
 
 private slots:
     void _requestComplete (QNetworkReply *reply);
@@ -124,8 +127,8 @@ private:
     QString                 _validationResult =     "Not validated";
     bool                    _validationConcluded =  false;
     QJsonDocument           _lastValidatedJson;
-    QList<QJsonObject>      _scheduledFlights;
+    QList<ScheduledFlight>  _scheduledFlights;
     QByteArray              _expectedHash;
-    QString                 _pendingSourceReference; ///< Set on the plan when `FetchLandingPointAdjustedMission` loads
+    ScheduledFlight         _pendingScheduledFlight; ///< Set on the plan when `FetchLandingPointAdjustedMission` loads
     static qint64           _requestIdCounter; // Static counter for Request-Id
 };

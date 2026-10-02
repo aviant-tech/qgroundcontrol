@@ -301,28 +301,28 @@ Item {
                                     QGCLabel {
                                         Layout.fillWidth:      true
                                         Layout.preferredWidth: 1
-                                        text:                  modelData && modelData.source_reference ? modelData.source_reference : "Reference not available"
+                                        text:                  modelData.sourceReference || "Reference not available"
                                         wrapMode:              Text.WordWrap
                                     }
 
                                     QGCLabel {
                                         Layout.fillWidth:      true
                                         Layout.preferredWidth: 1
-                                        text:                  modelData && modelData.requested_delivery_at ? _aviantMissionTools.formatScheduledFlightTime(modelData.requested_delivery_at) : "N/A"
+                                        text:                  _aviantMissionTools.formatScheduledFlightTime(modelData.requestedDeliveryAt)
                                         wrapMode:              Text.WordWrap
                                     }
 
                                     QGCLabel {
                                         Layout.fillWidth:      true
                                         Layout.preferredWidth: 1
-                                        text:                  modelData && modelData.flight_window_start ? formatWindow(_aviantMissionTools.formatScheduledFlightTime(modelData.flight_window_start), modelData.flight_window_end ? _aviantMissionTools.formatScheduledFlightTime(modelData.flight_window_end) : "") : "Flight window not available"
+                                        text:                  isNaN(modelData.start) ? "Flight window not available" : formatWindow(_aviantMissionTools.formatScheduledFlightTime(modelData.start), isNaN(modelData.end) ? "" : _aviantMissionTools.formatScheduledFlightTime(modelData.end))
                                         wrapMode:              Text.WordWrap
                                     }
 
                                     QGCLabel {
                                         Layout.fillWidth:      true
                                         Layout.preferredWidth: 1
-                                        text:                  modelData && modelData.delivery_address && modelData.delivery_address.street_address ? modelData.delivery_address.street_address : "Address not available"
+                                        text:                  modelData.deliveryAddress || "Address not available"
                                         wrapMode:              Text.WordWrap
                                     }
                                     
@@ -335,7 +335,7 @@ Item {
                                             anchors.centerIn: parent
                                             id:               missionButton
                                             text:             qsTr("Select mission")
-                                            visible:          modelData && modelData.mission_plan_id
+                                            visible:          modelData.missionPlanId > 0
                                             onClicked: {
                                                 var currentActiveVehicle = QGroundControl.multiVehicleManager ? QGroundControl.multiVehicleManager.activeVehicle : null;
                                                 var aircraftName = currentActiveVehicle ? currentActiveVehicle.name : "";
@@ -347,7 +347,7 @@ Item {
                                                     )
                                                     return; 
                                                 }
-                                                _aviantMissionTools.downloadMissionFileFromScheduledFlight(modelData.mission_plan_id, aircraftName, modelData.source_reference || "")
+                                                _aviantMissionTools.downloadMissionFileFromScheduledFlight(modelData.reference, aircraftName)
                                                 hideDialog()
                                             }
                                         }
@@ -355,7 +355,7 @@ Item {
                                         QGCLabel {
                                             anchors.centerIn: parent
                                             id:               missionNotAvailableLabel
-                                            visible:          !modelData || !modelData.mission_plan_id
+                                            visible:          modelData.missionPlanId <= 0
                                             text:             "Mission not available"
                                         }
                                     }

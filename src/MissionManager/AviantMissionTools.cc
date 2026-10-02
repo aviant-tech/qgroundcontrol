@@ -433,7 +433,7 @@ void AviantMissionTools::_parseAndLoadMissionResponse(const QByteArray &bytes)
 
     if (_currentOperation == FetchLandingPointAdjustedMission) {
         _masterController->clearCurrentPlanFile();
-        _masterController->setSourceReference(_pendingSourceReference);
+        _masterController->setScheduledFlight(_pendingScheduledFlight);
     }
 
     qgcApp()->showAppMessage(tr("Operation successful"), tr("Mission Tools - ") + _getOperationName(_currentOperation));
@@ -474,8 +474,20 @@ void AviantMissionTools::fetchScheduledFlights()
     _initiateNetworkRequest(FetchScheduledFlights, url);
 }
 
-void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanId, const QString& aircraftName, const QString& sourceReference)
+void AviantMissionTools::downloadMissionFileFromScheduledFlight(const QString& reference, const QString& aircraftName)
 {
+    ScheduledFlight scheduledFlight;
+    for (const ScheduledFlight& flight : _scheduledFlights) {
+        if (flight.reference == reference) {
+            scheduledFlight = flight;
+            break;
+        }
+    }
+    if (scheduledFlight.reference.isEmpty()) {
+        qgcApp()->showAppMessage(tr("Scheduled flight %1 not found.").arg(reference), tr("Mission Tools Error"));
+        return;
+    }
+    int missionPlanId = scheduledFlight.missionPlanId;
     AviantSettings* aviantSettings = qgcApp()->toolbox()->settingsManager()->aviantSettings();
     QUrl url = getMmsUrl(FetchLandingPointAdjustedMission, aviantSettings->missionToolsUrl()->rawValue().toString(), missionPlanId, aircraftName);
 
@@ -484,7 +496,7 @@ void AviantMissionTools::downloadMissionFileFromScheduledFlight(int missionPlanI
         qgcApp()->showAppMessage(tr("Could not generate valid base URL for mission download."), tr("Mission Tools Error"));
         return;
     }
-    _pendingSourceReference = sourceReference;
+    _pendingScheduledFlight = scheduledFlight;
     _initiateNetworkRequest(FetchLandingPointAdjustedMission, url);
 }
 
@@ -519,18 +531,14 @@ bool AviantMissionTools::scheduledFlightsTimeZoneFallback()
     return !id.isEmpty() && !QTimeZone(id).isValid();
 }
 
-QString AviantMissionTools::formatScheduledFlightTime(const QString& isoTime)
+QString AviantMissionTools::formatScheduledFlightTime(const QDateTime& dateTime)
 {
-    if (isoTime.isEmpty()) {
+    if (!dateTime.isValid()) {
         return QStringLiteral("N/A");
-    }
-    QDateTime time = QDateTime::fromString(isoTime, Qt::ISODateWithMs);
-    if (!time.isValid()) {
-        return isoTime;
     }
 
     QTimeZone timeZone = _scheduledFlightsTimeZone();
-    time = time.toTimeZone(timeZone);
+    QDateTime time = dateTime.toTimeZone(timeZone);
 
     qint64 dayOffset = QDateTime::currentDateTime().toTimeZone(timeZone).date().daysTo(time.date());
     if (dayOffset == 0) {
@@ -552,12 +560,14 @@ void AviantMissionTools::_parseScheduledFlightsResponse(const QByteArray &bytes)
 
     QJsonArray scheduledFlightsArray = jsonDoc.array();
     _scheduledFlights.clear();
+    QVariantList scheduledFlights;
     for (const QJsonValue &value : scheduledFlightsArray) {
         if (value.isObject()) {
-            _scheduledFlights.append(value.toObject());
+            _scheduledFlights.append(ScheduledFlight::fromJson(value.toObject()));
+            scheduledFlights.append(QVariant::fromValue(_scheduledFlights.last()));
         }
     }
-    emit scheduledFlightsChanged(_scheduledFlights);
+    emit scheduledFlightsChanged(scheduledFlights);
 }
 
 bool AviantMissionTools::_validateFileHash(const QByteArray &fileData, const QByteArray &expectedHash)

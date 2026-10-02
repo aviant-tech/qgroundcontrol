@@ -17,6 +17,7 @@ add_custom_target(FligthDisplayQml
 		FlyViewToolStripActionList.qml
 		FlyViewToolStrip.qml
 		FlyViewVideo.qml
+		FlyViewWarningBanner.qml
 		FlyViewWidgetLayer.qml
 		GuidedActionActionList.qml
 		GuidedActionConfirm.qml
