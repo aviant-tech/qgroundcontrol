@@ -1,6 +1,10 @@
 #include "VehicleAviantFactGroup.h"
 #include "Vehicle.h"
 #include "ParameterManager.h"
+#include "ADSBVehicleManager.h"
+#include "QGCApplication.h"
+#include "QGCToolbox.h"
+#include "QGCGeo.h"
 #include "mavlink.h"
 
 #include <algorithm>
@@ -88,6 +92,10 @@ void VehicleAviantFactGroup::handleMessage(Vehicle* vehicle, mavlink_message_t& 
             return handleTempLoggerMsg(vehicle, message);
         case MAVLINK_MSG_ID_AVIANT_INDICATOR_TEMP_FC:
             return handleTempFcMsg(vehicle, message);
+        case MAVLINK_MSG_ID_HOME_POSITION:
+            return handleHomePosition(message);
+        case MAVLINK_MSG_ID_AVIANT_TRN_TEST_DATA:
+            return handleTrnTestData(vehicle, message);
         default:
             return;
     }
@@ -338,4 +346,60 @@ void VehicleAviantFactGroup::handleTempFcMsg(Vehicle* vehicle, mavlink_message_t
 
     setIndicatorColorOverride(_tempBaroInternalFact, temp.baro_internal_state);
     _tempBaroInternalFact.setRawValue(temp.baro_internal);
+}
+
+void VehicleAviantFactGroup::handleHomePosition(mavlink_message_t& message)
+{
+    mavlink_home_position_t home;
+    mavlink_msg_home_position_decode(&message, &home);
+
+    // Derive NED origin: home is at NED (home.x, home.y, home.z) relative to origin.
+    // Invert: origin is at NED (-home.x, -home.y, -home.z) relative to home.
+    QGeoCoordinate homeGeo(home.latitude / 1e7, home.longitude / 1e7, home.altitude / 1e3);
+    convertNedToGeo(-static_cast<double>(home.x),
+                    -static_cast<double>(home.y),
+                    -static_cast<double>(home.z),
+                    homeGeo, &_origin);
+    _originValid = true;
+}
+
+void VehicleAviantFactGroup::handleTrnTestData(Vehicle* /* vehicle */, mavlink_message_t& message)
+{
+    if (!_originValid) {
+        return;
+    }
+
+    mavlink_aviant_trn_test_data_t trn;
+    mavlink_msg_aviant_trn_test_data_decode(&message, &trn);
+
+    QGeoCoordinate trnPos;
+    convertNedToGeo(trn.x, trn.y, trn.z, _origin, &trnPos);
+
+    float roll, pitch, yaw;
+    const float q[4] = { trn.q1, trn.q2, trn.q3, trn.q4 };
+    mavlink_quaternion_to_euler(q, &roll, &pitch, &yaw);
+    double heading = static_cast<double>(yaw) * (180.0 / M_PI);
+    if (heading < 0) {
+        heading += 360.0;
+    }
+
+    static const QString kCallsign = QStringLiteral("TRN");
+
+    ADSBVehicle::VehicleInfo_t info;
+    info.icaoAddress = TRN_GHOST_ICAO;
+    info.callsign = kCallsign;
+    info.location = trnPos;
+    info.altitude = trnPos.altitude();
+    info.heading = heading;
+    info.alert = false;
+    info.emitterType = ADSBVehicle::EmitterType::EMITTER_TYPE_UAV;
+    info.availableFlags = ADSBVehicle::CallsignAvailable
+                        | ADSBVehicle::LocationAvailable
+                        | ADSBVehicle::AltitudeAvailable
+                        | ADSBVehicle::HeadingAvailable;
+
+    auto* mgr = qgcApp()->toolbox()->adsbVehicleManager();
+    if (mgr) {
+        mgr->adsbVehicleUpdate(info);
+    }
 }

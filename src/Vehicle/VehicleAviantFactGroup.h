@@ -4,6 +4,7 @@
 #include "QGCMAVLink.h"
 
 #include <QColor>
+#include <QGeoCoordinate>
 #include <ctime>
 
 class VehicleAviantFactGroup : public FactGroup
@@ -82,6 +83,8 @@ private:
     void handleFwIcingMsg(Vehicle* vehicle, mavlink_message_t& message);
     void handleTempLoggerMsg(Vehicle* vehicle, mavlink_message_t& message);
     void handleTempFcMsg(Vehicle* vehicle, mavlink_message_t& message);
+    void handleHomePosition(mavlink_message_t& message);
+    void handleTrnTestData(Vehicle* vehicle, mavlink_message_t& message);
 
     static void setIndicatorColorOverride(Fact& fact, int state);
     void resolveRotorClassification(Vehicle* vehicle);
@@ -165,4 +168,10 @@ private:
     uint32_t _topMotorsMask = 0;
     uint32_t _pusherMotorsMask = 0;
     bool     _rotorClassificationResolved = false;
+
+    // NED frame origin derived from HOME_POSITION
+    QGeoCoordinate _origin;
+    bool           _originValid = false;
+
+    static constexpr uint32_t TRN_GHOST_ICAO = 0xFFFFFE;
 };
