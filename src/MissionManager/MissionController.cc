@@ -1929,6 +1929,11 @@ void MissionController::_initAllVisualItems(void)
     emit containsItemsChanged(containsItems());
     emit plannedHomePositionChanged(plannedHomePosition());
 
+    // Items were replaced, so re-mark the current item and re-trigger bindings which look up items by current index
+    if (_missionManager) {
+        _currentMissionIndexChanged(_missionManager->currentIndex());
+    }
+
     if (!_flyView) {
         setCurrentPlanViewSeqNum(0, true);
     }
@@ -2028,6 +2033,7 @@ void MissionController::_managerVehicleChanged(Vehicle* managerVehicle)
 
     emit complexMissionItemNamesChanged();
     emit resumeMissionIndexChanged();
+    emit currentMissionIndexChanged(currentMissionIndex());
 }
 
 void MissionController::_inProgressChanged(bool inProgress)
