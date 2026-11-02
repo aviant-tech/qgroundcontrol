@@ -288,10 +288,6 @@ Item {
                                 height: contentLayout.implicitHeight + 2 * _margin
                                 color:  index % 2 === 0 ? qgcPal.windowShadeDark : qgcPal.windowShade
 
-                                function formatWindow(start, end) {
-                                    return start === end || !end ? start : start + " - " + end
-                                }
-
                                 RowLayout {
                                     id:              contentLayout
                                     anchors.fill:    parent
@@ -315,7 +311,7 @@ Item {
                                     QGCLabel {
                                         Layout.fillWidth:      true
                                         Layout.preferredWidth: 1
-                                        text:                  isNaN(modelData.start) ? "Flight window not available" : formatWindow(_aviantMissionTools.formatScheduledFlightTime(modelData.start), isNaN(modelData.end) ? "" : _aviantMissionTools.formatScheduledFlightTime(modelData.end))
+                                        text:                  isNaN(modelData.start) ? "Flight window not available" : _aviantMissionTools.formatScheduledFlightWindow(modelData.start, modelData.end)
                                         wrapMode:              Text.WordWrap
                                     }
 

@@ -87,6 +87,7 @@ void LoadedScheduledFlight::_scheduledFlightChanged(void)
     // Even for the same flight a new mission may have been loaded, the heartbeat below checks again
     _clearWarnings();
     _flight = flight;
+    _setFlightWindow(_flight.start, _flight.end);
     // Not in `_clearWarnings`, which also runs when the heartbeat is not sent
     if (_flight.reference.isEmpty()) {
         _watchdogTimer.stop();
@@ -190,6 +191,10 @@ void LoadedScheduledFlight::_heartbeatComplete(QNetworkReply* reply)
     // A null mission plan, e.g. during a replan, is 0 and counts as outdated too
     _setMissionPlanOutdated(current.missionPlanId != _flight.missionPlanId);
     _setNotReadyStatus(statusIfNotReady(current.status));
+    if (current.start != _start || current.end != _end) {
+        _setFlightWindow(current.start, current.end);
+        _setNewFlightWindow(true);
+    }
 }
 
 void LoadedScheduledFlight::_clearWarnings(void)
@@ -197,6 +202,7 @@ void LoadedScheduledFlight::_clearWarnings(void)
     _setOtherClaimants({});
     _setMissionPlanOutdated(false);
     _setNotReadyStatus(QString());
+    _setNewFlightWindow(false);
 }
 
 void LoadedScheduledFlight::_setOtherClaimants(const QStringList& otherClaimants)
@@ -224,6 +230,25 @@ void LoadedScheduledFlight::_setNotReadyStatus(const QString& notReadyStatus)
     }
     _notReadyStatus = notReadyStatus;
     emit notReadyStatusChanged();
+}
+
+void LoadedScheduledFlight::_setFlightWindow(const QDateTime& start, const QDateTime& end)
+{
+    if (start == _start && end == _end) {
+        return;
+    }
+    _start = start;
+    _end = end;
+    emit flightWindowChanged();
+}
+
+void LoadedScheduledFlight::_setNewFlightWindow(bool newFlightWindow)
+{
+    if (newFlightWindow == _newFlightWindow) {
+        return;
+    }
+    _newFlightWindow = newFlightWindow;
+    emit newFlightWindowChanged();
 }
 
 void LoadedScheduledFlight::_mmsReached(void)

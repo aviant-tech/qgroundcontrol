@@ -127,9 +127,9 @@ Rectangle {
         }
 
         QGCLabel {
-            property bool _hasWindow: !!_scheduledFlight && !isNaN(_scheduledFlight.start)
+            property bool _hasWindow: !isNaN(globals.scheduledFlightStart)
             anchors.right:  parent.right
-            text:           _hasWindow ? _planMasterController.aviantMissionTools.formatScheduledFlightTime(_scheduledFlight.start) + (isNaN(_scheduledFlight.end) ? "" : " - " + _planMasterController.aviantMissionTools.formatScheduledFlightTime(_scheduledFlight.end)) : ""
+            text:           _hasWindow ? _planMasterController.aviantMissionTools.formatScheduledFlightWindow(globals.scheduledFlightStart, globals.scheduledFlightEnd) : ""
             visible:        _hasWindow
             color:          globals.outsideFlightWindow ? qgcPal.colorRed : (globals.flightWindowEndingSoon ? qgcPal.colorOrange : qgcPal.text)
         }

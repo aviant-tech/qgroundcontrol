@@ -345,7 +345,7 @@ Item {
         FlyViewWarningBanner {
             color:      globals.outsideFlightWindow ? "red" : "orange"
             textColor:  globals.outsideFlightWindow ? "white" : "black"
-            text:       globals.outsideFlightWindow ? qsTr("Outside scheduled timeslot") : qsTr("Timeslot ends soon")
+            text:       globals.outsideFlightWindow ? qsTr("Outside scheduled flight window") : qsTr("Flight window ends soon")
             visible:    _activeVehicle && (globals.outsideFlightWindow || globals.flightWindowEndingSoon)
         }
 
@@ -357,6 +357,15 @@ Item {
         FlyViewWarningBanner {
             text:       qsTr("Mission plan changed in MMS, reload the scheduled flight")
             visible:    globals.scheduledFlightMissionPlanOutdated
+        }
+
+        FlyViewWarningBanner {
+            color:          "orange"
+            textColor:      "black"
+            text:           qsTr("Flight window changed in MMS to %1").arg(_planMasterController.aviantMissionTools.formatScheduledFlightWindow(globals.scheduledFlightStart, globals.scheduledFlightEnd))
+            visible:        globals.scheduledFlightNewFlightWindow
+            dismissable:    true
+            onDismissed:    loadedScheduledFlight.dismissNewFlightWindow()
         }
 
         FlyViewWarningBanner {

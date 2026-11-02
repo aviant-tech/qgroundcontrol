@@ -88,14 +88,20 @@ ApplicationWindow {
         property var                planMasterControllerPlanView:   null
         property var                currentPlanMissionItem:         planMasterControllerPlanView ? planMasterControllerPlanView.missionController.currentPlanViewItem : null
 
-        /// `ScheduledFlight` the plan was loaded from, null before the plan view exists. Its times are invalid dates if missing
+        /// `ScheduledFlight` the plan was loaded from, null before the plan view exists. Its times are as loaded, see `scheduledFlightStart` and `scheduledFlightEnd` for the current flight window
         readonly property var       scheduledFlight:                planMasterControllerPlanView ? planMasterControllerPlanView.scheduledFlight : null
 
+        /// Flight window of the loaded scheduled flight as MMS last reported it, invalid dates if missing
+        readonly property var       scheduledFlightStart:           loadedScheduledFlight.start
+        readonly property var       scheduledFlightEnd:             loadedScheduledFlight.end
+        /// MMS changed the flight window of the loaded scheduled flight, until dismissed
+        readonly property bool      scheduledFlightNewFlightWindow: loadedScheduledFlight.newFlightWindow
+
         property var                now:                            new Date()
-        readonly property bool      outsideFlightWindow:            !!scheduledFlight && !isNaN(scheduledFlight.start) &&
-                                                                    (now < scheduledFlight.start || (!isNaN(scheduledFlight.end) && now >= scheduledFlight.end))
-        readonly property bool      flightWindowEndingSoon:         !!scheduledFlight && !isNaN(scheduledFlight.start) && !isNaN(scheduledFlight.end) &&
-                                                                    !outsideFlightWindow && scheduledFlight.end - now < 10 * 60 * 1000
+        readonly property bool      outsideFlightWindow:            !isNaN(scheduledFlightStart) &&
+                                                                    (now < scheduledFlightStart || (!isNaN(scheduledFlightEnd) && now >= scheduledFlightEnd))
+        readonly property bool      flightWindowEndingSoon:         !isNaN(scheduledFlightStart) && !isNaN(scheduledFlightEnd) &&
+                                                                    !outsideFlightWindow && scheduledFlightEnd - now < 10 * 60 * 1000
         /// `agcIdentifier` of other QGC instances that have loaded the same scheduled flight
         readonly property var       scheduledFlightOtherClaimants:  loadedScheduledFlight.otherClaimants
         /// MMS has another mission plan, or none, for the loaded scheduled flight

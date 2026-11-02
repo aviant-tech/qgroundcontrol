@@ -549,6 +549,13 @@ QString AviantMissionTools::formatScheduledFlightTime(const QDateTime& dateTime)
     return dayOffset > 0 ? "in " + days : days + " ago";
 }
 
+QString AviantMissionTools::formatScheduledFlightWindow(const QDateTime& start, const QDateTime& end)
+{
+    QString formattedStart = formatScheduledFlightTime(start);
+    QString formattedEnd = formatScheduledFlightTime(end);
+    return !end.isValid() || formattedEnd == formattedStart ? formattedStart : formattedStart + " - " + formattedEnd;
+}
+
 void AviantMissionTools::_parseScheduledFlightsResponse(const QByteArray &bytes)
 {
     QJsonDocument jsonDoc;

@@ -75,6 +75,8 @@ public:
     Q_INVOKABLE void downloadMissionFileFromScheduledFlight(const QString& reference, const QString& aircraftName);
     /// `dateTime` as HH:MM in the `scheduledFlightsTimeZone` setting's zone if today, otherwise e.g. "in 1 day". "N/A" if invalid
     Q_INVOKABLE static QString formatScheduledFlightTime(const QDateTime& dateTime);
+    /// `start` - `end` formatted with `formatScheduledFlightTime`, just `start` if `end` is invalid or formats the same
+    Q_INVOKABLE static QString formatScheduledFlightWindow(const QDateTime& start, const QDateTime& end);
     /// Which time zone `formatScheduledFlightTime` uses, or a warning if it fell back to UTC
     Q_INVOKABLE static QString scheduledFlightsTimeZoneDescription();
     /// True if the `scheduledFlightsTimeZone` setting is not an available time zone, so UTC is used instead
