@@ -182,44 +182,66 @@ Rectangle {
             text: getValue("tension")
         }
 
-        // Show why drop is blocked, currently not used to reduce noise in interface
-        // QGCLabel {
-        //     text: _vehicle ? _vehicle.winchStatus.dropBlocker.enumOrValueString : ""
-        // }
+        Item {
+            Layout.preferredWidth:          parent.parent._child_width
+            implicitHeight:                 winchDeliverBtn.implicitHeight
 
-        QGCButton {
-            id:                         winchDeliverBtn
-            backRadius:                 10
-            showBorder:                 true
-            Layout.preferredWidth:      parent.parent._child_width
-            text:                       "DELIVER"
-            hoverEnabled:               false
-            checkable:                  true
-            enabled:                    _vehicle ? _vehicle.winchStatus.dropAllowed.rawValue : false
-            Image {
-                id:                     downArrow
-                source:                 "/qmlimages/ArrowDirection.svg"
-                height:                 parent.height
-                width:                  height
-                x:                      10
-                transform: Rotation {
-                    origin.x:           downArrow.width/2
-                    origin.y:           downArrow.height/2
-                    angle:              180
+            QGCButton {
+                id:                         winchDeliverBtn
+                anchors.fill:               parent
+                backRadius:                 10
+                showBorder:                 true
+                text:                       enabled && _vehicle ? (_vehicle.winchStatus.defaultDrop.rawValue ? "Deliver default" : "DELIVER")
+                                            : (_vehicle && _vehicle.winchStatus.dropBlocker.enumStringValue) || "No winch"
+                hoverEnabled:               false
+                checkable:                  true
+                enabled:                    _vehicle ? _vehicle.winchStatus.dropAllowed.rawValue : false
+                Image {
+                    id:                     downArrow
+                    source:                 "/qmlimages/ArrowDirection.svg"
+                    height:                 parent.height
+                    width:                  height
+                    x:                      10
+                    transform: Rotation {
+                        origin.x:           downArrow.width/2
+                        origin.y:           downArrow.height/2
+                        angle:              180
+                    }
+                }
+                onClicked:                  winchDeliver()
+
+                function winchDeliver() {
+                    if (checked) {
+                        slider.enableWinchSlider(WinchControl.WinchCommands.WINCH_DELIVER, qsTr("Drop"))
+                        uncheckInactiveButtons()
+                    } else {
+                        slider.disableWinchSlider()
+                    }
                 }
             }
-            onClicked:                  winchDeliver()
-            
-            function winchDeliver() {
-                if (checked) {
-                    slider.enableWinchSlider(WinchControl.WinchCommands.WINCH_DELIVER, qsTr("Drop"))
-                    uncheckInactiveButtons()
-                } else {
-                    slider.disableWinchSlider()
+
+            // A disabled button gets no clicks, so explain why DELIVER is disabled from on top of it
+            MouseArea {
+                anchors.fill:               parent
+                enabled:                    !winchDeliverBtn.enabled
+                onClicked: {
+                    const reasons = {
+                        2: qsTr("The winch is not at home."),
+                        3: qsTr("The drone is not in multirotor mode."),
+                        4: qsTr("The winch has no valid lidar reading."),
+                        5: qsTr("The lidar reading is too low for a drop."),
+                        6: qsTr("The lidar reading is too high for a drop."),
+                        7: qsTr("The winch has no valid lidar reading and no recent RTK fix, so it cannot drop at the default length.")
+                    }
+                    const blocker = _vehicle ? _vehicle.winchStatus.dropBlocker.rawValue : 0
+                    const down = _vehicle ? _vehicle.distanceSensors.rotationPitch270 : null
+                    mainWindow.showMessageDialog(winchDeliverBtn.text,
+                                                 (reasons[blocker] || qsTr("No status from the winch."))
+                                                 + "\n" + qsTr("Down: %1 %2").arg(down ? down.valueString : "N/A").arg(down ? down.units : ""))
                 }
             }
         }
-        
+
         QGCButton {
             id:                    winchRetractBtn
             backRadius:            10
