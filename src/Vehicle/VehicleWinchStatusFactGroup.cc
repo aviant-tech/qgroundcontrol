@@ -32,6 +32,7 @@ const char* VehicleWinchStatusFactGroup::_loadLineFactName =       "loadLine";
 const char* VehicleWinchStatusFactGroup::_loadPayloadFactName =    "loadPayload";
 const char* VehicleWinchStatusFactGroup::_dropAllowedFactName =    "dropAllowed";
 const char* VehicleWinchStatusFactGroup::_dropBlockerFactName =    "dropBlocker";
+const char* VehicleWinchStatusFactGroup::_defaultDropFactName =    "defaultDrop";
 const char* VehicleWinchStatusFactGroup::_staleFactName =          "stale";
 
 static const int kStaleTimeout = 6;  // * update rate = 6 * 500 = 3 seconds
@@ -60,6 +61,7 @@ VehicleWinchStatusFactGroup::VehicleWinchStatusFactGroup(QObject* parent)
     , _loadPayloadFact     (0, _loadPayloadFactName,     FactMetaData::valueTypeBool)
     , _dropAllowedFact     (0, _dropAllowedFactName,     FactMetaData::valueTypeUint8)
     , _dropBlockerFact     (0, _dropBlockerFactName,     FactMetaData::valueTypeUint8)
+    , _defaultDropFact     (0, _defaultDropFactName,     FactMetaData::valueTypeBool)
     , _staleFact           (0, _staleFactName,           FactMetaData::valueTypeBool)
     , _staleCounter        (0)
 {
@@ -85,12 +87,14 @@ VehicleWinchStatusFactGroup::VehicleWinchStatusFactGroup(QObject* parent)
     _addFact(&_loadPayloadFact,    _loadPayloadFactName);
     _addFact(&_dropAllowedFact,    _dropAllowedFactName);
     _addFact(&_dropBlockerFact,    _dropBlockerFactName);
+    _addFact(&_defaultDropFact,    _defaultDropFactName);
     _addFact(&_staleFact,          _staleFactName);
 }
 
 #define CUSTOM_AVIANT_STATUS_SHIFT         24
 #define CUSTOM_AVIANT_STATUS_MASK          0xFF  // After shift, max 8 bit
 #define CUSTOM_AVIANT_STATUS_DROP_ALLOWED  1     // After shift
+#define CUSTOM_AVIANT_DEFAULT_DROP_LENGTH  (1 << 23)  // Set with DROP_ALLOWED when the drop uses the default length
 
 void VehicleWinchStatusFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
 {
@@ -124,6 +128,7 @@ void VehicleWinchStatusFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_
     uint8_t custom_aviant_status = static_cast<uint8_t>(winchStatus.status >> CUSTOM_AVIANT_STATUS_SHIFT & CUSTOM_AVIANT_STATUS_MASK);
     dropAllowed()->setRawValue     (custom_aviant_status == CUSTOM_AVIANT_STATUS_DROP_ALLOWED);
     dropBlocker()->setRawValue     (custom_aviant_status);
+    defaultDrop()->setRawValue     (!!(winchStatus.status & CUSTOM_AVIANT_DEFAULT_DROP_LENGTH));
     stale()->setRawValue           (false);
     _staleCounter = 0;
 
@@ -155,6 +160,7 @@ void VehicleWinchStatusFactGroup::_updateAllValues()
         loadPayload()->setRawValue     (loadPayload()->rawDefaultValue());
         dropAllowed()->setRawValue     (dropAllowed()->rawDefaultValue());
         dropBlocker()->setRawValue     (dropBlocker()->rawDefaultValue());
+        defaultDrop()->setRawValue     (defaultDrop()->rawDefaultValue());
         stale()->setRawValue           (true);
     }
 
