@@ -4,7 +4,6 @@
 #include "QGCMAVLink.h"
 
 #include <QColor>
-#include <ctime>
 
 class VehicleAviantFactGroup : public FactGroup
 {
@@ -158,8 +157,14 @@ private:
     static const QColor COLOR_WARNING;
     static const QColor COLOR_CRITICAL;
 
-    static constexpr uint32_t ATS_STATUS_HYSTERESIS_S = 1;
-    time_t _time_last_ats_status_ok = 0;
+    // The ATS indicator low-pass filters "any flag set" over the AVIANT_ATS_STATUS messages: the result is the recent
+    // share of time with a flag set, so a flag that keeps flickering goes red even if no single run of it is long
+    static constexpr double ATS_FLAGGED_FILTER_TIME_S = 10.0;
+    static constexpr double ATS_FLAGGED_WARN_SHARE = 0.01;
+    static constexpr double ATS_FLAGGED_FAIL_SHARE = 0.10;
+    static constexpr double ATS_STATUS_INTERVAL_S = 0.2; // AVIANT_ATS_STATUS is streamed at 5 Hz
+    double _atsFlaggedShare = 0.0;
+    uint32_t _atsLastTimeBootMs = 0;
 
     static constexpr int NUM_ROTORS_MAX = 12;
     uint32_t _topMotorsMask = 0;
