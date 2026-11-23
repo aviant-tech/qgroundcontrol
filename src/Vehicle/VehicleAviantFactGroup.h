@@ -164,6 +164,7 @@ private:
     static constexpr double ATS_FLAGGED_FAIL_SHARE = 0.05;
     static constexpr double ATS_STATUS_INTERVAL_S = 0.2; // AVIANT_ATS_STATUS is streamed at 5 Hz
     double _atsFlaggedShare = 0.0;
+    bool _atsRedLatched = false; // red stays until the vehicle disarms
     uint32_t _atsLastTimeBootMs = 0;
 
     static constexpr int NUM_ROTORS_MAX = 12;
