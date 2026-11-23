@@ -160,8 +160,10 @@ private:
     // The ATS indicator low-pass filters "any flag set" over the AVIANT_ATS_STATUS messages: the result is the recent
     // share of time with a flag set, so a flag that keeps flickering goes red even if no single run of it is long
     static constexpr double ATS_FLAGGED_FILTER_TIME_S = 10.0;
-    static constexpr double ATS_FLAGGED_WARN_SHARE = 0.01;
-    static constexpr double ATS_FLAGGED_FAIL_SHARE = 0.05;
+    // WARN: one flagged message alone (1.96 %) stays green, two within ~39 s go yellow.
+    // FAIL: between five (9.43 %) and six (11.2 %) flagged messages in a row, i.e. about 1 s of a continuous fault.
+    static constexpr double ATS_FLAGGED_WARN_SHARE = 0.02;
+    static constexpr double ATS_FLAGGED_FAIL_SHARE = 0.10;
     static constexpr double ATS_STATUS_INTERVAL_S = 0.2; // AVIANT_ATS_STATUS is streamed at 5 Hz
     double _atsFlaggedShare = 0.0;
     bool _atsRedLatched = false; // red stays until the vehicle disarms
