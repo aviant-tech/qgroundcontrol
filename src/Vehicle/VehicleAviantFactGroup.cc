@@ -194,6 +194,8 @@ void VehicleAviantFactGroup::handleAtsStatusMsg(Vehicle* vehicle, mavlink_messag
     constexpr uint32_t VALUE_FAIL = 3;
 
     if (!atsStatus.ats_enabled) {
+        _atsFlaggedShare = 0.0;
+        _atsRedLatched = false;
         _atsStatusFact.setOverrideColor(COLOR_UNKNOWN);
         _atsStatusFact.setRawValue(VALUE_DEACT);
         return;
@@ -209,21 +211,29 @@ void VehicleAviantFactGroup::handleAtsStatusMsg(Vehicle* vehicle, mavlink_messag
     }
     const bool ats_status_ok = ats_status_flags == 0;
 
-    const time_t now = time(nullptr);
-
-    if (ats_status_ok) {
-        _time_last_ats_status_ok = now;
+    // Weight each message by the ATS time since the previous one; fall back to the nominal interval after a gap,
+    // an ATS reboot or on the first message
+    double dt_s = (atsStatus.time_boot_ms - _atsLastTimeBootMs) * 1e-3;
+    if (atsStatus.time_boot_ms <= _atsLastTimeBootMs || dt_s > 1.0) {
+        dt_s = ATS_STATUS_INTERVAL_S;
     }
+    _atsLastTimeBootMs = atsStatus.time_boot_ms;
+    const double alpha = dt_s / (dt_s + ATS_FLAGGED_FILTER_TIME_S);
+    _atsFlaggedShare += alpha * ((ats_status_ok ? 0.0 : 1.0) - _atsFlaggedShare);
 
-    if (ats_status_ok) {
-        _atsStatusFact.setOverrideColor(COLOR_NOMINAL);
-        _atsStatusFact.setRawValue(VALUE_OK);
-    } else if (now - _time_last_ats_status_ok > ATS_STATUS_HYSTERESIS_S) {
+    // Red latches while armed so a short fault in flight is not missed; it clears on disarm
+    const bool armed = vehicle && vehicle->armed();
+    _atsRedLatched = armed && (_atsRedLatched || _atsFlaggedShare > ATS_FLAGGED_FAIL_SHARE);
+
+    if (_atsRedLatched || _atsFlaggedShare > ATS_FLAGGED_FAIL_SHARE) {
         _atsStatusFact.setOverrideColor(COLOR_CRITICAL);
         _atsStatusFact.setRawValue(VALUE_FAIL);
-    } else {
+    } else if (_atsFlaggedShare > ATS_FLAGGED_WARN_SHARE) {
         _atsStatusFact.setOverrideColor(COLOR_WARNING);
         _atsStatusFact.setRawValue(VALUE_WARN);
+    } else {
+        _atsStatusFact.setOverrideColor(COLOR_NOMINAL);
+        _atsStatusFact.setRawValue(VALUE_OK);
     }
 }
 
