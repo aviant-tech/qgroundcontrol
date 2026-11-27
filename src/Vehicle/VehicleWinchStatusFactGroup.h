@@ -43,6 +43,7 @@ public:
     Q_PROPERTY(Fact* loadPayload     READ loadPayload      CONSTANT)
     Q_PROPERTY(Fact* dropAllowed     READ dropAllowed      CONSTANT)
     Q_PROPERTY(Fact* dropBlocker     READ dropBlocker      CONSTANT)
+    Q_PROPERTY(Fact* defaultDrop     READ defaultDrop      CONSTANT)
     Q_PROPERTY(Fact* stale           READ stale            CONSTANT)
 
 
@@ -69,6 +70,7 @@ public:
     Fact *loadPayload     () { return &_loadPayloadFact; }
     Fact *dropAllowed     () { return &_dropAllowedFact; }
     Fact *dropBlocker     () { return &_dropBlockerFact; }
+    Fact *defaultDrop     () { return &_defaultDropFact; }
     Fact *stale           () { return &_staleFact; }
 
     // Overrides from FactGroup
@@ -96,6 +98,7 @@ public:
     static const char* _loadPayloadFactName;
     static const char* _dropAllowedFactName;
     static const char* _dropBlockerFactName;
+    static const char* _defaultDropFactName;
     static const char* _staleFactName;
 
 private slots:
@@ -124,6 +127,7 @@ private:
     Fact _loadPayloadFact;
     Fact _dropAllowedFact;
     Fact _dropBlockerFact;
+    Fact _defaultDropFact;
     Fact _staleFact;
     int  _staleCounter;
 };
